@@ -1,0 +1,12 @@
+{
+  "planName": "Starter",
+  "price": "$0/month",
+  "nextBilling": "No renewal scheduled",
+  "status": "Free",
+  "daysUsed": 18,
+  "totalDays": 30,
+  "progressPercentage": 60,
+  "remainingDays": 12,
+  "needsAttention": false,
+  "attentionMessage": ""
+}

@@ -1,0 +1,23 @@
+[
+  {
+    "id": 1,
+    "month": "March 2026",
+    "plan": "Starter",
+    "amount": "$0.00",
+    "status": "Paid"
+  },
+  {
+    "id": 2,
+    "month": "February 2026",
+    "plan": "Starter",
+    "amount": "$0.00",
+    "status": "Paid"
+  },
+  {
+    "id": 3,
+    "month": "January 2026",
+    "plan": "Starter",
+    "amount": "$0.00",
+    "status": "Paid"
+  }
+]
