@@ -76,14 +76,16 @@ export function LandingNavbar() {
         {/* Desktop CTA */}
         <div className="hidden md:flex items-center gap-2">
           <ModeToggle variant="ghost" />
+          {/* /sign-in, not /dashboard: the proxy bounces anonymous visitors
+              off the dashboard straight back here. */}
           <Button
             variant="outline"
             className="cursor-pointer"
             nativeButton={false}
-            render={<Link href="/sign-in" />} // anonymous visitors are bounced off /dashboard by the proxy
+            render={<Link href="/sign-in" />}
           >
             <LayoutDashboard data-icon="inline-start" />
-            Live Demo
+            Demo
           </Button>
           <Button
             variant="ghost"
@@ -98,7 +100,7 @@ export function LandingNavbar() {
             nativeButton={false}
             render={<Link href="/sign-up" />}
           >
-            Get Started
+            Create an account
           </Button>
         </div>
 
@@ -185,10 +187,10 @@ export function LandingNavbar() {
                   size="lg"
                   className="w-full cursor-pointer"
                   nativeButton={false}
-                  render={<Link href="/sign-in" />} // anonymous visitors are bounced off /dashboard by the proxy
+                  render={<Link href="/sign-in" />}
                 >
                   <LayoutDashboard data-icon="inline-start" />
-                  Live Demo
+                  Demo
                 </Button>
 
                 <div className="grid grid-cols-2 gap-3">
@@ -207,7 +209,7 @@ export function LandingNavbar() {
                     nativeButton={false}
                     render={<Link href="/sign-up" />}
                   >
-                    Get Started
+                    Create an account
                   </Button>
                 </div>
               </div>

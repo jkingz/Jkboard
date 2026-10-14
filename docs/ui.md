@@ -2,6 +2,54 @@
 
 ---
 
+## Design direction
+
+`DESIGN.md` at the project root is the source of truth for identity, palette, typography, mood and
+the three dials. Read it before changing any UI. It is transcribed from the owner's decisions, so
+do not fill its unset fields on your own.
+
+Dials in force: **ENERGY 2 / RHYTHM 2 / MOTION 2**.
+
+### Motion
+
+`src/components/reveal.tsx` is the scroll-reveal primitive, the only motion primitive on the landing
+page. It fires once on intersection, disconnects after firing, and never re-hides on scroll-out.
+
+The reduced-motion decision is made **during render**, not inside the effect. Deciding it in the
+effect calls `setState` synchronously inside an effect body, which trips
+`react-hooks/set-state-in-effect` and causes the cascading render React warns about.
+
+Permitted motion, per DESIGN.md: scroll-reveal, hover/focus feedback, and one transition on the hero
+product preview. **No parallax, no pinning, no floating or pulsing loops.**
+
+### Removed from the landing page
+
+These were deleted because DESIGN.md forbids them, and each was verified unused first:
+
+- `src/components/dot-pattern.tsx` — deleted. Zero importers after the landing page stopped using it.
+  DESIGN.md → Texture forbids dot grids.
+- The eyebrow badge above the H1, the `Badge` kicker pills on each feature block, and the
+  `TrendingUp` badge in the CTA. All restated text already present (R-09).
+- The gradient headline phrase. Permitted as a hierarchy device, but it was paired with an
+  underline bar and a second gradient in the CTA, which pushed it over into decoration.
+
+### Honesty constraints
+
+DESIGN.md → Honesty constraints binds every future change to this page. The following were **false**
+and are now corrected:
+
+| Claimed | Reality |
+| --- | --- |
+| 94% on-time rate, 11h saved weekly, 48 tasks completed | Fabricated. The stats section now reads real counts from the seeded workspace and says so. |
+| Starter / Team / Business plans at 0/12/29 per month | No payment provider exists. The pricing section now states there is no billing. |
+| Bulk CSV import, project templates | Not built. |
+| Daily progress digest email | Not built. |
+| Guest collaborators, task comments, saved views | Not built. Replaced with what exists. |
+| Privacy, Terms, Security footer links | No such pages. Removed rather than pointed at the FAQ. |
+| Newsletter subscription form | Resolved `Promise.resolve(email)` and toasted success without storing anything. Removed. |
+
+---
+
 ## Design tokens
 
 Tailwind v4, `@theme inline` in `src/app/globals.css` maps `--color-*` to the shadcn variables.

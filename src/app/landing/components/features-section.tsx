@@ -4,18 +4,18 @@ import Link from "next/link"
 import {
   ArrowRight,
   BarChart3,
-  Bell,
   CalendarClock,
   CheckCircle2,
   FolderKanban,
   LayoutList,
-  MessageSquare,
+  ListChecks,
   ShieldCheck,
+  UserPlus,
   Users,
 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
+import { Reveal } from "@/components/reveal"
 import { ProductPreview, type PreviewKind } from "./product-preview"
 
 interface FeatureBlock {
@@ -43,13 +43,13 @@ const features: FeatureBlock[] = [
       },
       {
         icon: ShieldCheck,
-        title: "Owners and roles",
-        description: "Clear responsibility for every project.",
+        title: "One owner per project",
+        description: "Transferred automatically if they leave.",
       },
       {
-        icon: CheckCircle2,
-        title: "Milestone tracking",
-        description: "Know exactly what ships next.",
+        icon: CalendarClock,
+        title: "Start and due dates",
+        description: "Every project carries both.",
       },
     ],
   },
@@ -63,18 +63,18 @@ const features: FeatureBlock[] = [
     bullets: [
       {
         icon: LayoutList,
-        title: "Priority that matters",
-        description: "Urgent, high, medium and low at a glance.",
+        title: "Four priorities",
+        description: "Urgent, high, medium and low.",
       },
       {
         icon: CalendarClock,
-        title: "Due dates built in",
-        description: "Overdue work surfaces automatically.",
+        title: "Overdue surfaces itself",
+        description: "Counted in UTC, so timezones cannot skew it.",
       },
       {
-        icon: Bell,
-        title: "Saved views",
-        description: "Return to the same filtered queue daily.",
+        icon: ListChecks,
+        title: "Filter and sort",
+        description: "By status, project, assignee or due date.",
       },
     ],
   },
@@ -88,18 +88,18 @@ const features: FeatureBlock[] = [
     bullets: [
       {
         icon: Users,
-        title: "Workload visibility",
-        description: "Spot overload before it becomes a slip.",
+        title: "Workload per person",
+        description: "Open and completed, side by side.",
       },
       {
-        icon: MessageSquare,
-        title: "Comments on tasks",
-        description: "Discuss the work where it lives.",
+        icon: UserPlus,
+        title: "Invite by email",
+        description: "They claim the account by signing in.",
       },
       {
         icon: ShieldCheck,
-        title: "Guest collaborators",
-        description: "Invite clients into a single project.",
+        title: "One shared workspace",
+        description: "Not separate spaces per project.",
       },
     ],
   },
@@ -113,39 +113,47 @@ const features: FeatureBlock[] = [
     bullets: [
       {
         icon: BarChart3,
-        title: "Completion trends",
-        description: "Created versus completed over time.",
+        title: "Created versus completed",
+        description: "Twelve weeks at a glance.",
       },
       {
         icon: CheckCircle2,
-        title: "Progress by project",
-        description: "Compare scope against finished work.",
+        title: "Progress per project",
+        description: "Finished work against total scope.",
       },
       {
         icon: CalendarClock,
-        title: "Deadline forecasting",
-        description: "Catch slipping timelines early.",
+        title: "Deadline calendar",
+        description: "What is due, and what is late.",
       },
     ],
   },
 ]
 
-function FeatureBlockSection({ feature, reversed }: { feature: FeatureBlock; reversed: boolean }) {
+function FeatureBlockSection({
+  feature,
+  reversed,
+  index,
+}: {
+  feature: FeatureBlock
+  reversed: boolean
+  index: number
+}) {
   return (
-    <div
+    <Reveal
       id={feature.id}
       className="grid scroll-mt-24 items-center gap-12 lg:grid-cols-2 lg:gap-8 xl:gap-16"
     >
       <div
         className={
           reversed
-            ? "flex flex-col gap-6 lg:col-start-2"
-            : "flex flex-col gap-6"
+            ? "flex min-w-0 flex-col gap-6 lg:col-start-2"
+            : "flex min-w-0 flex-col gap-6"
         }
       >
-        <Badge variant="outline" className="w-fit">
-          {feature.kicker}
-        </Badge>
+        {/* The kicker is plain text, not a badge: it labels the section rather
+            than announcing a status (R-09). */}
+        <p className="text-sm text-muted-foreground">{feature.kicker}</p>
         <div className="flex flex-col gap-4">
           <h3 className="text-2xl font-semibold tracking-tight text-balance sm:text-3xl">
             {feature.title}
@@ -155,21 +163,16 @@ function FeatureBlockSection({ feature, reversed }: { feature: FeatureBlock; rev
           </p>
         </div>
 
-        <ul className="grid gap-4 sm:grid-cols-2">
+        <ul className="grid gap-x-6 gap-y-5">
           {feature.bullets.map((bullet) => (
-            <li
-              key={bullet.title}
-              className="group hover:bg-accent/5 flex items-start gap-3 p-2 rounded-lg transition-colors"
-            >
-              <div className="mt-0.5 flex shrink-0 items-center justify-center">
-                <bullet.icon
-                  className="size-5 text-primary"
-                  aria-hidden="true"
-                />
-              </div>
+            <li key={bullet.title} className="flex items-start gap-3">
+              <bullet.icon
+                className="mt-0.5 size-4 shrink-0 text-primary"
+                aria-hidden="true"
+              />
               <div>
-                <h3 className="text-foreground font-medium">{bullet.title}</h3>
-                <p className="text-muted-foreground mt-1 text-sm">
+                <p className="font-medium">{bullet.title}</p>
+                <p className="mt-0.5 text-sm text-muted-foreground">
                   {bullet.description}
                 </p>
               </div>
@@ -178,61 +181,71 @@ function FeatureBlockSection({ feature, reversed }: { feature: FeatureBlock; rev
         </ul>
       </div>
 
-      <div className={reversed ? "lg:col-start-1 lg:row-start-1" : ""}>
+      <div
+        className={
+          reversed ? "min-w-0 lg:col-start-1 lg:row-start-1" : "min-w-0"
+        }
+      >
         <ProductPreview kind={feature.preview} />
       </div>
-    </div>
+      <span className="sr-only">{`Feature ${index + 1} of ${features.length}`}</span>
+    </Reveal>
   )
 }
 
 export function FeaturesSection() {
   return (
-    <section id="features" className="py-24 sm:py-32 bg-muted/30">
+    <section id="features" className="py-20 sm:py-28">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
-        <div className="mx-auto mb-20 max-w-2xl text-center">
-          <Badge variant="outline" className="mb-4">
-            Product Features
-          </Badge>
-          <h2 className="mb-4 text-3xl font-bold tracking-tight sm:text-4xl">
-            Everything a small team needs to ship on time
-          </h2>
-          <p className="text-lg text-muted-foreground">
-            Projects, tasks, collaboration and reporting — connected in one
-            workspace instead of scattered across four different tools.
-          </p>
-        </div>
+        <Reveal>
+          <div className="mb-16 max-w-2xl">
+            <h2 className="mb-4 text-3xl font-semibold tracking-tight sm:text-4xl">
+              Four views of the same workspace
+            </h2>
+            <p className="text-lg text-muted-foreground text-pretty">
+              Each one answers a different question. Nothing here is a mockup:
+              every screenshot below is rendered from the components the app
+              actually uses.
+            </p>
+          </div>
+        </Reveal>
 
-        <div className="flex flex-col gap-24">
+        <div className="flex flex-col gap-20 sm:gap-24">
           {features.map((feature, index) => (
             <FeatureBlockSection
               key={feature.id}
               feature={feature}
+              index={index}
               reversed={index % 2 === 1}
             />
           ))}
         </div>
 
-        <div className="mt-16 flex flex-col justify-center gap-4 sm:flex-row">
-          <Button
-            size="lg"
-            className="cursor-pointer"
-            nativeButton={false}
-            render={<Link href="/sign-up" />}
-          >
-            Start your first project
-            <ArrowRight data-icon="inline-end" />
-          </Button>
-          <Button
-            size="lg"
-            variant="outline"
-            className="cursor-pointer"
-            nativeButton={false}
-            render={<Link href="/dashboard" />}
-          >
-            Explore the live demo
-          </Button>
-        </div>
+        <Reveal delay={0.1}>
+          <div className="mt-16 flex flex-col gap-4 sm:flex-row">
+            <Button
+              size="lg"
+              className="cursor-pointer"
+              nativeButton={false}
+              render={<Link href="/sign-up" />}
+            >
+              Create an account
+              <ArrowRight data-icon="inline-end" />
+            </Button>
+            {/* /sign-in, not /dashboard: the proxy bounces anonymous visitors
+                off the dashboard straight back here. */}
+            <Button
+              size="lg"
+              variant="outline"
+              className="cursor-pointer"
+              nativeButton={false}
+              render={<Link href="/sign-in" />}
+            >
+              Open the live demo
+            </Button>
+          </div>
+        </Reveal>
       </div>
     </section>
   )

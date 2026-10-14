@@ -2,209 +2,112 @@
 
 import Link from "next/link"
 import { Check } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
-import { useState } from "react"
-import { cn } from "@/lib/utils"
 
-const plans = [
-  {
-    name: "Starter",
-    description: "For individuals planning their own work",
-    monthlyPrice: 0,
-    yearlyPrice: 0,
-    features: [
-      "Up to 3 active projects",
-      "Unlimited tasks",
-      "Board and list views",
-      "Due dates and reminders",
-      "Community support",
-    ],
-    cta: "Start for free",
-    popular: false,
-  },
-  {
-    name: "Team",
-    description: "For small teams shipping work together",
-    monthlyPrice: 12,
-    yearlyPrice: 9,
-    features: [
-      "Unlimited projects",
-      "Up to 10 teammates",
-      "Workload and progress views",
-      "Deadline calendar",
-      "Guest collaborators",
-      "Email digest and notifications",
-      "Priority support",
-    ],
-    cta: "Start free trial",
-    popular: true,
-    includesPrevious: "Everything in Starter, plus",
-  },
-  {
-    name: "Business",
-    description: "For larger teams with reporting needs",
-    monthlyPrice: 29,
-    yearlyPrice: 24,
-    features: [
-      "Unlimited teammates",
-      "Portfolio progress analytics",
-      "Advanced permissions",
-      "Custom fields and views",
-      "API access",
-      "Dedicated onboarding",
-    ],
-    cta: "Talk to us",
-    popular: false,
-    includesPrevious: "Everything in Team, plus",
-  },
+import { Button } from "@/components/ui/button"
+import { Reveal } from "@/components/reveal"
+
+/**
+ * There is no billing.
+ *
+ * The previous version of this section sold Starter, Team and Business plans
+ * with a per-seat toggle and a highlighted middle tier. No payment provider is
+ * wired up: there is no Stripe integration, no subscription table, and the
+ * billing settings page renders committed JSON fixtures. DESIGN.md → Honesty
+ * constraints forbids claiming a capability that does not exist, so the section
+ * states the actual position instead of pricing one.
+ */
+const included = [
+  "Every project, task and teammate view",
+  "Kanban boards, task table and deadline calendar",
+  "Workload per teammate",
+  "Progress and completion trends",
+  "Email and password accounts",
+  "No card, no trial, no cancellation",
+]
+
+const notYet = [
+  "Importing work from another tracker",
+  "Multiple workspaces per account",
+  "Roles and permissions beyond a free-text title",
+  "Any kind of billing",
 ]
 
 export function PricingSection() {
-  const [isYearly, setIsYearly] = useState(false)
-
   return (
-    <section id="pricing" className="py-24 sm:py-32 bg-muted/40">
+    <section id="pricing" className="border-t py-20 sm:py-28">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Section Header */}
-        <div className="mx-auto max-w-2xl text-center mb-12">
-          <Badge variant="outline" className="mb-4">
-            Pricing
-          </Badge>
-          <h2 className="text-3xl font-bold tracking-tight sm:text-4xl mb-4">
-            Simple pricing that scales with your team
-          </h2>
-          <p className="text-lg text-muted-foreground mb-8">
-            Start free, upgrade when your team needs shared boards, workload
-            views and deadline tracking.
-          </p>
-
-          {/* Billing Toggle */}
-          <div className="flex items-center justify-center mb-2">
-            <ToggleGroup
-              value={[isYearly ? "yearly" : "monthly"]}
-              onValueChange={(value) =>
-                value[0] && setIsYearly(value[0] === "yearly")
-              }
-              className="bg-secondary text-secondary-foreground border-none rounded-full p-1 cursor-pointer shadow-none"
-            >
-              <ToggleGroupItem
-                value="monthly"
-                className="data-pressed:bg-background data-pressed:border-border border-transparent border px-6 rounded-full! data-pressed:text-foreground hover:bg-transparent cursor-pointer transition-colors"
-              >
-                Monthly
-              </ToggleGroupItem>
-              <ToggleGroupItem
-                value="yearly"
-                className="data-pressed:bg-background data-pressed:border-border border-transparent border px-6 rounded-full! data-pressed:text-foreground hover:bg-transparent cursor-pointer transition-colors"
-              >
-                Annually
-              </ToggleGroupItem>
-            </ToggleGroup>
-          </div>
-
-          <p className="text-sm text-muted-foreground">
-            <span className="text-primary font-semibold">Save 25%</span> On
-            Annual Billing
-          </p>
-        </div>
-
-        {/* Pricing Cards */}
-        <div className="mx-auto max-w-6xl">
-          <div className="rounded-xl border">
-            <div className="grid lg:grid-cols-3">
-              {plans.map((plan, index) => (
-                <div
-                  key={index}
-                  className={cn(
-                    "p-8 grid grid-rows-subgrid row-span-4 gap-6",
-                    plan.popular
-                      ? "my-2 mx-4 rounded-xl bg-card border-transparent shadow-xl ring-1 ring-foreground/10 backdrop-blur"
-                      : ""
-                  )}
+        <div className="grid gap-12 lg:grid-cols-2 lg:gap-16">
+          <Reveal>
+            <div className="flex flex-col gap-4">
+              <h2 className="text-3xl font-semibold tracking-tight sm:text-4xl">
+                It costs nothing, because there is nothing to charge for
+              </h2>
+              <p className="text-muted-foreground text-pretty">
+                Jkboard has no billing system and collects no payment details.
+                Sign up with an email address and you get the whole thing: every
+                view below is included, with no tier to upgrade to and nothing to
+                cancel later.
+              </p>
+              <div className="flex flex-wrap gap-3 pt-2">
+                <Button
+                  className="cursor-pointer"
+                  nativeButton={false}
+                  render={<Link href="/sign-up" />}
                 >
-                  {/* Plan Header */}
-                  <div>
-                    <div className="flex items-center gap-2 text-lg font-medium tracking-tight mb-2">
-                      {plan.name}
-                      {plan.popular && (
-                        <Badge variant="secondary">Most popular</Badge>
-                      )}
-                    </div>
-                    <div className="text-muted-foreground text-balance text-sm">
-                      {plan.description}
-                    </div>
-                  </div>
-
-                  {/* Pricing */}
-                  <div>
-                    <div className="text-4xl font-bold mb-1 tabular-nums">
-                      ${isYearly ? plan.yearlyPrice : plan.monthlyPrice}
-                    </div>
-                    <div className="text-muted-foreground text-sm">
-                      {isYearly ? "per month, billed annually" : "per month"}
-                    </div>
-                  </div>
-
-                  {/* CTA Button */}
-                  <div>
-                    <Button
-                      className={cn(
-                        "w-full cursor-pointer my-2",
-                        plan.popular
-                          ? "shadow-md border-[0.5px] border-primary-foreground/25 shadow-black/20 bg-primary ring-1 ring-primary/15 text-primary-foreground hover:bg-primary/90"
-                          : "shadow-sm shadow-black/15 border border-transparent bg-background ring-1 ring-foreground/10 hover:bg-muted/50"
-                      )}
-                      variant={plan.popular ? "default" : "secondary"}
-                      nativeButton={false}
-                      render={<Link href="/sign-up" />}
-                    >
-                      {plan.cta}
-                    </Button>
-                  </div>
-
-                  {/* Features */}
-                  <div>
-                    <ul role="list" className="flex flex-col gap-3 text-sm">
-                      {plan.includesPrevious && (
-                        <li className="flex items-center gap-3 font-medium">
-                          {plan.includesPrevious}:
-                        </li>
-                      )}
-                      {plan.features.map((feature, featureIndex) => (
-                        <li
-                          key={featureIndex}
-                          className="flex items-center gap-3"
-                        >
-                          <Check
-                            className="text-muted-foreground size-4 flex-shrink-0"
-                            strokeWidth={2.5}
-                          />
-                          <span>{feature}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                </div>
-              ))}
+                  Create an account
+                </Button>
+                <Button
+                  variant="outline"
+                  className="cursor-pointer"
+                  nativeButton={false}
+                  render={<Link href="/sign-in" />}
+                >
+                  Try the demo first
+                </Button>
+              </div>
             </div>
-          </div>
-        </div>
+          </Reveal>
 
-        {/* Enterprise Note */}
-        <div className="mt-16 text-center">
-          <p className="text-muted-foreground">
-            Need on-prem hosting or a security review?{" "}
-            <Button
-              variant="link"
-              className="p-0 h-auto cursor-pointer"
-              nativeButton={false}
-              render={<a href="#faq" />}
-            >
-              Read the FAQ
-            </Button>
-          </p>
+          <Reveal delay={0.1}>
+            <div className="flex flex-col gap-8">
+              <div>
+                <h3 className="mb-3 text-sm font-medium">
+                  What you get with an account
+                </h3>
+                <ul className="grid gap-2.5">
+                  {included.map((item) => (
+                    <li key={item} className="flex items-start gap-2.5">
+                      <Check
+                        className="mt-0.5 size-4 shrink-0 text-primary"
+                        aria-hidden="true"
+                      />
+                      <span className="text-sm">{item}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              <div>
+                <h3 className="mb-3 text-sm font-medium text-muted-foreground">
+                  Not built yet
+                </h3>
+                <ul className="grid gap-2.5">
+                  {notYet.map((item) => (
+                    <li
+                      key={item}
+                      className="flex items-start gap-2.5 text-muted-foreground"
+                    >
+                      <span
+                        className="mt-2 size-1.5 shrink-0 rounded-full bg-muted-foreground/40"
+                        aria-hidden="true"
+                      />
+                      <span className="text-sm">{item}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          </Reveal>
         </div>
       </div>
     </section>
