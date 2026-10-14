@@ -17,14 +17,14 @@ import { project } from "./projects"
  * account. Identity (name, email, credentials) stays in the Better Auth
  * `user` table — nothing is duplicated here, only referenced.
  */
-export const memberStatusEnum = pgEnum("jkboard_member_status", [
+export const memberStatusEnum = pgEnum("member_status", [
   "active",
   "invited",
   "away",
 ])
 
 export const member = pgTable(
-  "jkboard_member",
+  "member",
   {
     id: uuid("id").primaryKey().defaultRandom(),
     userId: text("user_id")
@@ -46,7 +46,7 @@ export const member = pgTable(
 
 /** Many-to-many: who is on which project. */
 export const projectMember = pgTable(
-  "jkboard_project_member",
+  "project_member",
   {
     projectId: uuid("project_id")
       .notNull()

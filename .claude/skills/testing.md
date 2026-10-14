@@ -28,7 +28,7 @@ tests/
 - **`selectors.unit.test.ts`** — `getTaskStats`, `isOverdue`, `getProjectProgress`, `getWorkload`,
   `getUpcomingTasks`, `getTasksForProject`, and a `daysUntil` regression test.
 - **`invariants.integration.test.ts`** — asserts the persistence invariants against
-  `information_schema`: table namespacing, `jkboard_member` having no identity columns,
+  `information_schema`: the eight declared tables, `member` having no identity columns,
   `reference` being database-generated and unique, and the RESTRICT / SET NULL / CASCADE asymmetry.
 
 The unit tier builds **its own fixtures**. Asserting against the seed arrays in `src/data/jkboard.ts`

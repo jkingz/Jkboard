@@ -7,7 +7,9 @@
 
 ## Status
 
-**Built** — email/password sign-up and sign-in; one shared workspace loaded server-side; projects
+**Built** — email/password sign-up and sign-in; **public demo access with credentials printed on the
+landing page and sign-in form**, plus a one-click "Try the live demo" button; one shared workspace
+loaded server-side; projects
 with CRUD, status and membership; tasks with CRUD, status, priority, assignee, due date, duplicate and
 drag-and-drop ordering; kanban board per project; filterable/sortable task table; deadline calendar;
 team page with invite / status / remove; dashboard with stats, charts, recent projects and tasks;
@@ -17,10 +19,11 @@ marketing landing page; light/dark theming with a runtime theme customizer.
 
 - **Multi-tenancy / per-user scoping.** There is exactly one workspace. `getMemberId()`
   (`src/db/queries/jkboard.ts:123`) returns the *first* `member` row, and `currentMember` is
-  hardcoded to `members[0]` (`src/data/jkboard-store.tsx:308`). Every signed-in user sees and can
-  mutate the same data.
+  hardcoded to `members[0]` (`src/data/jkboard-store.tsx:308`). Every signed-in user — including
+  every anonymous demo visitor — sees and can mutate the same data.
 - **Authorization.** No role check guards any mutation. `role` is a free-text column with default
-  `"Member"`; nothing branches on it. Any authenticated session can delete any project.
+  `"Member"`; nothing branches on it. Any authenticated session can delete any project. Combined with
+  public demo credentials, that means a visitor can empty the demo workspace.
 - **Email delivery.** `inviteMemberAction` creates the `user` + `member` rows and stops. No message is
   sent; the invitee must already know to sign in.
 - **Tests.** No runner, no files.

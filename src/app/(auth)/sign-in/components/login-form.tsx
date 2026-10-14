@@ -20,7 +20,15 @@ import {
 } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { toast } from "@/components/ui/toast"
+import { Sparkles } from "lucide-react"
+
 import { useEmailPasswordAuth } from "@/hooks/use-email-password"
+import {
+  DEMO_ACCOUNTS,
+  DEMO_EMAIL,
+  DEMO_PASSWORD,
+  DEMO_REDIRECT_TO,
+} from "@/lib/demo"
 
 const loginFormSchema = z.object({
   email: z.string().email("Invalid email address"),
@@ -43,6 +51,16 @@ export function LoginForm({
       password: "",
     },
   })
+
+  /**
+   * Fills the form with the demo account and signs in immediately, so a visitor
+   * reaches the dashboard in one click instead of transcribing credentials.
+   */
+  function enterDemo() {
+    form.setValue("email", DEMO_EMAIL)
+    form.setValue("password", DEMO_PASSWORD)
+    submit("sign-in", { email: DEMO_EMAIL, password: DEMO_PASSWORD }, redirectTo ?? DEMO_REDIRECT_TO)
+  }
 
   function onSubmit(values: LoginFormValues) {
     submit("sign-in", values, redirectTo)
@@ -112,6 +130,52 @@ export function LoginForm({
                     {error}
                   </p>
                 )}
+
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="w-full cursor-pointer"
+                  onClick={enterDemo}
+                  disabled={pending}
+                >
+                  <Sparkles className="size-4" />
+                  Try the live demo
+                </Button>
+
+                <div className="rounded-lg border border-dashed bg-muted/40 p-3">
+                  <p className="mb-2 text-xs font-medium text-muted-foreground">
+                    Demo account — no sign-up needed
+                  </p>
+                  <dl className="grid gap-1 font-mono text-xs">
+                    <div className="flex gap-2">
+                      <dt className="text-muted-foreground">Email</dt>
+                      <dd className="select-all">{DEMO_EMAIL}</dd>
+                    </div>
+                    <div className="flex gap-2">
+                      <dt className="text-muted-foreground">Password</dt>
+                      <dd className="select-all">{DEMO_PASSWORD}</dd>
+                    </div>
+                  </dl>
+                  <div className="mt-2 flex flex-wrap gap-1">
+                    {DEMO_ACCOUNTS.map((account) => (
+                      <button
+                        key={account.email}
+                        type="button"
+                        onClick={() => {
+                          form.setValue("email", account.email)
+                          form.setValue("password", DEMO_PASSWORD)
+                        }}
+                        className="cursor-pointer rounded border px-1.5 py-0.5 text-[11px] text-muted-foreground hover:text-foreground"
+                      >
+                        {account.name}
+                      </button>
+                    ))}
+                  </div>
+                  <p className="mt-2 text-[11px] text-muted-foreground">
+                    Shared demo data. Anything you change is visible to other
+                    visitors.
+                  </p>
+                </div>
 
                 <Button
                   type="submit"

@@ -1,9 +1,10 @@
 "use client"
 
 import Link from "next/link"
-import { ArrowRight, Sparkles } from "lucide-react"
+import { ArrowRight, Play, Sparkles } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
+import { DEMO_EMAIL, DEMO_PASSWORD } from "@/lib/demo"
 import { Badge } from "@/components/ui/badge"
 import { DotPattern } from "@/components/dot-pattern"
 import { ProductPreview } from "./product-preview"
@@ -57,19 +58,52 @@ export function HeroSection() {
               size="lg"
               className="text-base cursor-pointer"
               nativeButton={false}
-              render={<Link href="/sign-up" />}
+              render={<Link href="/sign-in" />}
             >
-              Get Started Free
-              <ArrowRight data-icon="inline-end" />
+              Try the live demo
+              <Play data-icon="inline-end" />
             </Button>
             <Button
               variant="outline"
               size="lg"
               className="text-base cursor-pointer"
               nativeButton={false}
-              render={<a href="#features" />}
+              render={<Link href="/sign-up" />}
             >
-              Explore Features
+              Get Started Free
+              <ArrowRight data-icon="inline-end" />
+            </Button>
+          </div>
+
+          {/* Demo credentials, visible without an account */}
+          <div className="mx-auto mt-6 max-w-md rounded-lg border border-dashed bg-muted/40 p-4 text-left">
+            <p className="mb-2 flex items-center gap-2 text-sm font-medium">
+              <Play className="size-4 text-primary" />
+              Look around first — no account needed
+            </p>
+            <p className="mb-3 text-xs text-muted-foreground">
+              Sign in with the demo account to explore a workspace with real
+              projects, tasks and teammates.
+            </p>
+            <dl className="grid gap-1 font-mono text-xs">
+              <div className="flex gap-2">
+                <dt className="w-20 shrink-0 text-muted-foreground">Email</dt>
+                <dd className="select-all">{DEMO_EMAIL}</dd>
+              </div>
+              <div className="flex gap-2">
+                <dt className="w-20 shrink-0 text-muted-foreground">Password</dt>
+                <dd className="select-all">{DEMO_PASSWORD}</dd>
+              </div>
+            </dl>
+            <Button
+              variant="outline"
+              size="sm"
+              className="mt-3 w-full cursor-pointer"
+              nativeButton={false}
+              render={<Link href="/sign-in" />}
+            >
+              Open the demo workspace
+              <ArrowRight data-icon="inline-end" />
             </Button>
           </div>
 

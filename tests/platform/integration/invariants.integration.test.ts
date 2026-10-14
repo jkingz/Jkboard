@@ -45,7 +45,7 @@ const deleteRuleFor = async (table: string, column: string) =>
   )[0]?.delete_rule
 
 describe.skipIf(!available)("persistence invariants", () => {
-  it("every FlowBoard table is namespaced under jkboard_", async () => {
+  it("the eight declared tables exist in public", async () => {
     const tables = rowsOf<{ table_name: string }>(
       await db!.execute(
         sql`select table_name from information_schema.tables
@@ -54,29 +54,24 @@ describe.skipIf(!available)("persistence invariants", () => {
       )
     ).map((t) => t.table_name)
 
-    for (const table of tables) {
-      expect(table).toMatch(/^jkboard_/)
-    }
-
-    // The eight tables the schema declares.
     expect(tables).toEqual(
       expect.arrayContaining([
-        "jkboard_user",
-        "jkboard_session",
-        "jkboard_account",
-        "jkboard_verification",
-        "jkboard_member",
-        "jkboard_project",
-        "jkboard_project_member",
-        "jkboard_task",
+        "user",
+        "session",
+        "account",
+        "verification",
+        "member",
+        "project",
+        "project_member",
+        "task",
       ])
     )
   })
 
-  it("invariant 2: jkboard_member carries no identity columns", async () => {
-    const names = await columnNames("jkboard_member")
+  it("invariant 2: member carries no identity columns", async () => {
+    const names = await columnNames("member")
 
-    // Identity lives in jkboard_user; member holds membership only.
+    // Identity lives in user; member holds membership only.
     expect(names).not.toContain("email")
     expect(names).not.toContain("name")
     expect(names).not.toContain("image")
@@ -84,8 +79,29 @@ describe.skipIf(!available)("persistence invariants", () => {
     expect(names).toContain("role")
   })
 
-  it("invariant 2: jkboard_user is where identity actually lives", async () => {
-    const names = await columnNames("jkboard_user")
+  it("the app's user table is in public, and neon_auth.user is left alone", async () => {
+    // This database also hosts Neon's built-in Auth, which has its own
+    // `neon_auth.user`. Both exist and both must: the app's tables are in
+    // public, and nothing here may drop or alter anything under neon_auth.
+    const schemas = rowsOf<{ table_schema: string }>(
+      await db!.execute(
+        sql`select table_schema from information_schema.tables
+            where table_name = 'user' and table_type = 'BASE TABLE'`
+      )
+    ).map((t) => t.table_schema)
+
+    expect(schemas).toContain("public")
+    // neon_auth.user still being there is the point — it is untouched.
+    expect(schemas).toContain("neon_auth")
+
+    // The app's user table is the snake_case Drizzle one, not the auth shape.
+    const appColumns = await columnNames("user")
+    expect(appColumns).toContain("email_verified")
+    expect(appColumns).not.toContain("banned")
+  })
+
+  it("invariant 2: user is where identity actually lives", async () => {
+    const names = await columnNames("user")
 
     expect(names).toContain("email")
     expect(names).toContain("name")
@@ -95,7 +111,7 @@ describe.skipIf(!available)("persistence invariants", () => {
     expect(names).not.toContain("emailVerified")
   })
 
-  it("invariant 3: jkboard_task.reference is database-generated and unique", async () => {
+  it("invariant 3: task.reference is database-generated and unique", async () => {
     const reference = rowsOf<{
       column_default: string
       is_nullable: string
@@ -103,7 +119,7 @@ describe.skipIf(!available)("persistence invariants", () => {
       await db!.execute(
         sql`select column_default, is_nullable
             from information_schema.columns
-            where table_schema = 'public' and table_name = 'jkboard_task'
+            where table_schema = 'public' and table_name = 'task'
               and column_name = 'reference'`
       )
     )[0]
@@ -111,12 +127,12 @@ describe.skipIf(!available)("persistence invariants", () => {
     expect(reference).toBeDefined()
     // The client never supplies it — the database fills it in.
     expect(reference!.column_default).toContain("nextval")
-    expect(reference!.column_default).toContain("jkboard_task_reference_seq")
+    expect(reference!.column_default).toContain("task_reference_seq")
 
     const indexes = rowsOf<{ indexdef: string }>(
       await db!.execute(
         sql`select indexdef from pg_indexes
-            where schemaname = 'public' and tablename = 'jkboard_task'`
+            where schemaname = 'public' and tablename = 'task'`
       )
     )
 
@@ -130,34 +146,34 @@ describe.skipIf(!available)("persistence invariants", () => {
     // The generated migration declares the DEFAULT but never emits CREATE
     // SEQUENCE. Without this, the first task insert fails at runtime.
     const seq = await db!.execute(
-      sql`select 1 from pg_class where relname = 'jkboard_task_reference_seq'`
+      sql`select 1 from pg_class where relname = 'task_reference_seq'`
     )
     expect(rowsOf(seq)).toHaveLength(1)
   })
 
   it("the delete behaviours are asymmetric: owner RESTRICT, assignee SET NULL", async () => {
-    expect(await deleteRuleFor("jkboard_project", "owner_id")).toBe("RESTRICT")
-    expect(await deleteRuleFor("jkboard_task", "assignee_id")).toBe("SET NULL")
+    expect(await deleteRuleFor("project", "owner_id")).toBe("RESTRICT")
+    expect(await deleteRuleFor("task", "assignee_id")).toBe("SET NULL")
   })
 
-  it("jkboard_task.project_id cascades when a project is deleted", async () => {
-    expect(await deleteRuleFor("jkboard_task", "project_id")).toBe("CASCADE")
+  it("task.project_id cascades when a project is deleted", async () => {
+    expect(await deleteRuleFor("task", "project_id")).toBe("CASCADE")
   })
 
-  it("the enums are namespaced too", async () => {
+  it("the four status and priority enums exist", async () => {
     const enums = rowsOf<{ typname: string }>(
       await db!.execute(
         sql`select typname from pg_type
-            where typname like 'jkboard%' and typtype = 'e'`
+            where typname in ('member_status','project_status','task_status','task_priority') and typtype = 'e'`
       )
     ).map((e) => e.typname)
 
     expect(enums).toEqual(
       expect.arrayContaining([
-        "jkboard_member_status",
-        "jkboard_project_status",
-        "jkboard_task_status",
-        "jkboard_task_priority",
+        "member_status",
+        "project_status",
+        "task_status",
+        "task_priority",
       ])
     )
   })

@@ -4,6 +4,37 @@ These are the facts an agent cannot infer from the repo without reading it.
 
 ---
 
+## Demo access
+
+A visitor can reach a working dashboard without creating an account. The credentials live in
+`src/lib/demo.ts` and are printed on the landing page and the sign-in form.
+
+| | |
+| --- | --- |
+| Email | `maya.chen@jkboard.app` |
+| Password | `jkboard-2026` |
+| Accounts | 8 seeded teammates share the password |
+| Created by | `pnpm db:seed` then `pnpm db:seed:auth` |
+
+The sign-in form's **"Try the live demo"** button signs in as Maya without a form round-trip.
+
+**These credentials are public.** They are printed on a public page, so treat them as a label, not a
+secret. Three consequences, all current:
+
+1. **The workspace is shared.** Every demo visitor sees and mutates the same data. A visitor who
+   deletes a project deletes it for everyone.
+2. **Any authenticated session can delete anything.** No server action checks a role — see
+   [target-state.md](./target-state.md). An anonymous visitor who reads the page can wipe the demo
+   data.
+3. **The password hash lives in the same database as real users.** If this database is ever shared
+   with real accounts, rotate `DEMO_PASSWORD` and re-run `pnpm db:seed:auth --reset`.
+
+To retire the demo without touching the code, set `NEXT_PUBLIC_DEMO_MODE=false` and re-seed without
+`db:seed:auth`. Nothing in the app enforces that flag yet — it is read by `isDemoEnvironment()` in
+`src/lib/demo.ts`, which the UI does not currently consult.
+
+---
+
 ## Package manager and runtime
 
 `pnpm` — `pnpm-lock.yaml` is the single lockfile (lockfileVersion `9.0`) and the only one committed.
@@ -97,11 +128,15 @@ works in serverless/edge runtimes. Schema is Drizzle with `casing: "snake_case"`
 `drizzle.config.ts` and `src/db/index.ts` — changing one without the other silently desyncs property
 names from column names.
 
-**Every table and enum is namespaced `jkboard_*`** — `jkboard_user`, `jkboard_session`,
-`jkboard_account`, `jkboard_verification`, `jkboard_member`, `jkboard_project`,
-`jkboard_project_member`, `jkboard_task`, and the four `jkboard_*_status` / `_priority` enums. The
-prefix exists so the app's schema never collides with `neon_auth.*`, which this database also hosts
-and which must not be touched.
+**Table and enum names** — `user`, `session`, `account`, `verification`, `member`, `project`,
+`project_member`, `task`, and the four `member_status` / `project_status` / `task_status` /
+`task_priority` enums.
+
+These are unprefixed, and they live in the `public` schema. The same database also hosts Neon's
+built-in Auth under `neon_auth`, which has its own `user` table. The two coexist because they are in
+different schemas and `search_path` is `public` — but **raw SQL touching `user` must quote it**
+(`from "user"`), because `user` is a reserved word in Postgres. Unquoted, it fails with
+`column u.id does not exist`. Drizzle quotes correctly; hand-written SQL will not.
 
 Migrations are versioned files in `drizzle/`. **An applied migration is never edited** — append a new
 one via `pnpm db:generate`. `pnpm db:push` skips the migration files entirely; do not rely on it for
@@ -113,9 +148,9 @@ schema you intend to keep.
   that `@neondatabase/serverless` "can only connect to remote Neon/Vercel Postgres/Supabase instances
   through a websocket". Applying a migration to this database therefore means executing the SQL in
   `drizzle/*.sql` over `neon()` directly, splitting on `--> statement-breakpoint`.
-- `pnpm db:generate` emits the `jkboard_task.reference` **default** but never emits the
+- `pnpm db:generate` emits the `task.reference` **default** but never emits the
   `CREATE SEQUENCE` it depends on. The first task insert fails with
-  `relation "jkboard_task_reference_seq" does not exist` unless the sequence is created separately.
+  `relation "task_reference_seq" does not exist` unless the sequence is created separately.
   This is covered by an assertion in the integration tier.
 
 ---

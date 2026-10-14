@@ -44,6 +44,9 @@ quoted: the table grows, and a number typed here is wrong the day the next row l
 | "`description` is written but never read." | True of `task.description`, false of `project.description`, which three components render. | "`task.description` has no reader — `taskSchema` omits the field. `project.description` **is** rendered (`projects-grid.tsx:275`, `project-board.tsx:127`)." |
 | "The seed arrays in `src/data/jkboard.ts` are only test fixtures." | `src/components/command-search.tsx:30` imports the seed `projects` array and `site-header.tsx:73` renders it, so the ⌘K palette ships sample data. | "The seed arrays are live defaults, and `command-search.tsx` reads one of them — the ⌘K palette lists hardcoded projects, not the workspace." |
 | "The build needs real credentials." | It needs the env vars **present**, not valid. Placeholders from `.env.example` build fine. | "`pnpm build` exits 0 against the placeholder `DATABASE_URL` because `(dashboard)` is `force-dynamic`; deleting `.env.local` fails at page-data collection." |
+| "`from user` is fine in raw SQL." | `user` is a Postgres reserved word. Unquoted, the query fails with `column u.id does not exist`, which reads like a missing column rather than a syntax problem. | Quote it: `from \"user\"`. Drizzle does this automatically; hand-written SQL will not. |
+| "The demo account is safe because the password is obscure." | It is printed on a public landing page. | "`DEMO_PASSWORD` is public by design — a label, not a secret. The demo is protected only by nobody deleting things; no action checks a role." |
+| "The demo login is broken." | It works: `POST /api/auth/sign-in/email` returns 200 with a session cookie. | "Demo sign-in works. Verify in a **production** build — `next dev` recompiled 2,739 times while testing and never settled hydration, which looks identical to a broken form." |
 
 ---
 

@@ -23,16 +23,29 @@ That is a manual step, and it is invisible in the scripts.
 
 ## The `reference` sequence is not generated
 
-**Why:** `pnpm db:generate` emits `jkboard_task.reference`'s DEFAULT — which calls
-`nextval('jkboard_task_reference_seq')` — but never emits the `CREATE SEQUENCE`. A fresh database
+**Why:** `pnpm db:generate` emits `task.reference`'s DEFAULT — which calls
+`nextval('task_reference_seq')` — but never emits the `CREATE SEQUENCE`. A fresh database
 therefore fails the first task insert with
-`relation "jkboard_task_reference_seq" does not exist`. The sequence was created by hand. There is an
+`relation "task_reference_seq" does not exist`. The sequence was created by hand. There is an
 assertion for it in the integration tier, so the gap is caught rather than silent, but the underlying
 generation bug is unfixed.
 
 **Blocked by:** nothing.
 
 **Done when:** a regenerated migration creates the sequence itself.
+
+---
+
+## Scoping the demo account
+
+**Why:** the demo credentials are printed on a public landing page, and **no server action checks a
+role**. Any visitor can read the page, sign in, and delete every project in the shared workspace.
+Right now the demo is safe only because nobody is actively destroying it.
+
+**Blocked by:** the authorization work below.
+
+**Done when:** a session belonging to a demo account cannot delete or invite. Either enforce a role
+in each server action, or give the demo a scoped session that cannot write.
 
 ---
 

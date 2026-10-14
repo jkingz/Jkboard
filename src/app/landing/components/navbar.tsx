@@ -80,7 +80,7 @@ export function LandingNavbar() {
             variant="outline"
             className="cursor-pointer"
             nativeButton={false}
-            render={<Link href="/dashboard" />}
+            render={<Link href="/sign-in" />} // anonymous visitors are bounced off /dashboard by the proxy
           >
             <LayoutDashboard data-icon="inline-start" />
             Live Demo
@@ -185,7 +185,7 @@ export function LandingNavbar() {
                   size="lg"
                   className="w-full cursor-pointer"
                   nativeButton={false}
-                  render={<Link href="/dashboard" />}
+                  render={<Link href="/sign-in" />} // anonymous visitors are bounced off /dashboard by the proxy
                 >
                   <LayoutDashboard data-icon="inline-start" />
                   Live Demo

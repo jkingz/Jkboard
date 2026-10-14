@@ -14,8 +14,8 @@ import { neon } from "@neondatabase/serverless"
 import { drizzle } from "drizzle-orm/neon-http"
 
 import * as schema from "../src/db/schema/index.ts"
+import { DEMO_PASSWORD } from "../src/lib/demo.ts"
 
-const DEMO_PASSWORD = "jkboard-2026"
 const RESET = process.argv.includes("--reset")
 
 async function main() {

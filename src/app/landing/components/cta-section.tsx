@@ -10,6 +10,7 @@ import {
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
+import { DEMO_EMAIL, DEMO_PASSWORD } from "@/lib/demo"
 
 export function CTASection() {
   return (
@@ -75,16 +76,35 @@ export function CTASection() {
                   Get Started Free
                   <ArrowRight data-icon="inline-end" />
                 </Button>
+                {/* /sign-in, not /dashboard: an anonymous visitor sent to the
+                    dashboard is bounced straight back here by the proxy. */}
                 <Button
                   variant="outline"
                   size="lg"
                   className="cursor-pointer px-8 py-6 text-lg font-medium"
                   nativeButton={false}
-                  render={<Link href="/dashboard" />}
+                  render={<Link href="/sign-in" />}
                 >
                   <LayoutDashboard data-icon="inline-start" />
                   Open Live Demo
                 </Button>
+              </div>
+
+              <div className="mx-auto max-w-md rounded-lg border border-dashed bg-background/60 p-4 text-left">
+                <p className="mb-2 text-xs text-muted-foreground">
+                  Demo credentials — the workspace is shared, so treat changes as
+                  temporary.
+                </p>
+                <dl className="grid gap-1 font-mono text-xs">
+                  <div className="flex gap-2">
+                    <dt className="w-20 shrink-0 text-muted-foreground">Email</dt>
+                    <dd className="select-all">{DEMO_EMAIL}</dd>
+                  </div>
+                  <div className="flex gap-2">
+                    <dt className="w-20 shrink-0 text-muted-foreground">Password</dt>
+                    <dd className="select-all">{DEMO_PASSWORD}</dd>
+                  </div>
+                </dl>
               </div>
 
               {/* Trust Indicators */}
