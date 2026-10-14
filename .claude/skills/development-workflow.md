@@ -7,7 +7,7 @@ when: "user starts a new task, needs to scope work, or asks about development pr
 
 ## The loop, per unit of work
 
-1. **Read what governs the change** — STANDING RULES first, then the context sections for the touched module.
+1. **Read what governs the change** — `AGENTS.md` rules first, then the `docs/` file for the touched module.
 2. **Say the scope in one sentence** — what changes, and what explicitly does NOT.
 3. **Implement the smallest increment** that can be verified on its own.
 4. **Verify with a command** — never with a claim. Use `/verification-gates` skill.
@@ -24,14 +24,14 @@ when: "user starts a new task, needs to scope work, or asks about development pr
 
 ## Requirements discipline
 
-- Do not invent behavior that is not in AGENTS.md context sections.
+- Do not invent behavior that is not in `docs/`.
 - Ambiguous? Resolve it in the relevant section first, then implement.
 - Missing? Record it in `specs/` as an open question and stop that branch of work.
 
 ## Docs and truth
 
 - **Code is the source of truth.** Where a doc and the code disagree, the doc is the defect.
-- Design intent that is **not built** belongs in TARGET STATE, never in docs describing current behavior.
+- Design intent that is **not built** belongs in `docs/target-state.md`, never in a doc describing current behavior.
 - Status docs record actual state, not intended state.
 - Do not restate the spec in a doc — link it.
 - No rotting literals in docs: quote command output instead of typing counts or versions by hand.
@@ -44,14 +44,16 @@ when: "user starts a new task, needs to scope work, or asks about development pr
 ## Before moving to the next unit
 
 1. The unit works end to end inside the scope you stated at the start.
-2. No invariant in ARCHITECTURE CONTEXT was violated.
+2. No invariant in `docs/architecture.md` was violated.
 3. The spec in `specs/` reflects what actually happened.
 4. The full gate chain is green (use `/verification-gates`).
 
 ## Reference
 
-- STANDING RULES for the constraints on every change
+- `AGENTS.md` for the constraints on every change
+- [docs/verification-standards.md](../../docs/verification-standards.md) before writing or editing any doc
 - `/verification-gates` for the exact chain that must pass
 - `/testing` for tier structure and what is currently untested
 
-Commit and PR conventions live in AGENTS.md § PM CONVENTIONS. There is no `/git-workflow` skill: no remote is configured, so PR workflow is not exercisable yet.
+Commit and PR conventions live in [docs/project-context.md](../../docs/project-context.md). There is no
+`/git-workflow` skill: no remote is configured, so PR workflow is not exercisable yet.

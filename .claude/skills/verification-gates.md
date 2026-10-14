@@ -25,9 +25,13 @@ Work is done when, in this order:
 
 ## There is no test gate
 
-**No test runner is installed** — no vitest/jest/playwright in `package.json`, no `tests/` directory. Do not report "tests pass": there is nothing to run, and a green three-gate chain is not coverage. When a runner is added, insert it as gate 1 and update STANDING RULES §13.
+**No test runner is installed** — no vitest/jest/playwright in `package.json`, no `tests/` directory.
+Do not report "tests pass": there is nothing to run, and a green three-gate chain is not coverage.
+When a runner is added, insert it as gate 1 and update
+[docs/project-context.md](../../docs/project-context.md) → Verification gates.
 
-The six invariants in AGENTS.md § ARCHITECTURE CONTEXT are untested and are the first candidates.
+The six invariants in [docs/architecture.md](../../docs/architecture.md) are untested and are the first
+candidates.
 
 ## Reporting
 
@@ -53,22 +57,31 @@ kanban columns in the browser; it persisted across reload
 
 ## A gate that only passes on your machine is not a gate
 
-Anything fetched at build time over the network is a latent CI failure. This project fetches **Inter from Google Fonts** at build time. **A warm `.next` masks this** — the blackholed build exits 0 until you clear the cache. Always test cold:
+Anything fetched at build time over the network is a latent CI failure. This project fetches **Inter
+from Google Fonts** at build time. **A warm `.next` masks this** — the blackholed build exits 0 until
+you clear the cache. Always test cold:
 
 ```bash
 rm -rf .next && NODE_USE_ENV_PROXY=1 HTTPS_PROXY=http://127.0.0.1:9 pnpm build
 ```
 
-Verified: exit 0 with a warm cache, exit 1 cold with `Error while requesting resource … fonts.googleapis.com`. A sealed CI runner has no egress and will fail. Gate 3 cannot be trusted until the font is vendored.
+Verified: exit 0 with a warm cache, exit 1 cold with `Error while requesting resource … fonts.googleapis.com`.
+A sealed CI runner has no egress and will fail. Gate 3 cannot be trusted until the font is vendored —
+tracked in [docs/target-state.md](../../docs/target-state.md).
 
-Anything that needs your machine's environment state is not verified — that includes `.env.local`. The build must find `DATABASE_URL`, `BETTER_AUTH_SECRET` and `BETTER_AUTH_URL` **present**, though the placeholder values in `.env.example` are enough: nothing queries at build time because `(dashboard)` is `force-dynamic`. Removing `.env.local` fails the build at page-data collection.
+Anything that needs your machine's environment state is not verified — that includes `.env.local`. The
+build must find `DATABASE_URL`, `BETTER_AUTH_SECRET` and `BETTER_AUTH_URL` **present**, though the
+placeholder values in `.env.example` are enough: nothing queries at build time because `(dashboard)`
+is `force-dynamic`. Removing `.env.local` fails the build at page-data collection.
 
 ## CI verification
 
-None. There is no `.github/workflows/` and no remote configured, so these gates run locally only. Nothing runs on push or pull request today.
+None. There is no `.github/workflows/` and no remote configured, so these gates run locally only.
+Nothing runs on push or pull request today.
 
 ## Reference
 
-- STANDING RULES §13 for the gate chain and the missing test gate
-- CODE STANDARDS § Testing for the tier structure to adopt if a runner is added
-- PM CONVENTIONS § Review gate for the merge requirement
+- [docs/project-context.md](../../docs/project-context.md) → Verification gates for the chain and the
+  missing test step
+- [docs/architecture.md](../../docs/architecture.md) → Verification for the implemented surface
+- `/testing` for tier structure and what is currently untested

@@ -17,3 +17,7 @@ Each spec describes:
 - **Verification** — how to prove it works
 
 Specs live here; implementations live in the codebase. When a spec and code disagree, code is truth.
+
+See [docs/project-context.md](../docs/project-context.md) for the commands and gates, and
+[docs/architecture.md](../docs/architecture.md) for how the system works today. Design intent that is
+not built belongs in [docs/target-state.md](../docs/target-state.md).
