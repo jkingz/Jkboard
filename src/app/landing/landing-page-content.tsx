@@ -13,12 +13,17 @@ import {
   ThemeCustomizer,
   ThemeCustomizerTrigger,
 } from "@/components/theme-customizer"
+import { PageGrain } from "@/components/page-grain"
 
 export function LandingPageContent() {
   const [themeCustomizerOpen, setThemeCustomizerOpen] = React.useState(false)
 
   return (
     <div className="min-h-screen bg-background">
+      {/* Film grain over the whole page. Fixed rather than absolute so it
+          covers the full scroll height without a tall element. */}
+      <PageGrain />
+
       {/* Navigation */}
       <LandingNavbar />
 

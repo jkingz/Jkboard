@@ -218,12 +218,16 @@ export function ThemeCustomizerTrigger({ onClick }: { onClick: () => void }) {
     <Button
       onClick={onClick}
       size="icon"
+      // Icon-only control, so it needs an accessible name. Without one a
+      // screen reader announces "button" and nothing else.
+      aria-label="Customise theme"
+      title="Customise theme"
       className={cn(
         "fixed top-1/2 -mt-6 size-12 rounded-full shadow-lg z-50 active:not-aria-[haspopup]:translate-y-0 bg-primary hover:bg-primary/90 text-primary-foreground cursor-pointer",
         sidebarConfig.side === "left" ? "right-4" : "left-4"
       )}
     >
-      <Settings className="size-5" />
+      <Settings className="size-5" aria-hidden="true" />
     </Button>
   )
 }

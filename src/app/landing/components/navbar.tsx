@@ -21,6 +21,7 @@ import {
 import { Logo } from "@/components/logo"
 import { ModeToggle } from "@/components/mode-toggle"
 import { useTheme } from "@/hooks/use-theme"
+import { useSession } from "@/lib/auth-client"
 
 const navigationItems = [
   { name: "Features", href: "#features" },
@@ -44,6 +45,10 @@ const smoothScrollTo = (targetId: string) => {
 export function LandingNavbar() {
   const [isOpen, setIsOpen] = useState(false)
   const { setTheme, theme } = useTheme()
+  // `undefined` while the session is still being fetched, so treat only a
+  // definite session as signed in. Treating `undefined` as anonymous would
+  // flash the sign-in buttons at someone who is already signed in.
+  const isSignedIn = useSession().data != null
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/80 backdrop-blur-xl supports-[backdrop-filter]:bg-background/60">
@@ -73,35 +78,53 @@ export function LandingNavbar() {
           </NavigationMenuList>
         </NavigationMenu>
 
-        {/* Desktop CTA */}
+        {/* Desktop CTA. A signed-in visitor already has a workspace, so the
+            sign-in and sign-up paths are replaced by a single control that
+            takes them to it. Offering both to someone already signed in is
+            noise. */}
         <div className="hidden md:flex items-center gap-2">
-          <ModeToggle variant="ghost" />
-          {/* /sign-in, not /dashboard: the proxy bounces anonymous visitors
-              off the dashboard straight back here. */}
-          <Button
-            variant="outline"
-            className="cursor-pointer"
-            nativeButton={false}
-            render={<Link href="/sign-in" />}
-          >
-            <LayoutDashboard data-icon="inline-start" />
-            Demo
-          </Button>
-          <Button
-            variant="ghost"
-            className="cursor-pointer"
-            nativeButton={false}
-            render={<Link href="/sign-in" />}
-          >
-            Sign In
-          </Button>
-          <Button
-            className="cursor-pointer"
-            nativeButton={false}
-            render={<Link href="/sign-up" />}
-          >
-            Create an account
-          </Button>
+          {isSignedIn ? (
+            <Button
+              variant="outline"
+              size="icon"
+              className="cursor-pointer"
+              nativeButton={false}
+              render={<Link href="/dashboard" />}
+            >
+              <LayoutDashboard aria-hidden="true" />
+              <span className="sr-only">Open your workspace</span>
+            </Button>
+          ) : (
+            <>
+              <ModeToggle variant="ghost" />
+              {/* /sign-in, not /dashboard: the proxy bounces anonymous visitors
+                  off the dashboard straight back here. */}
+              <Button
+                variant="outline"
+                className="cursor-pointer"
+                nativeButton={false}
+                render={<Link href="/sign-in" />}
+              >
+                <LayoutDashboard data-icon="inline-start" />
+                Demo
+              </Button>
+              <Button
+                variant="ghost"
+                className="cursor-pointer"
+                nativeButton={false}
+                render={<Link href="/sign-in" />}
+              >
+                Sign In
+              </Button>
+              <Button
+                className="cursor-pointer"
+                nativeButton={false}
+                render={<Link href="/sign-up" />}
+              >
+                Create an account
+              </Button>
+            </>
+          )}
         </div>
 
         {/* Mobile Menu */}
@@ -182,36 +205,50 @@ export function LandingNavbar() {
 
               {/* Footer Actions */}
               <div className="flex flex-col border-t p-6 gap-4">
-                <Button
-                  variant="outline"
-                  size="lg"
-                  className="w-full cursor-pointer"
-                  nativeButton={false}
-                  render={<Link href="/sign-in" />}
-                >
-                  <LayoutDashboard data-icon="inline-start" />
-                  Demo
-                </Button>
+                {isSignedIn ? (
+                  <Button
+                    size="lg"
+                    className="w-full cursor-pointer"
+                    nativeButton={false}
+                    render={<Link href="/dashboard" />}
+                  >
+                    <LayoutDashboard data-icon="inline-start" />
+                    Open your workspace
+                  </Button>
+                ) : (
+                  <>
+                    <Button
+                      variant="outline"
+                      size="lg"
+                      className="w-full cursor-pointer"
+                      nativeButton={false}
+                      render={<Link href="/sign-in" />}
+                    >
+                      <LayoutDashboard data-icon="inline-start" />
+                      Demo
+                    </Button>
 
-                <div className="grid grid-cols-2 gap-3">
-                  <Button
-                    variant="outline"
-                    size="lg"
-                    className="cursor-pointer"
-                    nativeButton={false}
-                    render={<Link href="/sign-in" />}
-                  >
-                    Sign In
-                  </Button>
-                  <Button
-                    size="lg"
-                    className="cursor-pointer"
-                    nativeButton={false}
-                    render={<Link href="/sign-up" />}
-                  >
-                    Create an account
-                  </Button>
-                </div>
+                    <div className="grid grid-cols-2 gap-3">
+                      <Button
+                        variant="outline"
+                        size="lg"
+                        className="cursor-pointer"
+                        nativeButton={false}
+                        render={<Link href="/sign-in" />}
+                      >
+                        Sign In
+                      </Button>
+                      <Button
+                        size="lg"
+                        className="cursor-pointer"
+                        nativeButton={false}
+                        render={<Link href="/sign-up" />}
+                      >
+                        Create an account
+                      </Button>
+                    </div>
+                  </>
+                )}
               </div>
             </div>
           </SheetContent>
