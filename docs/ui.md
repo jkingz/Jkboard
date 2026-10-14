@@ -41,7 +41,7 @@ and are now corrected:
 | Claimed | Reality |
 | --- | --- |
 | 94% on-time rate, 11h saved weekly, 48 tasks completed | Fabricated. The stats section now reads real counts from the seeded workspace and says so. |
-| Starter / Team / Business plans at 0/12/29 per month | No payment provider exists. The pricing section now states there is no billing. |
+| Starter / Team / Business plans at 0/12/29 per month | No payment provider exists. The pricing section is titled "It is free, and early", lists what exists and what is still being built, and states plainly that no payment details are collected. Early stage is a true claim; a price table would not be. |
 | Bulk CSV import, project templates | Not built. |
 | Daily progress digest email | Not built. |
 | Guest collaborators, task comments, saved views | Not built. Replaced with what exists. |

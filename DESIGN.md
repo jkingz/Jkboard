@@ -143,8 +143,11 @@ These are not style preferences; they are correctness rules and they bind every 
 - **No invented numbers.** Every figure on the page comes from the seeded database or is marked
   `[REAL DATA]`. The current stats section (`6`, `48`, `94%`, `11h`) is fabricated and must go.
 - **No unbuilt features.** CSV import, project templates, digest emails, Starter/Team plans, plan
-  cancellation, guest collaborators: none of these exist. The pricing and FAQ sections currently
-  describe them and must be rewritten or removed (R-28, R-38).
+  cancellation, guest collaborators: none of these exist. The pricing and FAQ sections describe only
+  what is built, and say plainly that the product is early (R-28, R-38).
+
+  "Early stage" is itself a permitted claim: it is true, and it is more useful to a reader than a
+  price table would be. What is not permitted is dressing an early build as a finished one.
 - **No fake testimonials.** There is no testimonials section and none may be added without real,
   verifiable quotes.
 - **No security or performance claims.** Nothing about SOC 2, uptime, encryption, or speed.
