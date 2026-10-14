@@ -146,7 +146,7 @@ export default function NotificationSettings() {
     toast.add({
       type: "success",
       title: "Notification preferences saved",
-      description: "FlowBoard will use these channels from now on.",
+      description: "Jkboard will use these channels from now on.",
     })
   }
 
@@ -170,7 +170,7 @@ export default function NotificationSettings() {
           : "Browser notifications not enabled",
       description:
         result === "granted"
-          ? "FlowBoard can now notify you outside the tab."
+          ? "Jkboard can now notify you outside the tab."
           : "You can change this later in your browser settings.",
     })
   }
@@ -384,12 +384,12 @@ export default function NotificationSettings() {
               <CardTitle>Browser notifications</CardTitle>
               <CardDescription>
                 {permission === "granted"
-                  ? "Permission granted — FlowBoard can notify you outside this tab."
+                  ? "Permission granted — Jkboard can notify you outside this tab."
                   : permission === "denied"
                     ? "Permission blocked. Re-enable it in your browser settings."
                     : permission === "unsupported"
                       ? "This browser does not support the Notifications API."
-                      : "FlowBoard needs permission before it can notify you outside this tab."}
+                      : "Jkboard needs permission before it can notify you outside this tab."}
               </CardDescription>
             </CardHeader>
             <CardContent className="flex flex-col gap-4">
@@ -424,7 +424,7 @@ export default function NotificationSettings() {
                         Product news and tips
                       </FieldLabel>
                       <FieldDescription>
-                        Occasional emails about new FlowBoard features. No
+                        Occasional emails about new Jkboard features. No
                         upsells.
                       </FieldDescription>
                     </FieldContent>

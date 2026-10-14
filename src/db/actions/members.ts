@@ -8,7 +8,7 @@ import { z } from "zod"
 
 import { db } from "@/db"
 import { member, project, user } from "@/db/schema"
-import type { Member } from "@/data/flowboard"
+import type { Member } from "@/data/jkboard"
 
 const inviteSchema = z.object({
   name: z.string().min(2).max(120),

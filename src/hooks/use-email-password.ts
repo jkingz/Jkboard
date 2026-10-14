@@ -89,7 +89,7 @@ export function useEmailPasswordAuth() {
           title: mode === "sign-up" ? "Account created" : "Welcome back",
           description:
             mode === "sign-up"
-              ? "Your FlowBoard workspace is ready."
+              ? "Your Jkboard workspace is ready."
               : "You are signed in.",
         })
 

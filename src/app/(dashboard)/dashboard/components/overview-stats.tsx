@@ -19,13 +19,13 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { useFlowBoard } from "@/data/flowboard-store"
+import { useJkboard } from "@/data/jkboard-store"
 
 import type {
-  Project as FlowBoardProject,
-  Task as FlowBoardTask,
+  Project as JkboardProject,
+  Task as JkboardTask,
   TaskStats,
-} from "@/data/flowboard"
+} from "@/data/jkboard"
 
 interface Metric {
   title: string
@@ -37,8 +37,8 @@ interface Metric {
 }
 
 function buildMetrics(
-  projects: FlowBoardProject[],
-  tasks: FlowBoardTask[],
+  projects: JkboardProject[],
+  tasks: JkboardTask[],
   stats: TaskStats
 ): Metric[] {
   const inProgress = tasks.filter((task) => task.status === "in-progress").length
@@ -83,7 +83,7 @@ function buildMetrics(
 }
 
 export function OverviewStats() {
-  const { projects, tasks, taskStats } = useFlowBoard()
+  const { projects, tasks, taskStats } = useJkboard()
 
   return (
     <div className="*:data-[slot=card]:from-primary/5 *:data-[slot=card]:to-card dark:*:data-[slot=card]:bg-card *:data-[slot=card]:bg-gradient-to-t *:data-[slot=card]:shadow-xs grid gap-4 sm:grid-cols-2 @5xl:grid-cols-4">

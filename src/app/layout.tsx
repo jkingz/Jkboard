@@ -9,11 +9,11 @@ import { inter } from "@/lib/fonts"
 
 export const metadata: Metadata = {
   title: {
-    default: "FlowBoard",
-    template: "%s | FlowBoard",
+    default: "Jkboard",
+    template: "%s | Jkboard",
   },
   description:
-    "FlowBoard — project and task management for individuals and small teams.",
+    "Jkboard — project and task management for individuals and small teams.",
 }
 
 export default function RootLayout({

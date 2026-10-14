@@ -1,10 +1,10 @@
 "use client"
 
 import { ProjectsGrid } from "./components/projects-grid"
-import { useFlowBoard } from "@/data/flowboard-store"
+import { useJkboard } from "@/data/jkboard-store"
 
 export default function ProjectsPage() {
-  const { projects } = useFlowBoard()
+  const { projects } = useJkboard()
   const activeCount = projects.filter(
     (project) => project.status === "active"
   ).length

@@ -65,22 +65,28 @@ nobody notices. Check `globals.css` before introducing a name.
 
 ## Accessibility
 
-**Nothing is enforced by a machine.** No axe, no `eslint-plugin-jsx-a11y`, no Lighthouse gate — the
-ESLint config is `core-web-vitals` + `typescript` and nothing else, and `pnpm lint` exits 0 with no
-a11y rule present. So treat every item below as review guidance, not a gate that will catch a
-regression.
+**Six `jsx-a11y` rules ship as warnings, not errors.** They arrive with `eslint-config-next`, so
+there is no separate a11y dependency to add. Measured, not assumed — the active set on a TSX file is
+`alt-text`, `aria-props`, `aria-proptypes`, `aria-unsupported-elements`,
+`role-has-required-aria-props`, `role-supports-aria-props`, every one at severity `1` (warn).
 
-What the stack does give you:
+Verified by linting a probe file containing a bare `img` with no `alt`: both `jsx-a11y/alt-text` and
+`@next/next/no-img-element` reported **`warning`**, and `pnpm lint` **exited 0**.
+
+So: a11y regressions are a **review rule, not a gate**. Treat these six as advisory — read the
+warnings, but nothing will fail a build over them. No axe, no Lighthouse gate, no
+`eslint-plugin-jsx-a11y` in the project's own dependency list.
+
+No automated check covers any of the following. All are left to review:
+
+- Contrast of the custom `--success` / `--warning` / `--info` palette against their backgrounds.
+- Keyboard traversal of dnd-kit drag targets on the kanban board
+  (`app/(dashboard)/projects/[id]/components/project-board.tsx`).
+- Whether dialogs trap focus and restore it on close — `jsx-a11y` says nothing about focus order.
+- Status conveyed by colour alone (project status, task priority) with no text or icon equivalent.
+
+What the stack does give you, beyond the lint warnings:
 
 - shadcn/Base UI primitives ship semantic roles and keyboard handling by default — using the
   primitive rather than a raw `div` is the main lever available today.
 - Focus rings exist as a token (`ring-ring`).
-
-Left entirely to review:
-
-- Contrast of the custom `--success` / `--warning` / `--info` palette against their backgrounds.
-- Keyboard traversal of dnd-kit drag targets on the kanban board (`src/components/` and
-  `projects/[id]/components/project-board.tsx`).
-- Whether dialogs trap focus and restore it on close.
-- Any status conveyed by colour alone (project status, task priority) without a text or icon
-  equivalent.

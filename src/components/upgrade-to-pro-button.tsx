@@ -52,7 +52,7 @@ export function UpgradeToProButton() {
           <div className="flex flex-col gap-3">
             <h3 className="font-bold text-lg flex items-center gap-2">
               <Rocket size={18} className="text-primary" />
-              Move your team to FlowBoard Team
+              Move your team to Jkboard Team
             </h3>
             <p className="text-muted-foreground text-sm">
               You are on the Starter plan. Upgrade when the team needs shared

@@ -5,11 +5,11 @@ import Link from "next/link"
 import { UserPlus, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
-import { useFlowBoard } from "@/data/flowboard-store"
+import { useJkboard } from "@/data/jkboard-store"
 
 export function SidebarNotification() {
   const [isVisible, setIsVisible] = React.useState(true)
-  const { members } = useFlowBoard()
+  const { members } = useJkboard()
 
   const pending = members.filter((member) => member.status === "Invited").length
 

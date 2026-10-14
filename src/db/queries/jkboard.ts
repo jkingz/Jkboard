@@ -4,7 +4,7 @@ import { asc, eq } from "drizzle-orm"
 
 import { db } from "@/db"
 import { member, project, projectMember, task, user } from "@/db/schema"
-import type { Member, Project, Task } from "@/data/flowboard"
+import type { Member, Project, Task } from "@/data/jkboard"
 
 /**
  * Read model for the workspace.

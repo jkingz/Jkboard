@@ -4,12 +4,12 @@ import { CheckCircle2, Clock, ListTodo, UserCheck, Users } from "lucide-react"
 
 import { Card, CardContent } from "@/components/ui/card"
 import { Avatar, AvatarFallback, AvatarGroup } from "@/components/ui/avatar"
-import { useFlowBoard } from "@/data/flowboard-store"
+import { useJkboard } from "@/data/jkboard-store"
 import { InviteMemberDialog } from "./components/invite-member-dialog"
 import { TeamTable } from "./components/team-table"
 
 export default function TeamPage() {
-  const { members, workloadFor } = useFlowBoard()
+  const { members, workloadFor } = useJkboard()
 
   const activeCount = members.filter((m) => m.status === "Active").length
   const invitedCount = members.filter((m) => m.status === "Invited").length

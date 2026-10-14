@@ -5,89 +5,75 @@ when: "user needs to write, run, or update tests; asks about test structure, cov
 
 # Testing
 
-## Current state: no runner
+## The two tiers
 
-**Nothing runs.** There is no test dependency in `package.json` and no `tests/` directory. This skill
-describes the convention to follow *when a runner is added* — it is not a description of today.
+| Tier | Command | Needs |
+| --- | --- | --- |
+| unit | `pnpm test:unit` | nothing — no DB, no network |
+| integration | `pnpm test:integration` | a real `DATABASE_URL` |
+| both | `pnpm test` | whatever each tier needs |
 
-The first candidates are the six invariants in [docs/architecture.md](../../docs/architecture.md),
-which are currently unverified:
-
-1. `server-only` holds — no client component imports the db
-2. `member` has no identity columns; name/email come from joining `user`
-3. `task.reference` is database-generated
-4. every mutation calls `revalidatePath("/", "layout")`
-5. `proxy.ts` never redirects a session-bearing request away from `/sign-in`
-6. project ownership transfers before member deletion (`ON DELETE RESTRICT`)
-
-Invariants 2, 3 and 6 are unit-testable against a real database with no browser. Start there.
-
-## Organization
-
-Tests live in `tests/{feature}/{tier}/` — one folder per feature, tiers `unit`, `integration`, `e2e`.
-Nothing collocated beside the module.
+Split on disk exactly as split in `vitest.config.mts`:
 
 ```
 tests/
-  tasks/
-    unit/
-    integration/
-  members/
-    integration/
+├── setup-env.ts               loads .env.local for the integration tier
+└── platform/
+    ├── unit/                  pure selectors + Zod schemas, no DB
+    └── integration/           schema invariants, real DB, read-only
 ```
 
-## Import patterns
+## What exists today
 
-- Import the subject through the `@/` alias, **never relatively**
-- Check dynamic forms: `await import("./x")` is invisible to a `from "\./"` pattern
-- Example: `import { createTaskAction } from "@/db/actions/tasks"`
+- **`selectors.unit.test.ts`** — `getTaskStats`, `isOverdue`, `getProjectProgress`, `getWorkload`,
+  `getUpcomingTasks`, `getTasksForProject`, and a `daysUntil` regression test.
+- **`invariants.integration.test.ts`** — asserts the persistence invariants against
+  `information_schema`: table namespacing, `jkboard_member` having no identity columns,
+  `reference` being database-generated and unique, and the RESTRICT / SET NULL / CASCADE asymmetry.
 
-## Mocking
+The unit tier builds **its own fixtures**. Asserting against the seed arrays in `src/data/jkboard.ts`
+would pass even if the logic were inverted.
 
-- **Mock at the boundary only** — here that means `@/db`, the module that owns all I/O
-- Never mock inside business logic
-- Unit tier only; integration and e2e use the real Neon database
+## Two traps this tier has already hit
 
-`src/db/index.ts` throws at import if `DATABASE_URL` is unset, and is marked `server-only`. Any test
-touching it needs `.env.local` loaded — use the same `node --env-file=.env.local` wrapper the `db:*`
-scripts use.
+**A missing `DATABASE_URL` must never look like a pass.** `hasDatabase()` in
+`tests/platform/integration/helpers.ts` also rejects the `.env.example` placeholder, not just an
+absent value — that file exists in every fresh clone, so checking presence alone reports a usable
+database when there is none. When the tier skips, it prints the reason.
 
-## Running tests
+**Vitest does not read `.env.local`.** `tests/setup-env.ts` exists solely to load it. Delete that file
+and the integration tier silently skips while still looking green.
 
-No commands exist yet. Once a runner lands, record them in
-[docs/project-context.md](../../docs/project-context.md) → Commands and in the gate chain there.
+## Writing tests here
 
-Prove "run one file" by passing a path that must match nothing; the runner must say it collected
-nothing. If it runs everything and exits 0, the argument never reached the runner.
+- Import through the `@/` alias, never relatively.
+- Build dates with UTC helpers. The app derives every date from UTC (`toISODate`, and `date` columns
+  carry no timezone), so a fixture built from local time will pass or fail depending on the machine.
+  This is not hypothetical — a UTC-derived fixture is what exposed the `daysUntil` bug.
+- `db.execute()` returns a driver result object, **not** an array. Use `rowsOf(result)` from
+  `tests/platform/integration/helpers.ts`; calling `.map()` on the result directly throws
+  `rows.map is not a function`.
+- Never import `@/db` in a test: it is `server-only`, whose entry point throws outside a React Server
+  Component graph. Use `testDb()` from the integration helpers instead.
 
 ## Coverage requirements
 
-Every route gets a test covering:
-- `401` (unauthenticated)
-- `403` (forbidden)
-- `400` (bad request)
-- **No-data-before-auth path** — verify the handler checks auth before reading data
+Every route gets a test covering `401` / `403` / `400` and the no-data-before-auth path.
 
-Note that FlowBoard has **no HTTP routes** for projects or tasks — all mutations are server actions
-under `src/db/actions/`. The equivalent test is: an unauthenticated caller cannot invoke the action,
-and there is currently **nothing enforcing that**. See
-[docs/target-state.md](../../docs/target-state.md).
+FlowBoard has **no HTTP routes** for projects or tasks — all mutations are server actions under
+`src/db/actions/`. The equivalent test is: an unauthenticated caller cannot invoke the action. There
+is currently **nothing enforcing that**; see [docs/target-state.md](../../docs/target-state.md).
 
 Ownership/isolation needs a two-tenant fixture proving a foreign id cannot be read. FlowBoard has a
-single workspace, so this test would fail today — that is the point.
+single workspace, so that test would fail today — which is the point.
 
 ## Empty or credential-gated tiers
 
-Opt-in and empty tiers exit 0 — report which tier the run actually covered. A suite that collected
-zero files and exited 0 is not a pass.
+Report which tier a run actually covered. `pnpm test` prints both counts; a skipped integration tier
+appears as a skip, not as a silent pass.
 
 ## What's NOT tested yet
 
-Everything.
-
-## Reference
-
-- [docs/project-context.md](../../docs/project-context.md) → Verification gates, for why the chain has
-  no test step
-- [docs/architecture.md](../../docs/architecture.md) → Invariants, the list above
-- [docs/verification-standards.md](../../docs/verification-standards.md) before writing any doc here
+Invariants 1, 4 and 5 in [docs/architecture.md](../../docs/architecture.md) — the `server-only`
+guarantee, that every mutation revalidates, and the proxy redirect rule. All three need a running app
+or a browser. The server actions are also untested behaviourally: the integration tier is read-only.

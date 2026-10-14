@@ -27,7 +27,7 @@ import {
   CommandList,
 } from "@/components/ui/command"
 import { Kbd } from "@/components/ui/kbd"
-import { projects } from "@/data/flowboard"
+import { projects } from "@/data/jkboard"
 
 interface SearchItem {
   title: string

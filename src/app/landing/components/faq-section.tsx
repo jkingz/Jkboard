@@ -19,7 +19,7 @@ type FaqItem = {
 const faqItems: FaqItem[] = [
   {
     value: "item-1",
-    question: "How do I get started with FlowBoard?",
+    question: "How do I get started with Jkboard?",
     answer:
       "Create an account, then start from a project template or a blank project. Add tasks, set a due date, and assign an owner. The overview page fills in automatically as your team logs work, so you can see progress without maintaining a separate report.",
   },
@@ -31,7 +31,7 @@ const faqItems: FaqItem[] = [
   },
   {
     value: "item-3",
-    question: "Can I move my existing work into FlowBoard?",
+    question: "Can I move my existing work into Jkboard?",
     answer:
       "Yes. Projects can be created in bulk from a spreadsheet, and tasks can be imported from the CSV export of most other trackers. Your historical completion data is preserved so progress reporting stays accurate from day one.",
   },
@@ -43,7 +43,7 @@ const faqItems: FaqItem[] = [
   },
   {
     value: "item-5",
-    question: "Does FlowBoard work for a team of two or three people?",
+    question: "Does Jkboard work for a team of two or three people?",
     answer:
       "That is exactly the range we optimise for. There is no per-seat tax on the Starter plan, and the Team plan covers up to ten teammates, which keeps small teams in a single workspace instead of paying for an enterprise tool they do not need.",
   },

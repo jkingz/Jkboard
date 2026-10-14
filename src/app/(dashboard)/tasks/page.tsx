@@ -20,7 +20,7 @@ import {
 import { Badge } from "@/components/ui/badge"
 import { TaskDetailDialog } from "@/components/task-detail-dialog"
 import { toast } from "@/components/ui/toast"
-import { useFlowBoard } from "@/data/flowboard-store"
+import { useJkboard } from "@/data/jkboard-store"
 import { buildTaskColumns } from "./components/columns"
 import { DataTable } from "./components/data-table"
 
@@ -32,7 +32,7 @@ const statDefinitions = [
 ] as const
 
 export default function TasksPage() {
-  const { tasks, projects, members, taskStats, actions } = useFlowBoard()
+  const { tasks, projects, members, taskStats, actions } = useJkboard()
   const [openTaskId, setOpenTaskId] = React.useState<string | null>(null)
 
   const columns = React.useMemo(

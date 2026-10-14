@@ -117,7 +117,7 @@ export function AppSidebar({
                 <Logo size={24} className="text-current" />
               </div>
               <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-medium">FlowBoard</span>
+                <span className="truncate font-medium">Jkboard</span>
                 <span className="truncate text-xs">Project workspace</span>
               </div>
             </SidebarMenuButton>

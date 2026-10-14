@@ -17,8 +17,8 @@ import {
 import { DataTableViewOptions } from "./data-table-view-options"
 import { AddTaskModal } from "./add-task-modal"
 
-import { useFlowBoard } from "@/data/flowboard-store"
-import { taskPriorities, taskStatuses } from "@/data/flowboard"
+import { useJkboard } from "@/data/jkboard-store"
+import { taskPriorities, taskStatuses } from "@/data/jkboard"
 
 interface DataTableToolbarProps<TData extends RowData> {
   table: ReactTable<DataTableFeatures, TData>
@@ -27,7 +27,7 @@ interface DataTableToolbarProps<TData extends RowData> {
 export function DataTableToolbar<TData extends RowData>({
   table,
 }: DataTableToolbarProps<TData>) {
-  const { projects } = useFlowBoard()
+  const { projects } = useJkboard()
   const isFiltered = table.state.columnFilters.length > 0
 
   const projectOptions = projects.map((project) => ({

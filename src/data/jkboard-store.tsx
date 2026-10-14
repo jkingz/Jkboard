@@ -21,7 +21,7 @@ import {
   removeMemberAction,
   setMemberStatusAction,
 } from "@/db/actions/members"
-import type { WorkspaceData } from "@/db/queries/flowboard"
+import type { WorkspaceData } from "@/db/queries/jkboard"
 import {
   getProjectProgress,
   getTaskStats,
@@ -31,7 +31,7 @@ import {
   type ProjectProgress,
   type Task,
   type TaskStats,
-} from "./flowboard"
+} from "./jkboard"
 
 /**
  * Client-side view of the workspace.
@@ -70,7 +70,7 @@ export interface InviteInput {
   role: string
 }
 
-export interface FlowBoardActions {
+export interface JkboardActions {
   createProject: (project: ProjectInput) => Promise<Project>
   updateProject: (projectId: string, patch: Partial<ProjectInput>) => Promise<void>
   deleteProject: (projectId: string) => Promise<void>
@@ -87,13 +87,13 @@ export interface FlowBoardActions {
   removeMember: (memberId: string) => Promise<void>
 }
 
-interface FlowBoardContextValue {
+interface JkboardContextValue {
   projects: Project[]
   tasks: Task[]
   members: Member[]
   currentMember: Member
   taskStats: TaskStats
-  actions: FlowBoardActions
+  actions: JkboardActions
 
   projectById: (projectId: string) => Project | undefined
   memberById: (memberId: string) => Member | undefined
@@ -104,14 +104,14 @@ interface FlowBoardContextValue {
   projectsForMember: (memberId: string) => Project[]
 }
 
-const FlowBoardContext = React.createContext<FlowBoardContextValue | null>(null)
+const JkboardContext = React.createContext<JkboardContextValue | null>(null)
 
 function errorMessage(error: unknown, fallback: string) {
   if (error instanceof Error && error.message) return error.message
   return fallback
 }
 
-export function FlowBoardProvider({
+export function JkboardProvider({
   initialData,
   children,
 }: {
@@ -134,7 +134,7 @@ export function FlowBoardProvider({
     setMembers(initialData.members)
   }
 
-  const actions = React.useMemo<FlowBoardActions>(
+  const actions = React.useMemo<JkboardActions>(
     () => ({
       async createProject(input) {
         try {
@@ -300,7 +300,7 @@ export function FlowBoardProvider({
     [projects, tasks, members, router]
   )
 
-  const value = React.useMemo<FlowBoardContextValue>(
+  const value = React.useMemo<JkboardContextValue>(
     () => ({
       projects,
       tasks,
@@ -326,15 +326,15 @@ export function FlowBoardProvider({
   )
 
   return (
-    <FlowBoardContext.Provider value={value}>{children}</FlowBoardContext.Provider>
+    <JkboardContext.Provider value={value}>{children}</JkboardContext.Provider>
   )
 }
 
-export function useFlowBoard() {
-  const context = React.useContext(FlowBoardContext)
+export function useJkboard() {
+  const context = React.useContext(JkboardContext)
 
   if (!context) {
-    throw new Error("useFlowBoard must be used inside <FlowBoardProvider>")
+    throw new Error("useJkboard must be used inside <JkboardProvider>")
   }
 
   return context

@@ -31,7 +31,7 @@ function hoursAgo(hours: number) {
 const people = [
   {
     name: "Maya Chen",
-    email: "maya.chen@flowboard.app",
+    email: "maya.chen@jkboard.app",
     role: "Product Lead",
     status: "active" as MemberStatus,
     joinedAt: toISODate(-244),
@@ -39,7 +39,7 @@ const people = [
   },
   {
     name: "Daniel Okafor",
-    email: "daniel.okafor@flowboard.app",
+    email: "daniel.okafor@jkboard.app",
     role: "Engineering Lead",
     status: "active" as MemberStatus,
     joinedAt: toISODate(-224),
@@ -47,7 +47,7 @@ const people = [
   },
   {
     name: "Priya Raman",
-    email: "priya.raman@flowboard.app",
+    email: "priya.raman@jkboard.app",
     role: "Product Designer",
     status: "active" as MemberStatus,
     joinedAt: toISODate(-177),
@@ -55,7 +55,7 @@ const people = [
   },
   {
     name: "Tom Becker",
-    email: "tom.becker@flowboard.app",
+    email: "tom.becker@jkboard.app",
     role: "Frontend Engineer",
     status: "active" as MemberStatus,
     joinedAt: toISODate(-134),
@@ -63,7 +63,7 @@ const people = [
   },
   {
     name: "Sofia Alvarez",
-    email: "sofia.alvarez@flowboard.app",
+    email: "sofia.alvarez@jkboard.app",
     role: "QA Engineer",
     status: "away" as MemberStatus,
     joinedAt: toISODate(-110),
@@ -71,7 +71,7 @@ const people = [
   },
   {
     name: "Kenji Watanabe",
-    email: "kenji.watanabe@flowboard.app",
+    email: "kenji.watanabe@jkboard.app",
     role: "Backend Engineer",
     status: "active" as MemberStatus,
     joinedAt: toISODate(-59),
@@ -79,7 +79,7 @@ const people = [
   },
   {
     name: "Nora Lindqvist",
-    email: "nora.lindqvist@flowboard.app",
+    email: "nora.lindqvist@jkboard.app",
     role: "UX Researcher",
     status: "invited" as MemberStatus,
     joinedAt: toISODate(-8),
@@ -87,7 +87,7 @@ const people = [
   },
   {
     name: "Liam O'Connell",
-    email: "liam.oconnell@flowboard.app",
+    email: "liam.oconnell@jkboard.app",
     role: "Data Analyst",
     status: "active" as MemberStatus,
     joinedAt: toISODate(-13),
@@ -101,14 +101,14 @@ export const seedMembers = people.map((person) => ({
 }))
 
 const id = {
-  maya: userIdFor("maya.chen@flowboard.app"),
-  daniel: userIdFor("daniel.okafor@flowboard.app"),
-  priya: userIdFor("priya.raman@flowboard.app"),
-  tom: userIdFor("tom.becker@flowboard.app"),
-  sofia: userIdFor("sofia.alvarez@flowboard.app"),
-  kenji: userIdFor("kenji.watanabe@flowboard.app"),
-  nora: userIdFor("nora.lindqvist@flowboard.app"),
-  liam: userIdFor("liam.oconnell@flowboard.app"),
+  maya: userIdFor("maya.chen@jkboard.app"),
+  daniel: userIdFor("daniel.okafor@jkboard.app"),
+  priya: userIdFor("priya.raman@jkboard.app"),
+  tom: userIdFor("tom.becker@jkboard.app"),
+  sofia: userIdFor("sofia.alvarez@jkboard.app"),
+  kenji: userIdFor("kenji.watanabe@jkboard.app"),
+  nora: userIdFor("nora.lindqvist@jkboard.app"),
+  liam: userIdFor("liam.oconnell@jkboard.app"),
 }
 
 export const seedProjects = [

@@ -83,7 +83,7 @@ const features: FeatureBlock[] = [
     kicker: "Team collaboration",
     title: "Shared context instead of status meetings",
     description:
-      "Small teams move faster when everyone can see the same plan. FlowBoard keeps assignments, workload and recent activity in one shared workspace.",
+      "Small teams move faster when everyone can see the same plan. Jkboard keeps assignments, workload and recent activity in one shared workspace.",
     preview: "team",
     bullets: [
       {

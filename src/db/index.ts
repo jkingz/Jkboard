@@ -25,16 +25,16 @@ function connectionString() {
 }
 
 const globalForDb = globalThis as unknown as {
-  flowboardDb?: ReturnType<typeof drizzle<typeof schema>>
+  jkboardDb?: ReturnType<typeof drizzle<typeof schema>>
 }
 
 /** Reuse one client across hot reloads in development. */
 export const db =
-  globalForDb.flowboardDb ??
+  globalForDb.jkboardDb ??
   drizzle(neon(connectionString()), { schema, casing: "snake_case" })
 
 if (process.env.NODE_ENV !== "production") {
-  globalForDb.flowboardDb = db
+  globalForDb.jkboardDb = db
 }
 
 export { schema }

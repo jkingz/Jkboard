@@ -16,15 +16,15 @@ import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
 import { Avatar, AvatarFallback, AvatarGroup } from "@/components/ui/avatar"
 import { cn } from "@/lib/utils"
-import { useFlowBoard } from "@/data/flowboard-store"
+import { useJkboard } from "@/data/jkboard-store"
 import {
   formatDate,
   getProjectStatus,
   projectStatusClasses,
-} from "@/data/flowboard"
+} from "@/data/jkboard"
 
 export function RecentProjects() {
-  const { projects, memberById, projectProgress } = useFlowBoard()
+  const { projects, memberById, projectProgress } = useJkboard()
 
   const recent = [...projects]
     .sort((a, b) => a.dueDate.localeCompare(b.dueDate))

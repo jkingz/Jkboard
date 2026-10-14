@@ -13,18 +13,18 @@ import { user } from "./auth"
 import { project } from "./projects"
 
 /**
- * A workspace membership: the FlowBoard-side profile for someone who has an
+ * A workspace membership: the Jkboard-side profile for someone who has an
  * account. Identity (name, email, credentials) stays in the Better Auth
  * `user` table — nothing is duplicated here, only referenced.
  */
-export const memberStatusEnum = pgEnum("member_status", [
+export const memberStatusEnum = pgEnum("jkboard_member_status", [
   "active",
   "invited",
   "away",
 ])
 
 export const member = pgTable(
-  "member",
+  "jkboard_member",
   {
     id: uuid("id").primaryKey().defaultRandom(),
     userId: text("user_id")
@@ -46,7 +46,7 @@ export const member = pgTable(
 
 /** Many-to-many: who is on which project. */
 export const projectMember = pgTable(
-  "project_member",
+  "jkboard_project_member",
   {
     projectId: uuid("project_id")
       .notNull()

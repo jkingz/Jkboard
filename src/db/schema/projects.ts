@@ -11,7 +11,7 @@ import {
 
 import { member } from "./members"
 
-export const projectStatusEnum = pgEnum("project_status", [
+export const projectStatusEnum = pgEnum("jkboard_project_status", [
   "planning",
   "active",
   "on-hold",
@@ -19,7 +19,7 @@ export const projectStatusEnum = pgEnum("project_status", [
 ])
 
 export const project = pgTable(
-  "project",
+  "jkboard_project",
   {
     id: uuid("id").primaryKey().defaultRandom(),
     name: text("name").notNull(),

@@ -25,7 +25,7 @@ export default function BillingSettings() {
       <div>
         <h1 className="text-3xl font-bold">Plans &amp; Billing</h1>
         <p className="text-muted-foreground">
-          Manage your FlowBoard subscription, invoices and payment details.
+          Manage your Jkboard subscription, invoices and payment details.
         </p>
       </div>
 

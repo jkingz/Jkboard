@@ -16,8 +16,8 @@ marketing landing page; light/dark theming with a runtime theme customizer.
 **Not built** — verified by reading the code, not assumed:
 
 - **Multi-tenancy / per-user scoping.** There is exactly one workspace. `getMemberId()`
-  (`src/db/queries/flowboard.ts:123`) returns the *first* `member` row, and `currentMember` is
-  hardcoded to `members[0]` (`src/data/flowboard-store.tsx:308`). Every signed-in user sees and can
+  (`src/db/queries/jkboard.ts:123`) returns the *first* `member` row, and `currentMember` is
+  hardcoded to `members[0]` (`src/data/jkboard-store.tsx:308`). Every signed-in user sees and can
   mutate the same data.
 - **Authorization.** No role check guards any mutation. `role` is a free-text column with default
   `"Member"`; nothing branches on it. Any authenticated session can delete any project.
@@ -35,10 +35,10 @@ Verified: 2026-10-15, against the repo at `a70a95d`.
 
 ## Overview
 
-FlowBoard is a project and task management dashboard for a single team: create projects, break them
+Jkboard is a project and task management dashboard for a single team: create projects, break them
 into tasks, and track who is assigned what and when it is due. It grew out of a shadcn
 dashboard/landing template; the template supplied the shell (sidebar, theming, landing page, settings
-pages) and FlowBoard supplied the auth, Postgres data layer, and the actual project/task domain.
+pages) and Jkboard supplied the auth, Postgres data layer, and the actual project/task domain.
 
 ---
 
@@ -81,7 +81,7 @@ None recorded. No owner has stated a measurable target, so none is written here.
 
 A guessed answer here is a defect. An unanswered question is fine; an invented answer is not.
 
-- Should `role` become real authorization, or is FlowBoard intentionally a single-trust-team tool?
+- Should `role` become real authorization, or is Jkboard intentionally a single-trust-team tool?
 - Should invites send email, or is "sign in with the address you were invited with" the intended flow?
 - Which settings pages are meant to persist, and which are permanent template decoration?
 - Is one shared workspace the intended product, or an artifact of how far the build has got?

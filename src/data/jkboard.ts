@@ -104,13 +104,22 @@ export function formatShortDate(isoDate: string) {
   return format(parseISO(isoDate), "MMM d")
 }
 
-/** Positive when the date is still ahead, negative once it has passed. */
+/**
+ * Positive when the date is still ahead, negative once it has passed.
+ *
+ * Measures against **UTC** midnight, not local. Every date in this app is
+ * written by `toISODate()`, which derives the YYYY-MM-DD string from UTC, and
+ * `date` columns carry no timezone. Comparing that string against local
+ * midnight made a task due "today" read as overdue for the first hours of the
+ * day in any timezone ahead of UTC.
+ */
 export function daysUntil(isoDate: string) {
   const today = new Date()
-  today.setHours(0, 0, 0, 0)
-  return Math.round(
-    (parseISO(isoDate).getTime() - today.getTime()) / 86_400_000
-  )
+  today.setUTCHours(0, 0, 0, 0)
+  // Parse as UTC explicitly. `parseISO` returns *local* midnight, so pairing it
+  // with a UTC today reintroduces the offset this function exists to remove.
+  const due = new Date(`${isoDate}T00:00:00.000Z`)
+  return Math.round((due.getTime() - today.getTime()) / 86_400_000)
 }
 
 export function isOverdue(task: Task) {
@@ -184,7 +193,7 @@ export const members: Member[] = [
   {
     id: "u-1",
     name: "Maya Chen",
-    email: "maya.chen@flowboard.app",
+    email: "maya.chen@jkboard.app",
     initials: "MC",
     role: "Product Lead",
     status: "Active",
@@ -194,7 +203,7 @@ export const members: Member[] = [
   {
     id: "u-2",
     name: "Daniel Okafor",
-    email: "daniel.okafor@flowboard.app",
+    email: "daniel.okafor@jkboard.app",
     initials: "DO",
     role: "Engineering Lead",
     status: "Active",
@@ -204,7 +213,7 @@ export const members: Member[] = [
   {
     id: "u-3",
     name: "Priya Raman",
-    email: "priya.raman@flowboard.app",
+    email: "priya.raman@jkboard.app",
     initials: "PR",
     role: "Product Designer",
     status: "Active",
@@ -214,7 +223,7 @@ export const members: Member[] = [
   {
     id: "u-4",
     name: "Tom Becker",
-    email: "tom.becker@flowboard.app",
+    email: "tom.becker@jkboard.app",
     initials: "TB",
     role: "Frontend Engineer",
     status: "Active",
@@ -224,7 +233,7 @@ export const members: Member[] = [
   {
     id: "u-5",
     name: "Sofia Alvarez",
-    email: "sofia.alvarez@flowboard.app",
+    email: "sofia.alvarez@jkboard.app",
     initials: "SA",
     role: "QA Engineer",
     status: "Away",
@@ -234,7 +243,7 @@ export const members: Member[] = [
   {
     id: "u-6",
     name: "Kenji Watanabe",
-    email: "kenji.watanabe@flowboard.app",
+    email: "kenji.watanabe@jkboard.app",
     initials: "KW",
     role: "Backend Engineer",
     status: "Active",
@@ -244,7 +253,7 @@ export const members: Member[] = [
   {
     id: "u-7",
     name: "Nora Lindqvist",
-    email: "nora.lindqvist@flowboard.app",
+    email: "nora.lindqvist@jkboard.app",
     initials: "NL",
     role: "UX Researcher",
     status: "Invited",
@@ -254,7 +263,7 @@ export const members: Member[] = [
   {
     id: "u-8",
     name: "Liam O'Connell",
-    email: "liam.oconnell@flowboard.app",
+    email: "liam.oconnell@jkboard.app",
     initials: "LO",
     role: "Data Analyst",
     status: "Active",

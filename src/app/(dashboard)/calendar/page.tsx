@@ -1,11 +1,11 @@
 "use client"
 
 import { DeadlineCalendar } from "./components/deadline-calendar"
-import { useFlowBoard } from "@/data/flowboard-store"
-import { isOverdue } from "@/data/flowboard"
+import { useJkboard } from "@/data/jkboard-store"
+import { isOverdue } from "@/data/jkboard"
 
 export default function CalendarPage() {
-  const { tasks } = useFlowBoard()
+  const { tasks } = useJkboard()
 
   const upcoming = tasks
     .filter((task) => task.status !== "completed")

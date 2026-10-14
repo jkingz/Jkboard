@@ -15,7 +15,7 @@ import { drizzle } from "drizzle-orm/neon-http"
 
 import * as schema from "../src/db/schema/index.ts"
 
-const DEMO_PASSWORD = "flowboard-2026"
+const DEMO_PASSWORD = "jkboard-2026"
 const RESET = process.argv.includes("--reset")
 
 async function main() {

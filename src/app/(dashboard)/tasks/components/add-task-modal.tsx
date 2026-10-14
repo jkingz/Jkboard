@@ -24,12 +24,12 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { toast } from "@/components/ui/toast"
-import { useFlowBoard } from "@/data/flowboard-store"
+import { useJkboard } from "@/data/jkboard-store"
 import {
   dateFromToday,
   taskPriorities,
   taskStatuses,
-} from "@/data/flowboard"
+} from "@/data/jkboard"
 
 const taskFormSchema = z.object({
   title: z.string().min(3, "Give the task a title."),
@@ -52,7 +52,7 @@ export function AddTaskModal({
   defaultProjectId,
   trigger,
 }: AddTaskModalProps) {
-  const { projects, members, actions } = useFlowBoard()
+  const { projects, members, actions } = useJkboard()
   const [open, setOpen] = useState(false)
 
   const initialForm = (): TaskFormData => ({

@@ -1,11 +1,11 @@
 {
-  "id": "670bb7c6-e8c1-4ed3-a78d-e3a17f32d8a3",
+  "id": "69ea5df3-3fa1-4ddd-a729-44f4230e0e4a",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
-    "public.account": {
-      "name": "account",
+    "public.jkboard_account": {
+      "name": "jkboard_account",
       "schema": "",
       "columns": {
         "id": {
@@ -107,10 +107,10 @@
         }
       },
       "foreignKeys": {
-        "account_user_id_user_id_fk": {
-          "name": "account_user_id_user_id_fk",
-          "tableFrom": "account",
-          "tableTo": "user",
+        "jkboard_account_user_id_jkboard_user_id_fk": {
+          "name": "jkboard_account_user_id_jkboard_user_id_fk",
+          "tableFrom": "jkboard_account",
+          "tableTo": "jkboard_user",
           "columnsFrom": [
             "user_id"
           ],
@@ -127,8 +127,8 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.session": {
-      "name": "session",
+    "public.jkboard_session": {
+      "name": "jkboard_session",
       "schema": "",
       "columns": {
         "id": {
@@ -200,10 +200,10 @@
         }
       },
       "foreignKeys": {
-        "session_user_id_user_id_fk": {
-          "name": "session_user_id_user_id_fk",
-          "tableFrom": "session",
-          "tableTo": "user",
+        "jkboard_session_user_id_jkboard_user_id_fk": {
+          "name": "jkboard_session_user_id_jkboard_user_id_fk",
+          "tableFrom": "jkboard_session",
+          "tableTo": "jkboard_user",
           "columnsFrom": [
             "user_id"
           ],
@@ -216,8 +216,8 @@
       },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
-        "session_token_unique": {
-          "name": "session_token_unique",
+        "jkboard_session_token_unique": {
+          "name": "jkboard_session_token_unique",
           "nullsNotDistinct": false,
           "columns": [
             "token"
@@ -228,8 +228,8 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.user": {
-      "name": "user",
+    "public.jkboard_user": {
+      "name": "jkboard_user",
       "schema": "",
       "columns": {
         "id": {
@@ -282,8 +282,8 @@
       "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
-        "user_email_unique": {
-          "name": "user_email_unique",
+        "jkboard_user_email_unique": {
+          "name": "jkboard_user_email_unique",
           "nullsNotDistinct": false,
           "columns": [
             "email"
@@ -294,8 +294,8 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.verification": {
-      "name": "verification",
+    "public.jkboard_verification": {
+      "name": "jkboard_verification",
       "schema": "",
       "columns": {
         "id": {
@@ -361,8 +361,8 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.member": {
-      "name": "member",
+    "public.jkboard_member": {
+      "name": "jkboard_member",
       "schema": "",
       "columns": {
         "id": {
@@ -387,7 +387,7 @@
         },
         "status": {
           "name": "status",
-          "type": "member_status",
+          "type": "jkboard_member_status",
           "typeSchema": "public",
           "primaryKey": false,
           "notNull": true,
@@ -440,10 +440,10 @@
         }
       },
       "foreignKeys": {
-        "member_user_id_user_id_fk": {
-          "name": "member_user_id_user_id_fk",
-          "tableFrom": "member",
-          "tableTo": "user",
+        "jkboard_member_user_id_jkboard_user_id_fk": {
+          "name": "jkboard_member_user_id_jkboard_user_id_fk",
+          "tableFrom": "jkboard_member",
+          "tableTo": "jkboard_user",
           "columnsFrom": [
             "user_id"
           ],
@@ -460,8 +460,8 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.project_member": {
-      "name": "project_member",
+    "public.jkboard_project_member": {
+      "name": "jkboard_project_member",
       "schema": "",
       "columns": {
         "project_id": {
@@ -495,10 +495,10 @@
         }
       },
       "foreignKeys": {
-        "project_member_project_id_project_id_fk": {
-          "name": "project_member_project_id_project_id_fk",
-          "tableFrom": "project_member",
-          "tableTo": "project",
+        "jkboard_project_member_project_id_jkboard_project_id_fk": {
+          "name": "jkboard_project_member_project_id_jkboard_project_id_fk",
+          "tableFrom": "jkboard_project_member",
+          "tableTo": "jkboard_project",
           "columnsFrom": [
             "project_id"
           ],
@@ -508,10 +508,10 @@
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
-        "project_member_member_id_member_id_fk": {
-          "name": "project_member_member_id_member_id_fk",
-          "tableFrom": "project_member",
-          "tableTo": "member",
+        "jkboard_project_member_member_id_jkboard_member_id_fk": {
+          "name": "jkboard_project_member_member_id_jkboard_member_id_fk",
+          "tableFrom": "jkboard_project_member",
+          "tableTo": "jkboard_member",
           "columnsFrom": [
             "member_id"
           ],
@@ -523,8 +523,8 @@
         }
       },
       "compositePrimaryKeys": {
-        "project_member_project_id_member_id_pk": {
-          "name": "project_member_project_id_member_id_pk",
+        "jkboard_project_member_project_id_member_id_pk": {
+          "name": "jkboard_project_member_project_id_member_id_pk",
           "columns": [
             "project_id",
             "member_id"
@@ -536,8 +536,8 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.project": {
-      "name": "project",
+    "public.jkboard_project": {
+      "name": "jkboard_project",
       "schema": "",
       "columns": {
         "id": {
@@ -568,7 +568,7 @@
         },
         "status": {
           "name": "status",
-          "type": "project_status",
+          "type": "jkboard_project_status",
           "typeSchema": "public",
           "primaryKey": false,
           "notNull": true,
@@ -677,10 +677,10 @@
         }
       },
       "foreignKeys": {
-        "project_owner_id_member_id_fk": {
-          "name": "project_owner_id_member_id_fk",
-          "tableFrom": "project",
-          "tableTo": "member",
+        "jkboard_project_owner_id_jkboard_member_id_fk": {
+          "name": "jkboard_project_owner_id_jkboard_member_id_fk",
+          "tableFrom": "jkboard_project",
+          "tableTo": "jkboard_member",
           "columnsFrom": [
             "owner_id"
           ],
@@ -697,8 +697,8 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.task": {
-      "name": "task",
+    "public.jkboard_task": {
+      "name": "jkboard_task",
       "schema": "",
       "columns": {
         "id": {
@@ -707,6 +707,13 @@
           "primaryKey": true,
           "notNull": true,
           "default": "gen_random_uuid()"
+        },
+        "reference": {
+          "name": "reference",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'TSK-' || lpad(nextval('jkboard_task_reference_seq')::text, 4, '0')"
         },
         "project_id": {
           "name": "project_id",
@@ -729,7 +736,7 @@
         },
         "status": {
           "name": "status",
-          "type": "task_status",
+          "type": "jkboard_task_status",
           "typeSchema": "public",
           "primaryKey": false,
           "notNull": true,
@@ -737,7 +744,7 @@
         },
         "priority": {
           "name": "priority",
-          "type": "task_priority",
+          "type": "jkboard_task_priority",
           "typeSchema": "public",
           "primaryKey": false,
           "notNull": true,
@@ -864,13 +871,28 @@
           "concurrently": false,
           "method": "btree",
           "with": {}
+        },
+        "task_reference_uidx": {
+          "name": "task_reference_uidx",
+          "columns": [
+            {
+              "expression": "reference",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
         }
       },
       "foreignKeys": {
-        "task_project_id_project_id_fk": {
-          "name": "task_project_id_project_id_fk",
-          "tableFrom": "task",
-          "tableTo": "project",
+        "jkboard_task_project_id_jkboard_project_id_fk": {
+          "name": "jkboard_task_project_id_jkboard_project_id_fk",
+          "tableFrom": "jkboard_task",
+          "tableTo": "jkboard_project",
           "columnsFrom": [
             "project_id"
           ],
@@ -880,10 +902,10 @@
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
-        "task_assignee_id_member_id_fk": {
-          "name": "task_assignee_id_member_id_fk",
-          "tableFrom": "task",
-          "tableTo": "member",
+        "jkboard_task_assignee_id_jkboard_member_id_fk": {
+          "name": "jkboard_task_assignee_id_jkboard_member_id_fk",
+          "tableFrom": "jkboard_task",
+          "tableTo": "jkboard_member",
           "columnsFrom": [
             "assignee_id"
           ],
@@ -902,8 +924,8 @@
     }
   },
   "enums": {
-    "public.member_status": {
-      "name": "member_status",
+    "public.jkboard_member_status": {
+      "name": "jkboard_member_status",
       "schema": "public",
       "values": [
         "active",
@@ -911,8 +933,8 @@
         "away"
       ]
     },
-    "public.project_status": {
-      "name": "project_status",
+    "public.jkboard_project_status": {
+      "name": "jkboard_project_status",
       "schema": "public",
       "values": [
         "planning",
@@ -921,8 +943,8 @@
         "completed"
       ]
     },
-    "public.task_priority": {
-      "name": "task_priority",
+    "public.jkboard_task_priority": {
+      "name": "jkboard_task_priority",
       "schema": "public",
       "values": [
         "urgent",
@@ -931,8 +953,8 @@
         "low"
       ]
     },
-    "public.task_status": {
-      "name": "task_status",
+    "public.jkboard_task_status": {
+      "name": "jkboard_task_status",
       "schema": "public",
       "values": [
         "todo",

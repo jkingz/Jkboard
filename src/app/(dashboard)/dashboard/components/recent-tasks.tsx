@@ -22,7 +22,7 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { cn } from "@/lib/utils"
-import { useFlowBoard } from "@/data/flowboard-store"
+import { useJkboard } from "@/data/jkboard-store"
 import {
   formatShortDate,
   getProject,
@@ -30,10 +30,10 @@ import {
   isOverdue,
   priorityClasses,
   priorityIcons,
-} from "@/data/flowboard"
+} from "@/data/jkboard"
 
 export function RecentTasks() {
-  const { tasks, memberById } = useFlowBoard()
+  const { tasks, memberById } = useJkboard()
 
   const upcoming = tasks
     .filter((task) => task.status !== "completed")

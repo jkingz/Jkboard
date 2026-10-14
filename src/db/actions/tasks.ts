@@ -8,7 +8,7 @@ import { z } from "zod"
 
 import { db } from "@/db"
 import { task } from "@/db/schema"
-import type { Task } from "@/data/flowboard"
+import type { Task } from "@/data/jkboard"
 
 const taskInputSchema = z.object({
   projectId: z.string().uuid(),

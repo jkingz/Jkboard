@@ -1,9 +1,9 @@
-# FlowBoard
+# Jkboard
 
 A modern project & task management dashboard built with Next.js, TypeScript, Tailwind CSS v4 and shadcn/ui.
 
 <!-- prettier-ignore -->
-> Built on top of the open-source [shadcn Dashboard + Landing Page Template](https://github.com/shadcnstore/shadcn-dashboard-landing-template) by [ShadcnStore](https://shadcnstore.com), extended with authentication, a Postgres data layer and FlowBoard's project/task features.
+> Built on top of the open-source [shadcn Dashboard + Landing Page Template](https://github.com/shadcnstore/shadcn-dashboard-landing-template) by [ShadcnStore](https://shadcnstore.com), extended with authentication, a Postgres data layer and Jkboard's project/task features.
 
 ## Features
 

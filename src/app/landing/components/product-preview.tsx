@@ -30,7 +30,7 @@ import {
   projectProgressSeries,
   taskCompletionTrend,
   tasks,
-} from "@/data/flowboard"
+} from "@/data/jkboard"
 
 export type PreviewKind = "overview" | "board" | "tasks" | "team" | "analytics"
 

@@ -13,25 +13,22 @@ Work is done when, in this order:
    - Proves types, not behavior.
 
 2. **Lint passes** — `pnpm lint`
-   - Code style and forbidden patterns.
+   - Code style and forbidden patterns. Note: the six `jsx-a11y` rules ship as **warnings**, so lint
+     exits 0 with them — see [docs/ui.md](../../docs/ui.md) → Accessibility.
 
-3. **Production build passes** — `pnpm build`
-   - Anything the build fetches over the network at build time is a latent CI failure. Inter comes from Google Fonts (`src/lib/fonts.ts`), so this gate is **not hermetic** — see below.
+3. **Tests pass** — `pnpm test`
+   - **Name the tier it covered.** `pnpm test` runs both; the integration tier skips with a stated
+     reason when there is no real `DATABASE_URL`, and a skip is not a pass.
+   - Report the command and the counts.
 
-4. **Live exercise** — always, because there is no automated behavior check
-   - The three gates above prove nothing about whether the feature works.
-   - `pnpm db:push && pnpm db:seed`, then exercise the changed path in a browser.
+4. **Production build passes** — `pnpm build`
+   - Anything the build fetches over the network is a latent CI failure. Inter comes from Google Fonts
+     (`src/lib/fonts.ts`), so this gate is **not hermetic** — see below.
+
+5. **Live exercise** — always
+   - The four gates above do not prove the feature works in a browser.
+   - `pnpm db:seed`, then exercise the changed path.
    - Report the observation: what you did, what you saw.
-
-## There is no test gate
-
-**No test runner is installed** — no vitest/jest/playwright in `package.json`, no `tests/` directory.
-Do not report "tests pass": there is nothing to run, and a green three-gate chain is not coverage.
-When a runner is added, insert it as gate 1 and update
-[docs/project-context.md](../../docs/project-context.md) → Verification gates.
-
-The six invariants in [docs/architecture.md](../../docs/architecture.md) are untested and are the first
-candidates.
 
 ## Reporting
 
@@ -48,31 +45,38 @@ Typecheck: pnpm typecheck
 Lint: pnpm lint
 → No violations
 
+Tests: pnpm test
+→ 25 passed | 1 skipped (26)   [unit + integration; integration needs DATABASE_URL]
+
 Build: pnpm build
 → Compiled successfully, 0 errors
 
-Live: pnpm db:push && pnpm db:seed, then dragged a task between
-kanban columns in the browser; it persisted across reload
+Live: pnpm db:seed, then dragged a task between kanban columns
+in the browser; it persisted across reload
 ```
 
 ## A gate that only passes on your machine is not a gate
 
-Anything fetched at build time over the network is a latent CI failure. This project fetches **Inter
-from Google Fonts** at build time. **A warm `.next` masks this** — the blackholed build exits 0 until
-you clear the cache. Always test cold:
+**Test the build cold.** Inter is fetched from Google Fonts at build time, and **a warm `.next` masks
+it** — the blackholed build exits 0 until you clear the cache:
 
 ```bash
 rm -rf .next && NODE_USE_ENV_PROXY=1 HTTPS_PROXY=http://127.0.0.1:9 pnpm build
 ```
 
-Verified: exit 0 with a warm cache, exit 1 cold with `Error while requesting resource … fonts.googleapis.com`.
-A sealed CI runner has no egress and will fail. Gate 3 cannot be trusted until the font is vendored —
-tracked in [docs/target-state.md](../../docs/target-state.md).
+Verified: exit 0 warm, exit 1 cold with `Error while requesting resource … fonts.googleapis.com`.
+A sealed CI runner has no egress and will fail. Tracked in
+[docs/target-state.md](../../docs/target-state.md).
 
-Anything that needs your machine's environment state is not verified — that includes `.env.local`. The
-build must find `DATABASE_URL`, `BETTER_AUTH_SECRET` and `BETTER_AUTH_URL` **present**, though the
-placeholder values in `.env.example` are enough: nothing queries at build time because `(dashboard)`
-is `force-dynamic`. Removing `.env.local` fails the build at page-data collection.
+**Tests are just as machine-dependent.** The unit tier needs nothing; the integration tier needs a
+real database. Say which one you ran.
+
+## Reporting a tier that skipped
+
+Never report "tests pass" when a tier skipped. Say so, and say why:
+
+> Tests: `pnpm test` → 17 passed, unit tier only. The integration tier skipped because
+> `DATABASE_URL` is the `.env.example` placeholder. Persistence invariants are therefore unverified.
 
 ## CI verification
 
@@ -81,7 +85,6 @@ Nothing runs on push or pull request today.
 
 ## Reference
 
-- [docs/project-context.md](../../docs/project-context.md) → Verification gates for the chain and the
-  missing test step
-- [docs/architecture.md](../../docs/architecture.md) → Verification for the implemented surface
-- `/testing` for tier structure and what is currently untested
+- [docs/project-context.md](../../docs/project-context.md) → Verification gates
+- [docs/architecture.md](../../docs/architecture.md) → Invariants, and which have tests
+- `/testing` for tier structure and the traps this setup has already hit

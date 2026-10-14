@@ -26,14 +26,14 @@ import {
 } from "@/components/ui/select"
 import { toast } from "@/components/ui/toast"
 import { cn } from "@/lib/utils"
-import { useFlowBoard } from "@/data/flowboard-store"
+import { useJkboard } from "@/data/jkboard-store"
 import {
   dateFromToday,
   getMember,
   projectColorOptions,
   projectStatuses,
   type Project,
-} from "@/data/flowboard"
+} from "@/data/jkboard"
 
 const projectFormSchema = z.object({
   name: z.string().min(2, "Give the project a name."),
@@ -80,7 +80,7 @@ export function ProjectDialog({
   trigger,
   children,
 }: ProjectDialogProps) {
-  const { members, actions } = useFlowBoard()
+  const { members, actions } = useJkboard()
   const isEdit = Boolean(project)
 
   const [internalOpen, setInternalOpen] = useState(false)

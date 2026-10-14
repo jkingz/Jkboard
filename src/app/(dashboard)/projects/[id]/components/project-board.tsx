@@ -36,7 +36,7 @@ import { TaskDetailDialog } from "@/components/task-detail-dialog"
 import { AddTaskModal } from "@/app/(dashboard)/tasks/components/add-task-modal"
 import { ProjectDialog } from "@/components/project-dialog"
 import { cn } from "@/lib/utils"
-import { useFlowBoard } from "@/data/flowboard-store"
+import { useJkboard } from "@/data/jkboard-store"
 import {
   formatDate,
   isOverdue,
@@ -45,14 +45,14 @@ import {
   projectStatusClasses,
   projectStatuses,
   taskStatuses,
-} from "@/data/flowboard"
+} from "@/data/jkboard"
 
 export function ProjectBoard() {
   const params = useParams<{ id: string }>()
   const projectId = params?.id
 
   const { projectById, memberById, tasksForProject, projectProgress } =
-    useFlowBoard()
+    useJkboard()
 
   const [openTaskId, setOpenTaskId] = React.useState<string | null>(null)
   const [editOpen, setEditOpen] = React.useState(false)

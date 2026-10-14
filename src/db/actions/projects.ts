@@ -8,8 +8,8 @@ import { z } from "zod"
 
 import { db } from "@/db"
 import { member, project, projectMember } from "@/db/schema"
-import { getMemberId } from "@/db/queries/flowboard"
-import type { Project } from "@/data/flowboard"
+import { getMemberId } from "@/db/queries/jkboard"
+import type { Project } from "@/data/jkboard"
 
 const projectInputSchema = z.object({
   name: z.string().min(2).max(120),

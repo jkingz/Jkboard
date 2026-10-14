@@ -11,7 +11,7 @@ import { boolean, index, pgTable, text, timestamp } from "drizzle-orm/pg-core"
  * Better Auth maps fields to these **Drizzle property names**
  * (`emailVerified`, `createdAt`, ...), not to the snake_case column names.
  */
-export const user = pgTable("user", {
+export const user = pgTable("jkboard_user", {
   id: text("id").primaryKey(),
   name: text("name").notNull(),
   email: text("email").notNull().unique(),
@@ -27,7 +27,7 @@ export const user = pgTable("user", {
 })
 
 export const session = pgTable(
-  "session",
+  "jkboard_session",
   {
     id: text("id").primaryKey(),
     expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
@@ -49,7 +49,7 @@ export const session = pgTable(
 )
 
 export const account = pgTable(
-  "account",
+  "jkboard_account",
   {
     id: text("id").primaryKey(),
     accountId: text("account_id").notNull(),
@@ -80,7 +80,7 @@ export const account = pgTable(
 )
 
 export const verification = pgTable(
-  "verification",
+  "jkboard_verification",
   {
     id: text("id").primaryKey(),
     identifier: text("identifier").notNull(),

@@ -24,7 +24,7 @@ import {
 } from "@/components/ui/select"
 import { toast } from "@/components/ui/toast"
 import { cn } from "@/lib/utils"
-import { useFlowBoard } from "@/data/flowboard-store"
+import { useJkboard } from "@/data/jkboard-store"
 import {
   formatDate,
   isOverdue,
@@ -32,7 +32,7 @@ import {
   priorityIcons,
   taskPriorities,
   taskStatuses,
-} from "@/data/flowboard"
+} from "@/data/jkboard"
 
 interface TaskDetailDialogProps {
   taskId: string | null
@@ -44,7 +44,7 @@ export function TaskDetailDialog({
   onOpenChange,
 }: TaskDetailDialogProps) {
   const { taskById, projectById, memberById, members, actions } =
-    useFlowBoard()
+    useJkboard()
 
   const task = taskId ? taskById(taskId) : undefined
 

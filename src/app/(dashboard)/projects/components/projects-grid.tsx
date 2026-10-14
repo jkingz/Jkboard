@@ -57,19 +57,19 @@ import {
 } from "@/components/ui/select"
 import { toast } from "@/components/ui/toast"
 import { cn } from "@/lib/utils"
-import { useFlowBoard } from "@/data/flowboard-store"
+import { useJkboard } from "@/data/jkboard-store"
 import {
   daysUntil,
   formatDate,
   projectStatusClasses,
   projectStatuses,
   type Project,
-} from "@/data/flowboard"
+} from "@/data/jkboard"
 import { ProjectDialog } from "@/components/project-dialog"
 
 export function ProjectsGrid() {
   const { projects, projectProgress, memberById, tasksForProject, actions } =
-    useFlowBoard()
+    useJkboard()
 
   const [query, setQuery] = React.useState("")
   const [status, setStatus] = React.useState<string>("all")

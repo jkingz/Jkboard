@@ -60,9 +60,9 @@ export default function UserSettingsPage() {
     defaultValues: {
       firstName: "Maya",
       lastName: "Chen",
-      email: "maya.chen@flowboard.app",
+      email: "maya.chen@jkboard.app",
       phone: "+1 (415) 555-0142",
-      website: "https://flowboard.app",
+      website: "https://jkboard.app",
       location: "San Francisco, CA",
       role: "Product Lead",
       bio: "Product lead at Northwind Studio. I plan the work, keep the board honest, and make sure nothing ships late.",

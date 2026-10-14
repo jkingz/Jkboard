@@ -30,7 +30,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { toast } from "@/components/ui/toast"
-import { useFlowBoard } from "@/data/flowboard-store"
+import { useJkboard } from "@/data/jkboard-store"
 
 const inviteSchema = z.object({
   name: z.string().min(2, "Enter their full name."),
@@ -52,7 +52,7 @@ const roleOptions = [
 ]
 
 export function InviteMemberDialog() {
-  const { actions } = useFlowBoard()
+  const { actions } = useJkboard()
   const [open, setOpen] = useState(false)
   const [values, setValues] = useState<InviteValues>({
     name: "",
@@ -132,7 +132,7 @@ export function InviteMemberDialog() {
               <Input
                 id="invite-email"
                 type="email"
-                placeholder="alex@flowboard.app"
+                placeholder="alex@jkboard.app"
                 value={values.email}
                 onChange={(event) =>
                   setValues((prev) => ({ ...prev, email: event.target.value }))

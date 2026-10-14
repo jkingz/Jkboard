@@ -60,7 +60,7 @@ export function CTASection() {
 
                 <p className="text-muted-foreground mx-auto max-w-2xl text-balance lg:text-xl">
                   Create your first project in under a minute, import the work
-                  you already have, and let FlowBoard keep the deadlines visible.
+                  you already have, and let Jkboard keep the deadlines visible.
                 </p>
               </div>
 

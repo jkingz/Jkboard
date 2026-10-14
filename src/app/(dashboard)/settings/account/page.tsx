@@ -30,7 +30,7 @@ import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
 import { toast } from "@/components/ui/toast"
-import { useFlowBoard } from "@/data/flowboard-store"
+import { useJkboard } from "@/data/jkboard-store"
 
 const passwordSchema = z
   .object({
@@ -50,7 +50,7 @@ const passwordSchema = z
 type PasswordFormValues = z.infer<typeof passwordSchema>
 
 export default function SecuritySettings() {
-  const { currentMember } = useFlowBoard()
+  const { currentMember } = useJkboard()
   const form = useForm<PasswordFormValues>({
     resolver: zodResolver(passwordSchema),
     defaultValues: {

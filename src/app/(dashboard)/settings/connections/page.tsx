@@ -24,7 +24,7 @@ import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
 import { Switch } from "@/components/ui/switch"
 import { toast } from "@/components/ui/toast"
-import { useFlowBoard } from "@/data/flowboard-store"
+import { useJkboard } from "@/data/jkboard-store"
 
 type IntegrationKey =
   | "googleCalendar"
@@ -72,7 +72,7 @@ const DEMO_KEYS = [
 ]
 
 export default function IntegrationSettings() {
-  const { currentMember } = useFlowBoard()
+  const { currentMember } = useJkboard()
   const [connected, setConnected] = useState<Record<IntegrationKey, boolean>>({
     googleCalendar: true,
     slack: false,
@@ -88,8 +88,8 @@ export default function IntegrationSettings() {
       type: next ? "success" : "info",
       title: next ? `${name} connected` : `${name} disconnected`,
       description: next
-        ? "FlowBoard will start syncing as soon as OAuth is connected."
-        : "FlowBoard will stop syncing with this service.",
+        ? "Jkboard will start syncing as soon as OAuth is connected."
+        : "Jkboard will stop syncing with this service.",
     })
   }
 

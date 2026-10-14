@@ -21,7 +21,7 @@ export const accountRelations = relations(account, ({ one }) => ({
   user: one(user, { fields: [account.userId], references: [user.id] }),
 }))
 
-/* -------------------------------- FlowBoard ------------------------------- */
+/* -------------------------------- Jkboard ------------------------------- */
 
 export const memberRelations = relations(member, ({ one, many }) => ({
   user: one(user, { fields: [member.userId], references: [user.id] }),

@@ -2,7 +2,7 @@ import { headers } from "next/headers"
 import { redirect } from "next/navigation"
 
 import { DashboardShell } from "./components/dashboard-shell"
-import { getWorkspaceData } from "@/db/queries/flowboard"
+import { getWorkspaceData } from "@/db/queries/jkboard"
 import { auth } from "@/lib/auth"
 
 /**

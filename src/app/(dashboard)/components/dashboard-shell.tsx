@@ -12,8 +12,8 @@ import {
 } from "@/components/theme-customizer"
 import { UpgradeToProButton } from "@/components/upgrade-to-pro-button"
 import { useSidebarConfig } from "@/hooks/use-sidebar-config"
-import { FlowBoardProvider } from "@/data/flowboard-store"
-import type { WorkspaceData } from "@/db/queries/flowboard"
+import { JkboardProvider } from "@/data/jkboard-store"
+import type { WorkspaceData } from "@/db/queries/jkboard"
 
 /**
  * Client shell. The data it works with is loaded by the server layout and
@@ -38,7 +38,7 @@ export function DashboardShell({
   const { config } = useSidebarConfig()
 
   return (
-    <FlowBoardProvider initialData={initialData}>
+    <JkboardProvider initialData={initialData}>
       <SidebarProvider
         style={
           {
@@ -87,7 +87,7 @@ export function DashboardShell({
         />
         <UpgradeToProButton />
       </SidebarProvider>
-    </FlowBoardProvider>
+    </JkboardProvider>
   )
 }
 

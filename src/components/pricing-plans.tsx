@@ -25,7 +25,7 @@ export interface PricingPlan {
   popular?: boolean
 }
 
-export const flowboardPlans: PricingPlan[] = [
+export const jkboardPlans: PricingPlan[] = [
   {
     id: "starter",
     name: "Starter",
@@ -78,7 +78,7 @@ interface PricingPlansProps {
 }
 
 export function PricingPlans({
-  plans = flowboardPlans,
+  plans = jkboardPlans,
   mode = "pricing",
   currentPlanId,
   onPlanSelect,

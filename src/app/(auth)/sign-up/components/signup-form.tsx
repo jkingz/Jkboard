@@ -143,7 +143,7 @@ export function SignupForm({
                         id="signup-form-1-email"
                         aria-invalid={fieldState.invalid}
                         type="email"
-                        placeholder="you@flowboard.app"
+                        placeholder="you@jkboard.app"
                         {...field}
                       />
                       {fieldState.invalid && (

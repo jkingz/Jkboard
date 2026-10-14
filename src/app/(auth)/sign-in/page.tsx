@@ -4,8 +4,8 @@ import { Logo } from "@/components/logo"
 import { LoginForm } from "./components/login-form"
 
 export const metadata = {
-  title: "Sign in - FlowBoard",
-  description: "Sign in to your FlowBoard account",
+  title: "Sign in - Jkboard",
+  description: "Sign in to your Jkboard account",
 }
 
 export default async function SignInPage({
@@ -34,7 +34,7 @@ export default async function SignInPage({
           <div className="bg-primary text-primary-foreground flex size-9 items-center justify-center rounded-md">
             <Logo size={24} />
           </div>
-          FlowBoard
+          Jkboard
         </Link>
         <LoginForm redirectTo={target} />
       </div>

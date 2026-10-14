@@ -6,7 +6,7 @@
 
 - Imports use the `@/` alias, never relative paths across directories. `@/` maps to `./src/*`.
 - `"use client"` only where interactivity requires it. Data access stays server-side; client
-  components read from `useFlowBoard()`.
+  components read from `useJkboard()`.
 - Server-only modules (`src/db/index.ts`, `src/lib/auth.ts`, `src/db/actions/*.ts`) are marked
   `server-only` / `"use server"` and must not be imported from a client component.
 - Comments explain **why**, not what. The existing codebase does this well — match it. A comment
@@ -43,7 +43,7 @@ The conventions an agent from training data gets wrong in this pinned major vers
 
 - Server actions validate with Zod and throw `Error` carrying a user-readable message (e.g.
   `"Someone with that email is already in the workspace."`).
-- **The client is the sanitising layer.** `src/data/flowboard-store.tsx` catches and re-wraps via
+- **The client is the sanitising layer.** `src/data/jkboard-store.tsx` catches and re-wraps via
   `errorMessage(error, fallback)`, then rethrows a message safe to display. Internal stack traces
   never reach the UI — but that is by convention in one file, not by framework enforcement.
 - A thrown `Error` in an action surfaces as a rejected promise on the client, which the store converts
@@ -64,7 +64,7 @@ import { auth } from "@/lib/auth"
 export const { GET, POST } = toNextJsHandler(auth.handler)
 ```
 
-All status and validation logic lives inside Better Auth. FlowBoard does not hand-roll an auth
+All status and validation logic lives inside Better Auth. Jkboard does not hand-roll an auth
 endpoint and must not.
 
 - **Status precedence:** none is defined here — Better Auth owns it. Do not restate an order from
@@ -77,7 +77,7 @@ All other mutations are server actions, which have no HTTP surface of their own.
 
 ## Data access
 
-- **Reads** live in `src/db/queries/flowboard.ts` only. It flattens joins into arrays so the UI never
+- **Reads** live in `src/db/queries/jkboard.ts` only. It flattens joins into arrays so the UI never
   assembles relationships itself.
 - **Writes** live in `src/db/actions/{projects,tasks,members}.ts` only.
 - Both use the `db` handle from `src/db/index.ts`. No other module touches Drizzle.

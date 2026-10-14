@@ -17,6 +17,15 @@ floor and a silent major bump is possible.
 
 Two lockfiles is not a style opinion, it is a bug: the resolver picks one and the other rots.
 
+Test layout:
+
+```
+tests/platform/unit/         pure selectors + Zod schemas, no DB
+tests/platform/integration/  schema invariants, real DB, read-only
+tests/setup-env.ts           loads .env.local for the integration tier
+vitest.config.mts            two projects: unit, integration
+```
+
 ---
 
 ## Commands
@@ -24,7 +33,8 @@ Two lockfiles is not a style opinion, it is a bug: the resolver picks one and th
 | Need | Command |
 | --- | --- |
 | Dev server | `pnpm dev` |
-| Tests | **none — no runner installed.** See [Verification gates](#verification-gates) below. |
+| Tests | `pnpm test` (both tiers) · `pnpm test:unit` · `pnpm test:integration` · `pnpm test:watch` |
+| Run one test file | `pnpm test:unit tests/platform/unit/selectors.unit.test.ts` |
 | Types | `pnpm typecheck` |
 | Lint | `pnpm lint` (`eslint .`) |
 | Build | `pnpm build` |
@@ -39,13 +49,22 @@ before any of them will start.
 
 ## Verification gates
 
-`pnpm typecheck` → `pnpm lint` → `pnpm build`, in that order. All three verified green.
+`pnpm typecheck` → `pnpm lint` → `pnpm test` → `pnpm build`, in that order. All four verified green.
 
-**There is no test gate, because there is no test runner.** `package.json` has no vitest, jest or
-playwright dependency and the repo has no `tests/` directory. This is a known, accepted gap — not a
-pass. A green three-gate chain proves types, lint and build; it says nothing about behavior.
-`/verification-gates` adds a mandatory live browser exercise to cover that, and
-[target-state.md](./target-state.md) tracks adding a runner.
+**The test gate has two tiers, and only one of them is credential-free.**
+
+- **`unit`** — no database, no network. Covers the pure selectors and Zod schemas in
+  `src/data/jkboard.ts`. This is the tier a CI runner can always execute.
+- **`integration`** — needs a real `DATABASE_URL`. It asserts the persistence invariants against
+  `information_schema` and never mutates rows.
+
+**The gap CI would not close:** the integration tier is credential-gated. It is also currently
+**read-only** — it inspects schema metadata rather than inserting rows, so it cannot prove the server
+actions actually write correctly. Naming the tier as covered is not the same as covering behaviour;
+`pnpm test` reports both counts so a skipped tier is visible rather than silent.
+
+Vitest does not read `.env.local`, so `tests/setup-env.ts` loads it for the integration tier.
+Without that file the tier skips and looks like a pass.
 
 ---
 
@@ -78,10 +97,26 @@ works in serverless/edge runtimes. Schema is Drizzle with `casing: "snake_case"`
 `drizzle.config.ts` and `src/db/index.ts` — changing one without the other silently desyncs property
 names from column names.
 
-Migrations are versioned files in `drizzle/` (`0000_fixed_jetstream.sql`, `0001_add_task_reference.sql`
-plus `drizzle/meta/`). **An applied migration is never edited** — append a new one via
-`pnpm db:generate`. `pnpm db:push` skips the migration files entirely; do not rely on it for schema
-you intend to keep.
+**Every table and enum is namespaced `jkboard_*`** — `jkboard_user`, `jkboard_session`,
+`jkboard_account`, `jkboard_verification`, `jkboard_member`, `jkboard_project`,
+`jkboard_project_member`, `jkboard_task`, and the four `jkboard_*_status` / `_priority` enums. The
+prefix exists so the app's schema never collides with `neon_auth.*`, which this database also hosts
+and which must not be touched.
+
+Migrations are versioned files in `drizzle/`. **An applied migration is never edited** — append a new
+one via `pnpm db:generate`. `pnpm db:push` skips the migration files entirely; do not rely on it for
+schema you intend to keep.
+
+**Two known tooling limits here, both verified:**
+
+- `pnpm db:migrate` and `pnpm db:push` **cannot reach Neon over the HTTP driver** — drizzle-kit warns
+  that `@neondatabase/serverless` "can only connect to remote Neon/Vercel Postgres/Supabase instances
+  through a websocket". Applying a migration to this database therefore means executing the SQL in
+  `drizzle/*.sql` over `neon()` directly, splitting on `--> statement-breakpoint`.
+- `pnpm db:generate` emits the `jkboard_task.reference` **default** but never emits the
+  `CREATE SEQUENCE` it depends on. The first task insert fails with
+  `relation "jkboard_task_reference_seq" does not exist` unless the sequence is created separately.
+  This is covered by an assertion in the integration tier.
 
 ---
 
@@ -112,7 +147,7 @@ Each rule gets exactly one authority. No module may re-implement it in its own l
 | --- | --- | --- |
 | Session validity | `src/app/(dashboard)/layout.tsx:25` — `auth.api.getSession()` | The only such call site in `src/`. Verified by grep. |
 | Cookie presence | `src/proxy.ts:14` — `proxy()` | Presence only, not validity — the proxy bundle cannot import the database. |
-| Workspace read model | `src/db/queries/flowboard.ts` — `getWorkspaceData()` | All joins happen here so the UI stays on flat arrays. |
+| Workspace read model | `src/db/queries/jkboard.ts` — `getWorkspaceData()` | All joins happen here so the UI stays on flat arrays. |
 | Mutation entrypoint | `src/db/actions/*.ts` | Zod-parse, write, `revalidatePath("/", "layout")`. Nothing writes outside these files. |
 | Input validation | the Zod schema atop each `src/db/actions/*.ts` | Do not re-validate in a component or in the store. |
 
@@ -131,7 +166,9 @@ called from outside `(dashboard)`, it is fully open. This is tracked in
 Never patch a vendored component, a framework file, or third-party internals. If a foundation file
 seems to need editing, the real problem is upstream of it.
 
-- `drizzle/0000_*.sql`, `drizzle/0001_*.sql` — applied migrations
+- **`neon_auth.*`** — this database hosts Neon's built-in Auth. Nothing in this project may create,
+  alter or drop a `neon_auth` object.
+- `drizzle/*.sql` — applied migrations
 - `src/db/schema/auth.ts` — mirrors Better Auth's own generated PostgreSQL schema; hand-edits desync
   from the adapter
 - The `nextjs-agent-rules` block at the top of `AGENTS.md` — regenerated by `next dev`
@@ -152,8 +189,8 @@ src/components/ui/               shadcn Base UI primitives
 src/components/theme-customizer/ runtime theme editor
 src/components/*.tsx             app-shell pieces (sidebar, header, dialogs)
 src/contexts/                    sidebar + theme React contexts
-src/data/flowboard.ts            types (Zod schemas) + pure selectors; no I/O
-src/data/flowboard-store.tsx     the only client-side state; optimistic updates + error sanitising
+src/data/jkboard.ts            types (Zod schemas) + pure selectors; no I/O
+src/data/jkboard-store.tsx     the only client-side state; optimistic updates + error sanitising
 src/db/schema/                   Drizzle tables
 src/db/actions/                  writes, one file per entity
 src/db/queries/                  reads

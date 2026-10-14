@@ -47,7 +47,7 @@ export function HeroSection() {
 
           {/* Subheading */}
           <p className="mx-auto mb-10 max-w-2xl text-lg text-muted-foreground text-pretty sm:text-xl">
-            FlowBoard gives individuals and small teams one place to plan
+            Jkboard gives individuals and small teams one place to plan
             projects, manage tasks, and see upcoming deadlines before they slip.
           </p>
 

@@ -18,7 +18,7 @@ import {
   type Member,
   type Project,
   type Task,
-} from "@/data/flowboard"
+} from "@/data/jkboard"
 
 import { DataTableColumnHeader } from "./data-table-column-header"
 import { DataTableRowActions } from "./data-table-row-actions"

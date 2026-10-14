@@ -1,5 +1,5 @@
 /**
- * Seeds the FlowBoard development database with the sample workspace that the
+ * Seeds the Jkboard development database with the sample workspace that the
  * UI previously kept in memory.
  *
  *   pnpm db:seed

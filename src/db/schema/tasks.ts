@@ -14,14 +14,14 @@ import {
 import { member } from "./members"
 import { project } from "./projects"
 
-export const taskStatusEnum = pgEnum("task_status", [
+export const taskStatusEnum = pgEnum("jkboard_task_status", [
   "todo",
   "in-progress",
   "in-review",
   "completed",
 ])
 
-export const taskPriorityEnum = pgEnum("task_priority", [
+export const taskPriorityEnum = pgEnum("jkboard_task_priority", [
   "urgent",
   "high",
   "medium",
@@ -29,7 +29,7 @@ export const taskPriorityEnum = pgEnum("task_priority", [
 ])
 
 export const task = pgTable(
-  "task",
+  "jkboard_task",
   {
     id: uuid("id").primaryKey().defaultRandom(),
     /**
@@ -40,7 +40,7 @@ export const task = pgTable(
      */
     reference: text("reference")
       .notNull()
-      .default(sql`'TSK-' || lpad(nextval('task_reference_seq')::text, 4, '0')`),
+      .default(sql`'TSK-' || lpad(nextval('jkboard_task_reference_seq')::text, 4, '0')`),
     projectId: uuid("project_id")
       .notNull()
       .references(() => project.id, { onDelete: "cascade" }),

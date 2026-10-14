@@ -17,7 +17,7 @@ import {
 } from "@/components/ui/card"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { cn } from "@/lib/utils"
-import { useFlowBoard } from "@/data/flowboard-store"
+import { useJkboard } from "@/data/jkboard-store"
 import {
   daysUntil,
   formatDate,
@@ -27,10 +27,10 @@ import {
   priorityClasses,
   priorityIcons,
   type Task,
-} from "@/data/flowboard"
+} from "@/data/jkboard"
 
 export function DeadlineCalendar() {
-  const { tasks, projects } = useFlowBoard()
+  const { tasks, projects } = useJkboard()
   const [selected, setSelected] = React.useState<Date>(new Date())
   const [month, setMonth] = React.useState<Date>(new Date())
 
@@ -200,7 +200,7 @@ function DeadlineRow({
   task: Task
   showProject?: boolean
 }) {
-  const { memberById } = useFlowBoard()
+  const { memberById } = useJkboard()
   const status = getTaskStatus(task.status)
   const PriorityIcon = priorityIcons[task.priority]
   const project = getProject(task.projectId)

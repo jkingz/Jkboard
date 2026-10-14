@@ -51,7 +51,7 @@ export function LandingNavbar() {
         {/* Logo */}
         <Link href="/landing" className="flex items-center gap-2 cursor-pointer">
           <Logo size={32} />
-          <span className="text-lg font-bold tracking-tight">FlowBoard</span>
+          <span className="text-lg font-bold tracking-tight">Jkboard</span>
         </Link>
 
         {/* Desktop Navigation */}
@@ -126,7 +126,7 @@ export function LandingNavbar() {
                     <Logo size={16} />
                   </div>
                   <SheetTitle className="text-lg font-semibold">
-                    FlowBoard
+                    Jkboard
                   </SheetTitle>
                   <div className="ml-auto flex items-center gap-2">
                     <Button

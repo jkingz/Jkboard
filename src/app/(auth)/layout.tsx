@@ -1,7 +1,7 @@
 import type { Metadata } from "next"
 
 export const metadata: Metadata = {
-  title: "Authentication - FlowBoard",
+  title: "Authentication - Jkboard",
   description: "Sign in to your account or create a new one",
 }
 

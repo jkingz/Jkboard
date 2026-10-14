@@ -37,9 +37,9 @@ specs/                 one feature spec per unit of work — specs/README.md, sp
 .claude/skills/        the skills AGENTS.md rule 9 points at
 ```
 
-`tests/` and `.github/` are absent. There is no test runner and no remote, so a test tree reference
-and a CI workflow would describe machinery that does not exist. Both arrive with the feature that
-needs them.
+`tests/` exists with two tiers — see [project-context.md](./project-context.md) → Verification gates.
+`.github/` is absent: there is no remote, so a CI workflow would describe machinery that does not
+exist. It arrives with the feature that needs it.
 
 ## Health check
 

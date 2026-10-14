@@ -8,10 +8,38 @@ If a line would be a lie if quoted out of context, it belongs in this file, or n
 
 ---
 
+## Migrating migrations to drizzle-kit against Neon
+
+**Why:** `pnpm db:migrate` and `pnpm db:push` cannot reach this database — drizzle-kit requires a
+websocket for the Neon HTTP driver. Migrations were applied by executing
+`drizzle/0000_fuzzy_screwball.sql` over `neon()` directly, splitting on `--> statement-breakpoint`.
+That is a manual step, and it is invisible in the scripts.
+
+**Blocked by:** switching drizzle-kit to the websocket driver, or accepting the manual apply.
+
+**Done when:** `pnpm db:migrate` applies a migration unaided.
+
+---
+
+## The `reference` sequence is not generated
+
+**Why:** `pnpm db:generate` emits `jkboard_task.reference`'s DEFAULT — which calls
+`nextval('jkboard_task_reference_seq')` — but never emits the `CREATE SEQUENCE`. A fresh database
+therefore fails the first task insert with
+`relation "jkboard_task_reference_seq" does not exist`. The sequence was created by hand. There is an
+assertion for it in the integration tier, so the gap is caught rather than silent, but the underlying
+generation bug is unfixed.
+
+**Blocked by:** nothing.
+
+**Done when:** a regenerated migration creates the sequence itself.
+
+---
+
 ## Per-user workspace scoping
 
-**Why:** `getMemberId()` (`src/db/queries/flowboard.ts:123`) returns the first `member` row and
-`currentMember` is hardcoded to `members[0]` (`src/data/flowboard-store.tsx:308`), so every
+**Why:** `getMemberId()` (`src/db/queries/jkboard.ts:123`) returns the first `member` row and
+`currentMember` is hardcoded to `members[0]` (`src/data/jkboard-store.tsx:308`), so every
 signed-in user sees and mutates one shared workspace. Real scoping needs the session's `user.id`
 threaded into every query.
 
@@ -37,16 +65,16 @@ unauthorized case covered by a test.
 
 ---
 
-## A test runner
+## Behavioural tests for the server actions
 
-**Why:** there is no vitest/jest/playwright dependency and no `tests/` directory, so
-[project-context.md](./project-context.md) → Verification gates has no test step and the six
-invariants in [architecture.md](./architecture.md) are unverified.
+**Why:** the integration tier is currently **read-only** — it asserts the schema in
+`information_schema` and never inserts. It therefore proves the schema shape, not that
+`createTaskAction` writes correctly, that `revalidatePath` runs, or that a bad payload is rejected.
 
-**Blocked by:** nothing — it is unstarted.
+**Blocked by:** nothing. It needs a disposable database, since it writes rows. Point it at a scratch
+Neon branch rather than the working one.
 
-**Done when:** a runner exists, `pnpm test` is the first gate, and at least invariants 2, 3 and 6 are
-covered.
+**Done when:** the integration tier inserts and reads back a task, and covers a rejected payload.
 
 ---
 
@@ -97,7 +125,7 @@ A silent major bump is possible; nothing enforces Node 26.x or pnpm 10.
 
 ---
 
-## Removing the seed arrays in `src/data/flowboard.ts`
+## Removing the seed arrays in `src/data/jkboard.ts`
 
 **Why:** `src/components/command-search.tsx:30` imports the hardcoded `projects` array and
 `site-header.tsx:73` renders it, so the ⌘K palette lists sample projects rather than the workspace. A
@@ -105,7 +133,7 @@ user can click through to a project that does not exist in the database.
 
 **Blocked by:** nothing.
 
-**Done when:** the command palette reads from `useFlowBoard()`, or the seed arrays are deleted.
+**Done when:** the command palette reads from `useJkboard()`, or the seed arrays are deleted.
 
 ---
 

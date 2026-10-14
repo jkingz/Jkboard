@@ -71,7 +71,7 @@ export function LandingFooter() {
           <div className="mx-auto max-w-2xl text-center">
             <h3 className="text-2xl font-bold mb-4">Stay in the loop</h3>
             <p className="text-muted-foreground mb-6">
-              One email a month with new FlowBoard features, planning tips and
+              One email a month with new Jkboard features, planning tips and
               deadline reminders. No spam, unsubscribe any time.
             </p>
             <form
@@ -115,7 +115,7 @@ export function LandingFooter() {
                 className="flex items-center gap-2 cursor-pointer"
               >
                 <Logo size={32} />
-                <span className="font-bold text-xl">FlowBoard</span>
+                <span className="font-bold text-xl">Jkboard</span>
               </a>
             </div>
             <p className="text-muted-foreground mb-6 max-lg:text-center max-lg:flex max-lg:justify-center">
@@ -152,7 +152,7 @@ export function LandingFooter() {
         {/* Bottom Footer */}
         <div className="flex flex-col lg:flex-row justify-between items-center gap-2">
           <div className="flex flex-col sm:flex-row items-center gap-2 text-muted-foreground text-sm">
-            <span>© {new Date().getFullYear()} FlowBoard</span>
+            <span>© {new Date().getFullYear()} Jkboard</span>
             <span className="hidden sm:inline">•</span>
             <span>Plan the work. Ship on time.</span>
           </div>

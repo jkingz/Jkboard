@@ -26,8 +26,8 @@ import {
   ChartTooltipContent,
 } from "@/components/ui/chart"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
-import { useFlowBoard } from "@/data/flowboard-store"
-import { taskCompletionTrend } from "@/data/flowboard"
+import { useJkboard } from "@/data/jkboard-store"
+import { taskCompletionTrend } from "@/data/jkboard"
 
 const completionConfig = {
   completed: { label: "Completed", color: "var(--chart-1)" },
@@ -141,7 +141,7 @@ export function TaskCompletionChart() {
 }
 
 export function ProjectProgressChart() {
-  const { projects, projectProgress } = useFlowBoard()
+  const { projects, projectProgress } = useJkboard()
 
   const data = projects.map((project) => ({
     project: project.key,

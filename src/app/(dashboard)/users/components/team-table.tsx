@@ -67,8 +67,8 @@ import {
 } from "@/components/ui/table"
 import { toast } from "@/components/ui/toast"
 import { cn } from "@/lib/utils"
-import { useFlowBoard } from "@/data/flowboard-store"
-import { type Member, type MemberStatus } from "@/data/flowboard"
+import { useJkboard } from "@/data/jkboard-store"
+import { type Member, type MemberStatus } from "@/data/jkboard"
 
 const statusClasses: Record<MemberStatus, string> = {
   Active: "border-success/40 text-success bg-success/5",
@@ -86,7 +86,7 @@ const roleColors: Record<string, string> = {
 }
 
 export function TeamTable() {
-  const { members, projects, workloadFor, actions } = useFlowBoard()
+  const { members, projects, workloadFor, actions } = useJkboard()
 
   const [sorting, setSorting] = useState<SortingState>([])
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])

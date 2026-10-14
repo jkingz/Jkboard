@@ -74,7 +74,7 @@ export function LoginForm({
                         id="login-email"
                         aria-invalid={fieldState.invalid}
                         type="email"
-                        placeholder="you@flowboard.app"
+                        placeholder="you@jkboard.app"
                         {...field}
                       />
                       {fieldState.invalid && (
