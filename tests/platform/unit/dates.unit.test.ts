@@ -21,7 +21,7 @@ import {
  * Time is pinned with fake timers and the zone with `process.env.TZ`, so a result
  * that depends on the wall clock or the machine's locale is a failure rather than
  * a flake. Node honours a mid-process `TZ` change for subsequent `Date` calls,
- * which the last test in this file doubles as proof of.
+ * which the tests that re-`pin()` into a second zone double as proof of.
  */
 
 const PINNED_INSTANT = "2026-10-16T01:00:00.000Z"
@@ -74,20 +74,30 @@ describe("formatDate and formatShortDate", () => {
 })
 
 describe("dateFromToday", () => {
-  it("is a YYYY-MM-DD string, offset from the local calendar day", () => {
+  it("is a YYYY-MM-DD string, offset from the UTC calendar day", () => {
     pin({ zone: "America/Los_Angeles" })
 
-    expect(dateFromToday(0)).toBe("2026-10-15")
-    expect(dateFromToday(7)).toBe("2026-10-22")
-    expect(dateFromToday(-1)).toBe("2026-10-14")
+    expect(dateFromToday(0)).toBe("2026-10-16")
+    expect(dateFromToday(7)).toBe("2026-10-23")
+    expect(dateFromToday(-1)).toBe("2026-10-15")
+  })
+
+  it("does not move when the local calendar disagrees with UTC", () => {
+    // 2026-10-16T01:00Z is still Oct 15 in Los Angeles and already Oct 16 in
+    // Shanghai. A `date` column has no zone, so both must produce one value.
+    pin({ zone: "Asia/Shanghai" })
+    const inShanghai = dateFromToday(0)
+
+    pin({ zone: "America/Los_Angeles" })
+    expect(dateFromToday(0)).toBe(inShanghai)
   })
 
   it("matches a date-fns walk of the same length", () => {
     pin({ zone: "America/Los_Angeles" })
 
-    const localToday = format(parseISO(dateFromToday(0)), "yyyy-MM-dd")
+    const today = format(parseISO(dateFromToday(0)), "yyyy-MM-dd")
     expect(dateFromToday(3)).toBe(
-      format(addDays(parseISO(localToday), 3), "yyyy-MM-dd")
+      format(addDays(parseISO(today), 3), "yyyy-MM-dd")
     )
   })
 })
@@ -122,29 +132,28 @@ describe("daysUntil", () => {
   })
 })
 
-describe("the two clocks in this module", () => {
+describe("one calendar between the helpers", () => {
   /**
-   * Known defect, recorded so it stays visible and so fixing it turns this green
-   * with an "unexpected pass" rather than silently.
+   * `dateFromToday` and `daysUntil` are the write and read halves of the same
+   * `YYYY-MM-DD` value, and the forms feed one directly into the other:
+   * `add-task-modal.tsx:67` defaults `dueDate` to `dateFromToday(7)` and the
+   * board then calls `isOverdue` on it. This round-trip is what made the old
+   * local-vs-UTC split visible — at `2026-10-16T01:00Z` in Los Angeles the write
+   * half said Oct 15 while the read half measured from Oct 16, so a task created
+   * as "due today" reported -1 and rendered overdue on the day it was due.
    *
-   * `dateFromToday` reads the **local** calendar (`setHours`, `getDate`,
-   * `getFullYear`), while `daysUntil` reads the **UTC** calendar. Feed one's
-   * output to the other — which is exactly what the task and project forms do,
-   * defaulting `dueDate` to `dateFromToday(7)` and the board then calling
-   * `isOverdue` — and the answer drifts by the timezone offset whenever the two
-   * calendars disagree on the date. In `America/Los_Angeles` after 16:00 local,
-   * a task created as "due today" reports -1 and renders overdue on the day it
-   * is due.
-   *
-   * `docs/architecture.md` says the query layer converts to `YYYY-MM-DD` via UTC
-   * (`toISODate` in `src/db/queries/jkboard.ts`); this module's private
-   * `toISODate` is local. Making the two agree is the fix, and the owner should
-   * decide whether form defaults *should* be local — they may well be.
+   * Both halves now read UTC, so this stays green as an ordinary assertion. The
+   * negative offsets are the other half of the contract: a seed that is past its
+   * due date must still report past its due date.
    */
-  it.fails("a task due date built with dateFromToday(0) reads as due today", () => {
-    pin({ instant: PINNED_INSTANT, zone: "America/Los_Angeles" })
+  it("round-trips dateFromToday through daysUntil in every zone", () => {
+    for (const zone of ["America/Los_Angeles", "Asia/Shanghai", "UTC"]) {
+      pin({ instant: PINNED_INSTANT, zone })
 
-    expect(daysUntil(dateFromToday(0))).toBe(0)
+      for (const offset of [-96, -9, 0, 6, 7, 21, 30]) {
+        expect(daysUntil(dateFromToday(offset))).toBe(offset)
+      }
+    }
   })
 })
 

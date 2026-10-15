@@ -82,17 +82,21 @@ export type Task = z.infer<typeof taskSchema>
 /*                                  Utilities                                 */
 /* -------------------------------------------------------------------------- */
 
+/**
+ * Reads the **UTC** calendar, matching `toISODate` in `src/db/queries/jkboard.ts`
+ * and `scripts/seed-data.ts`. Local getters would put this helper one calendar
+ * day out of step with `daysUntil()` below.
+ */
 function toISODate(date: Date) {
-  const month = String(date.getMonth() + 1).padStart(2, "0")
-  const day = String(date.getDate()).padStart(2, "0")
-  return `${date.getFullYear()}-${month}-${day}`
+  const month = String(date.getUTCMonth() + 1).padStart(2, "0")
+  const day = String(date.getUTCDate()).padStart(2, "0")
+  return `${date.getUTCFullYear()}-${month}-${day}`
 }
 
 /** ISO date `offsetDays` away from today — keeps the mock data always relative. */
 export function dateFromToday(offsetDays: number) {
   const date = new Date()
-  date.setHours(0, 0, 0, 0)
-  date.setDate(date.getDate() + offsetDays)
+  date.setUTCDate(date.getUTCDate() + offsetDays)
   return toISODate(date)
 }
 

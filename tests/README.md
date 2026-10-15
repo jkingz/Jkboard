@@ -85,9 +85,11 @@ the reason it skipped. Report which tier a run covered.
 - **A structural matcher can pass by finding nothing.** `sourceFiles()` returns `[]` for a path typo
   and every `every()` over it is then trivially true. Each structural file asserts its own non-empty
   result; add that assertion before the rule it guards.
-- **`it.fails` is an assertion, not a TODO.** `dates.unit.test.ts` pins the `dateFromToday` /
-  `daysUntil` mismatch that way. Fix the mismatch and that test starts *failing* — the correct action
-  is to flip it to `it`, not delete it. An `it.todo` would never catch the fix.
+- **`it.fails` is an assertion, not a TODO.** It goes red on an unexpected pass, which is the signal
+  to flip it to `it` — an `it.todo` never notices the fix. `dates.unit.test.ts` pinned the
+  `dateFromToday` / `daysUntil` calendar mismatch this way; the mismatch is now fixed and the test is
+  a plain round-trip assertion, so **no `it.fails` remains in the suite**. Add one only against a
+  defect you have reproduced and are deliberately leaving open.
 
 ## Adding tests
 

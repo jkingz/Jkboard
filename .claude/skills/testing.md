@@ -108,6 +108,3 @@ What is still uncovered:
 - **Any of the interface.** No `e2e/` tier exists. `pnpm test` never renders a component.
 - **Invariant 6 behaviourally.** `ON DELETE RESTRICT` on `owner_id` is asserted as a constraint;
   nothing exercises a member who owns a project being removed.
-- **A defect pinned, not fixed.** `dateFromToday` builds dates on the local calendar while
-  `daysUntil` reads them on the UTC one; `dates.unit.test.ts` holds that open with an `it.fails`, so
-  the mismatch is visible in the report instead of silent. Fixing it flips that test.
