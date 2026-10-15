@@ -12,7 +12,17 @@ when: "user starts a new task, needs to scope work, or asks about development pr
 3. **Implement the smallest increment** that can be verified on its own.
 4. **Verify with a command** — never with a claim. Use `/verification-gates` skill.
 5. **Update the docs** the change made untrue — in the same change.
-6. **Report** — what changed, what was verified, what is still unknown.
+6. **Close with a Done / Next recap in chat.** Every unit — a spec, a feature, a fix, a PR — ends with
+   this block, unprompted:
+
+   ```
+   **Done** — what shipped, verified by the command run and what it printed
+   **Next** — the single most useful next step, and who is blocked: a spec number, a decision, or none
+   ```
+
+   Two lines. `Done` carries the command behind the claim, per rule 2 of `AGENTS.md` — a recap that
+   asserts behavior without output is the essay rule 1 bans. `Next` is one thing, never a list. If
+   nothing is next, say so instead of inventing a step.
 
 ## Scoping rules
 
