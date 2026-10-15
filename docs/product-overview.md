@@ -19,14 +19,16 @@ marketing landing page; light/dark theming with a runtime theme customizer.
 
 - **Multi-tenancy / per-user scoping.** There is exactly one workspace. `getMemberId()`
   (`src/db/queries/jkboard.ts:123`) returns the *first* `member` row, and `currentMember` is
-  hardcoded to `members[0]` (`src/data/jkboard-store.tsx:308`). Every signed-in user — including
+  hardcoded to `members[0]` (`src/data/jkboard-store.tsx:325`). Every signed-in user — including
   every anonymous demo visitor — sees and can mutate the same data.
 - **Authorization.** No role check guards any mutation. `role` is a free-text column with default
   `"Member"`; nothing branches on it. Any authenticated session can delete any project. Combined with
   public demo credentials, that means a visitor can empty the demo workspace.
 - **Email delivery.** `inviteMemberAction` creates the `user` + `member` rows and stops. No message is
   sent; the invitee must already know to sign in.
-- **Tests.** No runner, no files.
+- **Tests.** A unit tier and a read-only integration tier exist and run, but there is **no e2e tier** —
+  nothing renders the interface, and no test has ever written a row, so the server actions are unverified
+  behaviourally.
 - **Settings are static.** `settings/billing` reads from `data/*.json` files committed to the repo.
   `settings/user`, `settings/account`, `settings/notifications`, `settings/connections` have no
   persistence.

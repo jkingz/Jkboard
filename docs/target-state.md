@@ -26,7 +26,7 @@ in each server action, or give the demo a scoped session that cannot write.
 ## Per-user workspace scoping
 
 **Why:** `getMemberId()` (`src/db/queries/jkboard.ts:123`) returns the first `member` row and
-`currentMember` is hardcoded to `members[0]` (`src/data/jkboard-store.tsx:308`), so every
+`currentMember` is hardcoded to `members[0]` (`src/data/jkboard-store.tsx:325`), so every
 signed-in user sees and mutates one shared workspace. Real scoping needs the session's `user.id`
 threaded into every query.
 

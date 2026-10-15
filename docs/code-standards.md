@@ -97,12 +97,14 @@ for the full tree.
 `/testing` is the source of truth for test organization, tier definitions, mocking, and how to run
 tests.
 
-**Today there is no runner.** Do not report "tests pass" — there is nothing to run, and a green
-three-gate chain is not coverage. `/verification-gates` adds a mandatory live browser exercise to
-compensate.
+**A runner exists** — Vitest with a `unit` and an `integration` tier, the unit tier wired into CI.
+That does not relax the rule: do not report "tests pass" as coverage. Name the tier that ran, and say
+what no tier reaches. Nothing renders a component, so `/verification-gates` keeps its mandatory live
+browser exercise; nothing writes a row, so the integration tier proves schema shape, not action
+behaviour.
 
-The convention to follow when a runner lands: tests in `tests/{feature}/{tier}/`, importing through
-`@/`, mocking at the boundary in the unit tier only.
+The convention, now in force: tests in `tests/{feature}/{tier}/`, importing through `@/`, mocking at
+the boundary in the unit tier only.
 
 ---
 
