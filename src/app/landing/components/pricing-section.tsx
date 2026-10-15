@@ -12,7 +12,7 @@ import { Reveal } from "@/components/reveal"
  * The section previously sold Starter, Team and Business plans at 0/12/29 per
  * month with a highlighted middle tier. No payment provider is wired up, there
  * is no subscription table, and `settings/billing` renders committed JSON.
- * DESIGN.md -> Honesty constraints forbids that, so the section states the real
+ * docs/ui.md → Honesty constraints forbids that, so the section states the real
  * position and invites people to make use of it.
  *
  * The one thing a reader must not be misled about is that the demo workspace is

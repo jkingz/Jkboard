@@ -55,5 +55,5 @@ when: "user starts a new task, needs to scope work, or asks about development pr
 - `/verification-gates` for the exact chain that must pass
 - `/testing` for tier structure and what is currently untested
 
-Commit and PR conventions live in [docs/project-context.md](../../docs/project-context.md). There is no
-`/git-workflow` skill: no remote is configured, so PR workflow is not exercisable yet.
+Commit and PR conventions live in [docs/project-context.md](../../docs/project-context.md); the
+`/git-workflow` skill carries the commit, push and PR procedure.

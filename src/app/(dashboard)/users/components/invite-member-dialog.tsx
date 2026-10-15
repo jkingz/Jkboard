@@ -1,5 +1,6 @@
 "use client"
 
+import * as React from "react"
 import { useState } from "react"
 import { UserPlus } from "lucide-react"
 import { z } from "zod"
@@ -29,6 +30,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import { AsyncButton } from "@/components/async-button"
 import { toast } from "@/components/ui/toast"
 import { useJkboard } from "@/data/jkboard-store"
 
@@ -60,8 +62,9 @@ export function InviteMemberDialog() {
     role: roleOptions[2],
   })
   const [errors, setErrors] = useState<Record<string, string>>({})
+  const [pending, startTransition] = React.useTransition()
 
-  async function handleSubmit(event: React.FormEvent) {
+  function handleSubmit(event: React.FormEvent) {
     event.preventDefault()
 
     const result = inviteSchema.safeParse(values)
@@ -75,7 +78,9 @@ export function InviteMemberDialog() {
       return
     }
 
-    try {
+    // The store toasts the failure; the button is disabled while `pending`, so
+    // a second submit cannot fire.
+    startTransition(async () => {
       await actions.inviteMember(result.data)
 
       toast.add({
@@ -87,14 +92,7 @@ export function InviteMemberDialog() {
       setValues({ name: "", email: "", role: roleOptions[2] })
       setErrors({})
       setOpen(false)
-    } catch (error) {
-      toast.add({
-        type: "error",
-        title: "Invite failed",
-        description:
-          error instanceof Error ? error.message : "Please try again.",
-      })
-    }
+    })
   }
 
   return (
@@ -170,9 +168,14 @@ export function InviteMemberDialog() {
           </FieldGroup>
 
           <DialogFooter>
-            <Button type="submit" className="cursor-pointer">
+            <AsyncButton
+              type="submit"
+              pending={pending}
+              pendingText="Sending"
+              className="cursor-pointer"
+            >
               Send invite
-            </Button>
+            </AsyncButton>
           </DialogFooter>
         </form>
       </DialogContent>

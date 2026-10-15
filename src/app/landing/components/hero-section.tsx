@@ -11,7 +11,7 @@ import { ProductPreview } from "./product-preview"
 /**
  * The hero answers one question: is this real?
  *
- * DESIGN.md → Motion, item 3 allows exactly one transition here, and its purpose
+ * docs/ui.md → Motion, item 3 allows exactly one transition here, and its purpose
  * is to draw the eye to the product preview, which is the page's only evidence
  * that the app exists and works.
  */
@@ -107,7 +107,7 @@ export function HeroSection() {
           </Reveal>
         </div>
 
-        {/* The single permitted hero transition (DESIGN.md → Motion). Purpose:
+        {/* The single permitted hero transition (docs/ui.md → Motion). Purpose:
             direct attention to the only evidence on the page that the product
             is real. */}
         <Reveal className="relative mx-auto mt-16 max-w-6xl" delay={0.1}>

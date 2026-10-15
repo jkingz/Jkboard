@@ -8,7 +8,7 @@ import { Reveal } from "@/components/reveal"
  * What the demo workspace actually contains.
  *
  * These counts are read from the same seed arrays the product preview renders,
- * so they describe real rows rather than marketing figures. DESIGN.md →
+ * so they describe real rows rather than marketing figures. docs/ui.md →
  * Honesty constraints forbids inventing numbers, and the previous version of
  * this section claimed 94% on-time and 11h saved weekly, neither of which
  * existed anywhere in the app.

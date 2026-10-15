@@ -33,7 +33,7 @@ This file stays short so it stays read.
 
 **7. Git actions need authorization.** Commit, push, open or merge a PR only when asked. Before pushing a working branch: pull from main, merge, resolve, then push. No `--no-verify`, no bypassed signing. Never force-push a shared branch, and never `reset --hard` / `clean -f` / `checkout --` over work you did not write.
 
-**8. Every posted comment is a contract.** Not yet exercisable: this repo has no remote, so there is no PR to watch or comment on. When one is added, watch a PR with `/babysitting-a-pr`, and anything posted to a PR or issue goes through `/leaving-pr-comment` — triggers, body contract, AI-authorship disclaimer. No filler comments; a declined finding gets a written decline and a resolved thread.
+**8. Every posted comment is a contract.** Watch a PR with `/babysitting-a-pr`, and anything posted to a PR or issue goes through `/leaving-pr-comment` — triggers, body contract, AI-authorship disclaimer. No filler comments; a declined finding gets a written decline and a resolved thread.
 
 **9. Use the harness.** Check the skills before starting; if one applies, load it instead of re-deriving the workflow. Never hand-write a loop the platform already provides.
 
@@ -50,9 +50,9 @@ This file stays short so it stays read.
 | [`/development-workflow`](./.claude/skills/development-workflow.md) | scoping a task, or deciding what "done" means for a unit of work |
 | [`/verification-gates`](./.claude/skills/verification-gates.md) | finishing implementation, or deciding what to run and how to report it |
 | [`/testing`](./.claude/skills/testing.md) | writing, running or restructuring tests |
-| [`/git-workflow`](./.claude/skills/git-workflow.md) | committing, pushing, or opening a PR — **absent in this repo**, no remote configured; commit conventions live in [`docs/project-context.md`](./docs/project-context.md) |
-| [`/babysitting-a-pr`](./.claude/skills/babysitting-a-pr/SKILL.md) | watching an open PR — **absent in this repo**, no remote configured |
-| [`/leaving-pr-comment`](./.claude/skills/leaving-pr-comment/SKILL.md) | before posting to a PR or issue — **absent in this repo**, no remote configured |
+| [`/git-workflow`](./.claude/skills/git-workflow.md) | committing, pushing, or opening a PR; commit conventions live in [`docs/project-context.md`](./docs/project-context.md) |
+| [`/babysitting-a-pr`](./.claude/skills/babysitting-a-pr/SKILL.md) | watching an open PR |
+| [`/leaving-pr-comment`](./.claude/skills/leaving-pr-comment/SKILL.md) | before posting to a PR or issue |
 
 ## Docs
 

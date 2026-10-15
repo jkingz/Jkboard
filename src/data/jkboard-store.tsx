@@ -3,6 +3,9 @@
 import * as React from "react"
 import { useRouter } from "next/navigation"
 
+import { toast } from "@/components/ui/toast"
+import { errorMessage } from "@/lib/error-message"
+
 import {
   createProjectAction,
   deleteProjectAction,
@@ -106,9 +109,21 @@ interface JkboardContextValue {
 
 const JkboardContext = React.createContext<JkboardContextValue | null>(null)
 
-function errorMessage(error: unknown, fallback: string) {
-  if (error instanceof Error && error.message) return error.message
-  return fallback
+/**
+ * Every mutation funnels its failure through here.
+ *
+ * Errors are toasted in the store rather than at each of the ~30 call sites,
+ * because a call site that forgets its `catch` currently produces an unhandled
+ * rejection and a silent failure. Success toasts stay at the call sites —
+ * they need the created row's name, which only the caller has.
+ *
+ * Returns the sanitised error so the caller can still `throw` it: existing
+ * `catch` blocks keep working unchanged.
+ */
+function fail(error: unknown, fallback: string) {
+  const message = errorMessage(error, fallback)
+  toast.add({ type: "error", title: message, description: fallback })
+  return new Error(message)
 }
 
 export function JkboardProvider({
@@ -145,9 +160,7 @@ export function JkboardProvider({
           setProjects((prev) => [created, ...prev])
           return created
         } catch (error) {
-          throw new Error(
-            errorMessage(error, "Could not create the project.")
-          )
+          throw fail(error, "Could not create the project.")
         } finally {
           router.refresh()
         }
@@ -160,7 +173,7 @@ export function JkboardProvider({
           setProjects((prev) => prev.map((p) => (p.id === projectId ? updated : p)))
         } catch (error) {
           setProjects(previous)
-          throw new Error(errorMessage(error, "Could not update the project."))
+          throw fail(error, "Could not update the project.")
         } finally {
           router.refresh()
         }
@@ -174,18 +187,22 @@ export function JkboardProvider({
           await deleteProjectAction(projectId)
         } catch (error) {
           setProjects(previous)
-          throw new Error(errorMessage(error, "Could not delete the project."))
+          throw fail(error, "Could not delete the project.")
         } finally {
           router.refresh()
         }
       },
 
       async setProjectStatus(projectId, status) {
+        const previous = projects
         setProjects((prev) =>
           prev.map((p) => (p.id === projectId ? { ...p, status } : p))
         )
         try {
           await setProjectStatusAction(projectId, status)
+        } catch (error) {
+          setProjects(previous)
+          throw fail(error, "Could not change the project status.")
         } finally {
           router.refresh()
         }
@@ -201,7 +218,7 @@ export function JkboardProvider({
           setTasks((prev) => [created, ...prev])
           return created
         } catch (error) {
-          throw new Error(errorMessage(error, "Could not create the task."))
+          throw fail(error, "Could not create the task.")
         } finally {
           router.refresh()
         }
@@ -218,7 +235,7 @@ export function JkboardProvider({
           })
           setTasks((prev) => prev.map((t) => (t.id === taskId ? updated : t)))
         } catch (error) {
-          throw new Error(errorMessage(error, "Could not update the task."))
+          throw fail(error, "Could not update the task.")
         } finally {
           router.refresh()
         }
@@ -231,7 +248,7 @@ export function JkboardProvider({
           await deleteTaskAction(taskId)
         } catch (error) {
           setTasks(previous)
-          throw new Error(errorMessage(error, "Could not delete the task."))
+          throw fail(error, "Could not delete the task.")
         } finally {
           router.refresh()
         }
@@ -243,7 +260,7 @@ export function JkboardProvider({
           if (copy) setTasks((prev) => [copy, ...prev])
           return copy
         } catch (error) {
-          throw new Error(errorMessage(error, "Could not duplicate the task."))
+          throw fail(error, "Could not duplicate the task.")
         } finally {
           router.refresh()
         }
@@ -257,7 +274,7 @@ export function JkboardProvider({
           const updated = await setTaskStatusAction(taskId, status)
           setTasks((prev) => prev.map((t) => (t.id === taskId ? updated : t)))
         } catch (error) {
-          throw new Error(errorMessage(error, "Could not change the status."))
+          throw fail(error, "Could not change the status.")
         } finally {
           router.refresh()
         }
@@ -267,7 +284,7 @@ export function JkboardProvider({
         try {
           await inviteMemberAction(input)
         } catch (error) {
-          throw new Error(errorMessage(error, "Could not send the invite."))
+          throw fail(error, "Could not send the invite.")
         } finally {
           router.refresh()
         }
@@ -278,7 +295,7 @@ export function JkboardProvider({
           const updated = await setMemberStatusAction(memberId, status)
           setMembers((prev) => prev.map((m) => (m.id === memberId ? updated : m)))
         } catch (error) {
-          throw new Error(errorMessage(error, "Could not update the member."))
+          throw fail(error, "Could not update the member.")
         } finally {
           router.refresh()
         }
@@ -291,7 +308,7 @@ export function JkboardProvider({
           await removeMemberAction(memberId)
         } catch (error) {
           setMembers(previous)
-          throw new Error(errorMessage(error, "Could not remove the member."))
+          throw fail(error, "Could not remove the member.")
         } finally {
           router.refresh()
         }

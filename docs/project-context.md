@@ -51,11 +51,13 @@ Two lockfiles is not a style opinion, it is a bug: the resolver picks one and th
 Test layout:
 
 ```
-tests/platform/unit/         pure selectors + Zod schemas, no DB
-tests/platform/integration/  schema invariants, real DB, read-only
+tests/platform/unit/         selectors, dates, view-model coherence, proxy(), structural rules — no DB
+tests/platform/integration/  schema invariants + column contracts, real DB, read-only
 tests/setup-env.ts           loads .env.local for the integration tier
 vitest.config.mts            two projects: unit, integration
 ```
+
+Per-file map: [../tests/README.md](../tests/README.md).
 
 ---
 
@@ -76,6 +78,10 @@ vitest.config.mts            two projects: unit, integration
 Every `db:*` and seed script runs through `node --env-file=.env.local`, so `.env.local` must exist
 before any of them will start.
 
+`pnpm.onlyBuiltDependencies` in `package.json` allowlists `esbuild` and `unrs-resolver`. pnpm 10
+blocks postinstall scripts by default and fails the install with `ERR_PNPM_IGNORED_BUILDS` without
+that allowlist; both packages ship native binaries that need their postinstall to run.
+
 ---
 
 ## Verification gates
@@ -84,15 +90,20 @@ before any of them will start.
 
 **The test gate has two tiers, and only one of them is credential-free.**
 
-- **`unit`** — no database, no network. Covers the pure selectors and Zod schemas in
-  `src/data/jkboard.ts`. This is the tier a CI runner can always execute.
-- **`integration`** — needs a real `DATABASE_URL`. It asserts the persistence invariants against
-  `information_schema` and never mutates rows.
+- **`unit`** — no database, no network. Covers the pure selectors and date helpers, the enum /
+  catalogue / Zod coherence checks, `proxy()` called in-process, and the source-tree structural rules
+  behind invariants 1 and 4. This is the tier a CI runner can always execute, and it is what makes
+  invariants 1, 4 and 5 CI-visible without a browser — structurally, not behaviourally.
+- **`integration`** — needs a real `DATABASE_URL`. It asserts the persistence invariants and the
+  per-column contracts against `information_schema` and never mutates rows.
 
-**The gap CI would not close:** the integration tier is credential-gated. It is also currently
-**read-only** — it inspects schema metadata rather than inserting rows, so it cannot prove the server
-actions actually write correctly. Naming the tier as covered is not the same as covering behaviour;
-`pnpm test` reports both counts so a skipped tier is visible rather than silent.
+**The gap CI does not close:** `.github/workflows/ci.yml` runs `pnpm test:unit` in place of
+`pnpm test`, so the integration tier runs on this machine and nowhere else — it is the credential-free
+half that proves the persistence invariants, and a green check does not mean the schema was verified.
+The integration tier is also currently **read-only** — it inspects schema metadata rather than
+inserting rows, so it cannot prove the server actions actually write correctly. Naming the tier as
+covered is not the same as covering behaviour; `pnpm test` reports both counts so a skipped tier is
+visible rather than silent.
 
 Vitest does not read `.env.local`, so `tests/setup-env.ts` loads it for the integration tier.
 Without that file the tier skips and looks like a pass.
@@ -121,6 +132,32 @@ leave it in place and commit it with your work.
 
 ---
 
+## TypeScript 7 and the TS 6 API side-by-side
+
+`devDependencies` installs **two** TypeScript packages under npm aliases, and that is deliberate:
+
+```json
+"@typescript/native": "npm:typescript@^7.0.2",      // provides `tsc` — what pnpm typecheck runs
+"typescript": "npm:@typescript/typescript6@^6.0.2"  // provides the 6.0 API and `tsc6`
+```
+
+TypeScript 7 is the native Go port and **ships no programmatic API** until 7.1. `typescript-eslint`
+resolves `typescript` through a peer dependency and needs one, so on TS 7 alone it hard-fails at
+startup:
+
+```
+Error: typescript-eslint does not support TS 7.0.
+```
+
+The alias layout is Microsoft's documented answer. `node_modules/typescript` is 6.x for anything that
+imports the API; `pnpm typecheck` runs `tsc` 7.x, which is the fast path — measured at ~0.26s against
+~1.1–3.3s for `tsc6` on this repo. When TypeScript 7.1 ships its API and typescript-eslint supports
+it (tracked in typescript-eslint#10940), drop the aliases and go back to a plain `"typescript": "^7"`.
+
+To check what each binary is: `./node_modules/.bin/tsc --version` and `./node_modules/.bin/tsc6 --version`.
+
+---
+
 ## Datastore and schema
 
 PostgreSQL on Neon, reached over HTTP by `@neondatabase/serverless` (`neon-http` driver), so it
@@ -142,16 +179,23 @@ Migrations are versioned files in `drizzle/`. **An applied migration is never ed
 one via `pnpm db:generate`. `pnpm db:push` skips the migration files entirely; do not rely on it for
 schema you intend to keep.
 
-**Two known tooling limits here, both verified:**
+`drizzle/0000_curvy_marvel_boy.sql` was applied by hand over `neon()` before `pnpm db:migrate`
+worked, so its row in `drizzle.__drizzle_migrations` was inserted by hand to baseline it. Every
+migration after that one was applied by `pnpm db:migrate` itself.
 
-- `pnpm db:migrate` and `pnpm db:push` **cannot reach Neon over the HTTP driver** — drizzle-kit warns
-  that `@neondatabase/serverless` "can only connect to remote Neon/Vercel Postgres/Supabase instances
-  through a websocket". Applying a migration to this database therefore means executing the SQL in
-  `drizzle/*.sql` over `neon()` directly, splitting on `--> statement-breakpoint`.
-- `pnpm db:generate` emits the `task.reference` **default** but never emits the
-  `CREATE SEQUENCE` it depends on. The first task insert fails with
-  `relation "task_reference_seq" does not exist` unless the sequence is created separately.
-  This is covered by an assertion in the integration tier.
+**Three known tooling limits here, all verified:**
+
+- `pnpm db:migrate` and `pnpm db:push` both reach this database. drizzle-kit prints a warning that
+  `@neondatabase/serverless` "can only connect to remote Neon/Vercel Postgres/Supabase instances
+  through a websocket" — it is a warning, not a failure. drizzle-kit bundles its own `ws` and
+  connects over the websocket.
+- `pnpm db:generate` no longer needs a hand-written sequence: `taskReferenceSeq` is declared with
+  `pgSequence` in `src/db/schema/tasks.ts`, and `drizzle/0001_confused_joshua_kane.sql` carries the
+  `CREATE SEQUENCE`.
+- `pnpm db:push` reports a no-op `ALTER TABLE "task" ALTER COLUMN "reference" SET DEFAULT` it will
+  never stop reporting. Postgres stores the default normalized
+  (`nextval('task_reference_seq'::regclass)`) while drizzle-kit serializes the schema's spelling.
+  Harmless and idempotent; do not `--force` push to "clear" it.
 
 ---
 
@@ -244,9 +288,9 @@ Conventional prefixes: `feat:` `fix:` `style:` `perf:` `refactor:` `chore:` `doc
 `ci:`. One logical change per commit. Subject says **why**, body ≤ 4 lines. Never commit secrets or
 real env values.
 
-No remote is configured, so PRs are not currently possible. When one is: title in the form
-`feat(auth): add sign-out` — type, scope in parens, colon, imperative summary — body covering what
-changed / how verified / what wasn't covered, one PR per unit, draft until green.
+PR titles use the form `feat(auth): add sign-out` — type, scope in parens, colon, imperative summary —
+with a body covering what changed / how verified / what wasn't covered, one PR per unit, draft until
+green.
 
 Review gate: `pnpm typecheck` → `pnpm lint` → `pnpm build`, in that order.
 

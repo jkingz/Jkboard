@@ -15,7 +15,7 @@ import { Reveal } from "@/components/reveal"
 /**
  * Questions worth answering early, which is when a product is unfinished.
  *
- * DESIGN.md -> Honesty constraints: no feature may be described here unless it
+ * docs/ui.md → Honesty constraints: no feature may be described here unless it
  * exists. The previous version promised bulk CSV import, project templates, a
  * daily digest email, and plan cancellation from billing settings. None of those
  * are built, and there is no payment provider wired up at all.

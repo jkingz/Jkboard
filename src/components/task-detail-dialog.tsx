@@ -246,21 +246,12 @@ export function TaskDetailDialog({
               size="sm"
               className="cursor-pointer"
               onClick={async () => {
-                try {
-                  const copy = await actions.duplicateTask(task.id)
-                  if (copy) {
-                    toast.add({
-                      type: "success",
-                      title: "Task duplicated",
-                      description: `${copy.title} was added to the board.`,
-                    })
-                  }
-                } catch (error) {
+                const copy = await actions.duplicateTask(task.id)
+                if (copy) {
                   toast.add({
-                    type: "error",
-                    title: "Could not duplicate",
-                    description:
-                      error instanceof Error ? error.message : "Please try again.",
+                    type: "success",
+                    title: "Task duplicated",
+                    description: `${copy.title} was added to the board.`,
                   })
                 }
               }}
@@ -274,21 +265,12 @@ export function TaskDetailDialog({
               onClick={async () => {
                 const title = task.title
                 onOpenChange(false)
-                try {
-                  await actions.deleteTask(task.id)
-                  toast.add({
-                    type: "info",
-                    title: "Task deleted",
-                    description: `${title} was removed from the workspace.`,
-                  })
-                } catch (error) {
-                  toast.add({
-                    type: "error",
-                    title: "Could not delete",
-                    description:
-                      error instanceof Error ? error.message : "Please try again.",
-                  })
-                }
+                await actions.deleteTask(task.id)
+                toast.add({
+                  type: "info",
+                  title: "Task deleted",
+                  description: `${title} was removed from the workspace.`,
+                })
               }}
             >
               Delete task

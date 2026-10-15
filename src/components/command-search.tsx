@@ -27,7 +27,7 @@ import {
   CommandList,
 } from "@/components/ui/command"
 import { Kbd } from "@/components/ui/kbd"
-import { projects } from "@/data/jkboard"
+import { useJkboard } from "@/data/jkboard-store"
 
 interface SearchItem {
   title: string
@@ -43,6 +43,7 @@ interface CommandSearchProps {
 
 export function CommandSearch({ open, onOpenChange }: CommandSearchProps) {
   const router = useRouter()
+  const { projects } = useJkboard()
 
   const searchItems: SearchItem[] = [
     // Workspace

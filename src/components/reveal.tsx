@@ -3,31 +3,35 @@
 import * as React from "react"
 
 /**
- * Scroll-triggered reveal, per DESIGN.md → Motion.
+ * Scroll-triggered reveal, per docs/ui.md → Motion.
  *
  * Purpose: signals that content continues below the fold and gives sections a
  * reading order. It fires once on intersection and never loops.
  *
- * Two details that are easy to get wrong:
+ * The SSR/client split is the detail that is easy to get wrong here. The server
+ * has no `window`, so any `typeof window` branch inside a `useState` initializer
+ * produces a different first render on the client and React reports a hydration
+ * mismatch it cannot patch. `useSyncExternalStore` is the way out: its
+ * `getServerSnapshot` is used for both the server render *and* the hydration
+ * render, and only afterwards does React switch to the client snapshot. That
+ * buys two things at once — the HTML ships with the content visible, which is
+ * what a crawler or a no-JS reader needs, and the animation still plays.
  *
- * - The reduced-motion and no-IntersectionObserver cases are decided during
- *   render, not in the effect. Deciding them in the effect would call setState
- *   synchronously inside it, which is the cascading-render pattern React warns
- *   against (`react-hooks/set-state-in-effect`).
- * - Once shown, the observer disconnects. Nothing re-hides on scroll-out, so
- *   the element cannot flicker when a reader scrolls back up.
+ * Once shown, the observer disconnects. Nothing re-hides on scroll-out, so the
+ * element cannot flicker when a reader scrolls back up.
  */
 
-/** Read once at render. Safe because it is only ever read on the client. */
-function prefersReducedMotion() {
-  return (
-    typeof window !== "undefined" &&
-    window.matchMedia("(prefers-reduced-motion: reduce)").matches
-  )
+/** This value never changes after mount, so there is nothing to subscribe to. */
+function noopSubscribe() {
+  return () => {}
 }
 
-function supportsObserver() {
-  return typeof window !== "undefined" && "IntersectionObserver" in window
+function canAnimateOnClient() {
+  return (
+    typeof window !== "undefined" &&
+    "IntersectionObserver" in window &&
+    !window.matchMedia("(prefers-reduced-motion: reduce)").matches
+  )
 }
 
 export function Reveal({
@@ -45,15 +49,24 @@ export function Reveal({
   /** Rendered as a `div` by default; used for landmarks where needed. */
   as?: "div" | "section"
 }) {
-  const [shown, setShown] = React.useState(
-    () => typeof window === "undefined" || prefersReducedMotion() || !supportsObserver()
+  // False on the server and false during hydration; becomes the real value
+  // immediately after. Identical first render on both sides is the whole point.
+  const canAnimate = React.useSyncExternalStore(
+    noopSubscribe,
+    canAnimateOnClient,
+    // Server and hydration snapshot: never animate, so ship it visible.
+    () => false
   )
+
+  const [revealed, setRevealed] = React.useState(false)
+  const shown = revealed || !canAnimate
+
   const ref = React.useRef<HTMLDivElement>(null)
 
   React.useEffect(() => {
-    if (shown) return
+    if (!canAnimate || revealed) return
     const node = ref.current
-    if (!node || !supportsObserver()) return
+    if (!node) return
 
     const observer = new IntersectionObserver(
       (entries) => {
@@ -61,7 +74,7 @@ export function Reveal({
         // subscription update rather than a synchronous cascade.
         for (const entry of entries) {
           if (entry.isIntersecting) {
-            setShown(true)
+            setRevealed(true)
             observer.disconnect()
             break
           }
@@ -74,7 +87,7 @@ export function Reveal({
 
     observer.observe(node)
     return () => observer.disconnect()
-  }, [shown])
+  }, [canAnimate, revealed])
 
   return (
     <Tag

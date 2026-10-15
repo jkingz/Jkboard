@@ -4,9 +4,10 @@ import { fileURLToPath } from "node:url"
 /**
  * Two tiers, split the way they are split on disk.
  *
- * `unit` runs anywhere — no database, no network. It covers the pure modules:
- * the selectors and Zod schemas in `src/data/flowboard.ts`, and the seed
- * fixtures. This is the tier CI would run.
+ * `unit` runs anywhere — no database, no network. It covers the pure modules
+ * (selectors, date helpers, Zod/view-model coherence), `proxy()` called
+ * in-process, and the source-tree structural rules behind invariants 1 and 4.
+ * This is the tier CI runs.
  *
  * `integration` needs a real `DATABASE_URL`. It is credential-gated on purpose:
  * `tests/platform/integration/helpers.ts` detects the `.env.example` placeholder

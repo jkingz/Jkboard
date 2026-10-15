@@ -1,0 +1,73 @@
+name: CI
+
+# The gate steps are the same chain as docs/project-context.md → Verification
+# gates, in that order. One list, no drift.
+#
+# Two deliberate deviations, both named rather than hidden:
+#
+#   1. `pnpm test:unit`, not `pnpm test`. The integration tier needs a real
+#      DATABASE_URL; adding a repository secret to this job for a read-only
+#      schema assertion would let a fork and a first clone fail for a reason
+#      that is not a defect. The gap is recorded in docs/project-context.md →
+#      Verification gates and must stay there until the tier is credential-free.
+#   2. Versions are pinned literally below because package.json declares no
+#      `engines` or `packageManager` — see docs/target-state.md → Runtime floor
+#      enforcement. When those land, switch to the pins they define.
+#
+# Keep the build hermetic. Anything fetched over the network at build time fails
+# on a sealed runner. It was true of `next/font/google` and is now fixed by
+# vendoring Inter into src/lib/fonts/. Prove it after any font or asset change:
+#
+#   rm -rf .next && NODE_USE_ENV_PROXY=1 HTTPS_PROXY=http://127.0.0.1:9 pnpm build
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  gates:
+    name: typecheck / lint / test / build
+    runs-on: ubuntu-latest
+    env:
+      # Non-secret placeholders. The build prerenders and only needs these
+      # present; (dashboard) is force-dynamic so nothing connects at build time.
+      DATABASE_URL: postgresql://USER:PASSWORD@HOST/neondb?sslmode=require
+      BETTER_AUTH_SECRET: ci-placeholder-not-a-secret
+      BETTER_AUTH_URL: http://localhost:3000
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.18.3
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 26
+          cache: pnpm
+
+      - name: Install
+        # esbuild and unrs-resolver need their postinstall; they are allowed by
+        # pnpm.onlyBuiltDependencies in package.json, so --frozen-lockfile is
+        # enough.
+        run: pnpm install --frozen-lockfile
+
+      - name: Typecheck
+        run: pnpm typecheck
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Test (unit tier)
+        run: pnpm test:unit
+
+      - name: Build
+        run: pnpm build

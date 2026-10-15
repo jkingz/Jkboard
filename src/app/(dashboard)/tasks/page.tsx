@@ -42,40 +42,22 @@ export default function TasksPage() {
         members,
         onViewTask: setOpenTaskId,
         onDuplicateTask: async (taskId) => {
-          try {
-            const copy = await actions.duplicateTask(taskId)
-            if (copy) {
-              toast.add({
-                type: "success",
-                title: "Task duplicated",
-                description: `${copy.title} was added as a new task.`,
-              })
-            }
-          } catch (error) {
+          const copy = await actions.duplicateTask(taskId)
+          if (copy) {
             toast.add({
-              type: "error",
-              title: "Could not duplicate",
-              description:
-                error instanceof Error ? error.message : "Please try again.",
+              type: "success",
+              title: "Task duplicated",
+              description: `${copy.title} was added as a new task.`,
             })
           }
         },
         onDeleteTask: async (taskId) => {
-          try {
-            await actions.deleteTask(taskId)
-            toast.add({
-              type: "info",
-              title: "Task deleted",
-              description: `${taskId} was removed from the workspace.`,
-            })
-          } catch (error) {
-            toast.add({
-              type: "error",
-              title: "Could not delete",
-              description:
-                error instanceof Error ? error.message : "Please try again.",
-            })
-          }
+          await actions.deleteTask(taskId)
+          toast.add({
+            type: "info",
+            title: "Task deleted",
+            description: `${taskId} was removed from the workspace.`,
+          })
         },
       }),
     [projects, members, actions]

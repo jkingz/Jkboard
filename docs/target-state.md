@@ -8,32 +8,6 @@ If a line would be a lie if quoted out of context, it belongs in this file, or n
 
 ---
 
-## Migrating migrations to drizzle-kit against Neon
-
-**Why:** `pnpm db:migrate` and `pnpm db:push` cannot reach this database — drizzle-kit requires a
-websocket for the Neon HTTP driver. Migrations were applied by executing
-`drizzle/0000_fuzzy_screwball.sql` over `neon()` directly, splitting on `--> statement-breakpoint`.
-That is a manual step, and it is invisible in the scripts.
-
-**Blocked by:** switching drizzle-kit to the websocket driver, or accepting the manual apply.
-
-**Done when:** `pnpm db:migrate` applies a migration unaided.
-
----
-
-## The `reference` sequence is not generated
-
-**Why:** `pnpm db:generate` emits `task.reference`'s DEFAULT — which calls
-`nextval('task_reference_seq')` — but never emits the `CREATE SEQUENCE`. A fresh database
-therefore fails the first task insert with
-`relation "task_reference_seq" does not exist`. The sequence was created by hand. There is an
-assertion for it in the integration tier, so the gap is caught rather than silent, but the underlying
-generation bug is unfixed.
-
-**Blocked by:** nothing.
-
-**Done when:** a regenerated migration creates the sequence itself.
-
 ---
 
 ## Scoping the demo account
@@ -84,22 +58,14 @@ unauthorized case covered by a test.
 `information_schema` and never inserts. It therefore proves the schema shape, not that
 `createTaskAction` writes correctly, that `revalidatePath` runs, or that a bad payload is rejected.
 
+`tests/platform/unit/action-revalidation.unit.test.ts` closes the middle one only as far as text can:
+it proves the call is still written at every mutation, not that it executed or that the client picked
+up the result. This entry stays open until something inserts a row.
+
 **Blocked by:** nothing. It needs a disposable database, since it writes rows. Point it at a scratch
 Neon branch rather than the working one.
 
 **Done when:** the integration tier inserts and reads back a task, and covers a rejected payload.
-
----
-
-## A hermetic build
-
-**Why:** Inter is fetched from Google at build time (`src/lib/fonts.ts`). A cold build with no egress
-exits 1. Gate 3 cannot be trusted on any sealed runner.
-
-**Blocked by:** vendoring the font, or accepting and testing the fallback.
-
-**Done when:** `rm -rf .next && NODE_USE_ENV_PROXY=1 HTTPS_PROXY=http://127.0.0.1:9 pnpm build`
-exits 0.
 
 ---
 
@@ -117,13 +83,16 @@ invitee must already know to sign in.
 
 ## CI
 
-**Why:** there is no `.github/` directory and no remote, so the gate chain runs locally only and
-nothing verifies a push.
+**Why:** `.github/workflows/ci.yml` exists and runs `pnpm typecheck`, `pnpm lint`, `pnpm test:unit`
+and `pnpm build` on push and pull request — but it runs the **unit tier only**. The integration tier
+is the credential-free half that proves the persistence invariants, and it runs nowhere but one
+machine. A green check therefore does not mean the schema was verified.
 
-**Blocked by:** a hermetic build (above) and a remote.
+**Blocked by:** nothing. It needs an owner decision on whether the integration tier gets a
+`DATABASE_URL` in CI (a Neon branch URL stored as a repository secret) or stays local-only.
 
-**Done when:** `.github/workflows/ci.yml` runs the exact chain from
-[project-context.md](./project-context.md), in order.
+**Done when:** CI runs `pnpm test` unmodified, or the decision to keep it local is written down
+here as final rather than open.
 
 ---
 
@@ -140,13 +109,14 @@ A silent major bump is possible; nothing enforces Node 26.x or pnpm 10.
 
 ## Removing the seed arrays in `src/data/jkboard.ts`
 
-**Why:** `src/components/command-search.tsx:30` imports the hardcoded `projects` array and
-`site-header.tsx:73` renders it, so the ⌘K palette lists sample projects rather than the workspace. A
-user can click through to a project that does not exist in the database.
+**Why:** `src/data/jkboard-store.tsx` seeds the whole client store from the hardcoded arrays in
+`src/data/jkboard.ts`. The ⌘K palette now reads the store rather than the array, but the store is
+still seeded, so every surface still lists sample data rather than the workspace. A user can click
+through to a project that does not exist in the database.
 
 **Blocked by:** nothing.
 
-**Done when:** the command palette reads from `useJkboard()`, or the seed arrays are deleted.
+**Done when:** the seed arrays are deleted and the store is hydrated from the database only.
 
 ---
 

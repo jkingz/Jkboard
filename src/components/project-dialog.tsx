@@ -1,5 +1,6 @@
 "use client"
 
+import * as React from "react"
 import { useState } from "react"
 import { Plus, SquarePen } from "lucide-react"
 import { z } from "zod"
@@ -24,6 +25,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import { AsyncButton } from "@/components/async-button"
 import { toast } from "@/components/ui/toast"
 import { cn } from "@/lib/utils"
 import { useJkboard } from "@/data/jkboard-store"
@@ -101,6 +103,7 @@ export function ProjectDialog({
         }
   )
   const [errors, setErrors] = useState<Record<string, string>>({})
+  const [pending, startTransition] = React.useTransition()
 
   function reset() {
     setValues(
@@ -119,7 +122,7 @@ export function ProjectDialog({
     setErrors({})
   }
 
-  async function handleSubmit(event: React.FormEvent) {
+  function handleSubmit(event: React.FormEvent) {
     event.preventDefault()
 
     const result = projectFormSchema.safeParse(values)
@@ -133,33 +136,36 @@ export function ProjectDialog({
       return
     }
 
-    if (project) {
-      await actions.updateProject(project.id, {
-        ...result.data,
-        description: result.data.description ?? "",
-        key: result.data.key.toUpperCase(),
-      })
-      toast.add({
-        type: "success",
-        title: "Project updated",
-        description: `${result.data.name} has been saved.`,
-      })
-    } else {
-      const created = await actions.createProject({
-        ...result.data,
-        description: result.data.description ?? "",
-        key: result.data.key.toUpperCase(),
-        startDate: dateFromToday(0),
-      })
-      toast.add({
-        type: "success",
-        title: "Project created",
-        description: `${created.name} is ready for tasks.`,
-      })
-    }
+    // The store toasts the failure; the button is disabled while `pending`.
+    startTransition(async () => {
+      if (project) {
+        await actions.updateProject(project.id, {
+          ...result.data,
+          description: result.data.description ?? "",
+          key: result.data.key.toUpperCase(),
+        })
+        toast.add({
+          type: "success",
+          title: "Project updated",
+          description: `${result.data.name} has been saved.`,
+        })
+      } else {
+        const created = await actions.createProject({
+          ...result.data,
+          description: result.data.description ?? "",
+          key: result.data.key.toUpperCase(),
+          startDate: dateFromToday(0),
+        })
+        toast.add({
+          type: "success",
+          title: "Project created",
+          description: `${created.name} is ready for tasks.`,
+        })
+      }
 
-    reset()
-    setOpen(false)
+      reset()
+      setOpen(false)
+    })
   }
 
   function toggleMember(memberId: string) {
@@ -357,7 +363,12 @@ export function ProjectDialog({
             >
               Cancel
             </Button>
-            <Button type="submit" className="cursor-pointer">
+            <AsyncButton
+              type="submit"
+              pending={pending}
+              pendingText={isEdit ? "Saving" : "Creating"}
+              className="cursor-pointer"
+            >
               {isEdit ? (
                 <>
                   <SquarePen data-icon="inline-start" />
@@ -369,7 +380,7 @@ export function ProjectDialog({
                   Create project
                 </>
               )}
-            </Button>
+            </AsyncButton>
           </div>
         </form>
       </DialogContent>

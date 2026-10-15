@@ -6,6 +6,7 @@ import { AppSidebar } from "@/components/app-sidebar"
 import { SiteHeader } from "@/components/site-header"
 import { SiteFooter } from "@/components/site-footer"
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar"
+import { Skeleton } from "@/components/ui/skeleton"
 import {
   ThemeCustomizer,
   ThemeCustomizerTrigger,
@@ -96,9 +97,32 @@ function ContentArea({ children }: { children: React.ReactNode }) {
     <div className="flex flex-1 flex-col">
       <div className="@container/main flex flex-1 flex-col gap-2">
         <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
-          {children}
+          {/* The shell is already interactive once the layout has resolved, so
+              page data streams in behind this boundary instead of holding the
+              sidebar and header hostage to it. */}
+          <React.Suspense fallback={<ContentFallback />}>
+            {children}
+          </React.Suspense>
         </div>
       </div>
+    </div>
+  )
+}
+
+/** Same shape as `DashboardLoading`'s main column, minus the chrome around it. */
+function ContentFallback() {
+  return (
+    <div className="flex flex-col gap-6" aria-busy="true">
+      <div className="flex flex-col gap-2">
+        <Skeleton className="h-7 w-48" />
+        <Skeleton className="h-4 w-72" />
+      </div>
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        {Array.from({ length: 4 }).map((_, index) => (
+          <Skeleton key={index} className="h-24 w-full" />
+        ))}
+      </div>
+      <Skeleton className="h-72 w-full" />
     </div>
   )
 }

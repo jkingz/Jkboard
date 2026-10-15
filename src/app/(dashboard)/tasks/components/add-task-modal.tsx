@@ -23,8 +23,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import { AsyncButton } from "@/components/async-button"
 import { toast } from "@/components/ui/toast"
 import { useJkboard } from "@/data/jkboard-store"
+import * as React from "react"
 import {
   dateFromToday,
   taskPriorities,
@@ -54,6 +56,7 @@ export function AddTaskModal({
 }: AddTaskModalProps) {
   const { projects, members, actions } = useJkboard()
   const [open, setOpen] = useState(false)
+  const [pending, startTransition] = React.useTransition()
 
   const initialForm = (): TaskFormData => ({
     title: "",
@@ -67,7 +70,7 @@ export function AddTaskModal({
   const [formData, setFormData] = useState<TaskFormData>(initialForm)
   const [errors, setErrors] = useState<Record<string, string>>({})
 
-  async function handleSubmit(event: React.FormEvent) {
+  function handleSubmit(event: React.FormEvent) {
     event.preventDefault()
 
     const result = taskFormSchema.safeParse(formData)
@@ -81,20 +84,25 @@ export function AddTaskModal({
       return
     }
 
-    const created = await actions.createTask(result.data)
+    // The store toasts the failure; swallowing the throw here keeps a rejected
+    // action from surfacing as an unhandled rejection. The button is disabled
+    // while `pending`, so a second submit cannot fire.
+    startTransition(async () => {
+      const created = await actions.createTask(result.data)
 
-    toast.add({
-      type: "success",
-      title: "Task created",
-      description: `${created.title} was added to ${
-        projects.find((project) => project.id === created.projectId)?.name ??
-        "the workspace"
-      }.`,
+      toast.add({
+        type: "success",
+        title: "Task created",
+        description: `${created.title} was added to ${
+          projects.find((project) => project.id === created.projectId)?.name ??
+          "the workspace"
+        }.`,
+      })
+
+      setFormData(initialForm())
+      setErrors({})
+      setOpen(false)
     })
-
-    setFormData(initialForm())
-    setErrors({})
-    setOpen(false)
   }
 
   return (
@@ -283,10 +291,15 @@ export function AddTaskModal({
             >
               Cancel
             </Button>
-            <Button type="submit" className="cursor-pointer">
+            <AsyncButton
+              type="submit"
+              pending={pending}
+              pendingText="Creating"
+              className="cursor-pointer"
+            >
               <Plus data-icon="inline-start" />
               Create task
-            </Button>
+            </AsyncButton>
           </div>
         </form>
       </DialogContent>

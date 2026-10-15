@@ -4,6 +4,7 @@ import {
   index,
   integer,
   pgEnum,
+  pgSequence,
   pgTable,
   text,
   timestamp,
@@ -27,6 +28,12 @@ export const taskPriorityEnum = pgEnum("task_priority", [
   "medium",
   "low",
 ])
+
+/**
+ * Backs `task.reference`. Declared here, not created by hand, so a generated
+ * migration emits the `CREATE SEQUENCE` the column default depends on.
+ */
+export const taskReferenceSeq = pgSequence("task_reference_seq")
 
 export const task = pgTable(
   "task",

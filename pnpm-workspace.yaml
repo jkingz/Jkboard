@@ -1,0 +1,11 @@
+# pnpm 10 blocks dependency postinstall scripts and fails the install with
+# ERR_PNPM_IGNORED_BUILDS unless they are allowed here. Both ship native
+# binaries that need their postinstall: esbuild places a platform binary,
+# unrs-resolver checks its napi binding.
+#
+# This is the canonical pnpm 10 location. Configuring it in package.json's
+# `pnpm` field instead leaves pnpm writing a placeholder `pnpm-workspace.yaml`
+# with the literal text "set this to true or false" on some install paths.
+onlyBuiltDependencies:
+  - esbuild
+  - unrs-resolver

@@ -75,7 +75,9 @@ export function NavUser({
       toast.add({ type: "success", title: "Signed out" })
 
       // Drop the client-side session cache, then leave the protected area.
-      router.replace("/sign-in")
+      // `/landing` is public, so it renders without a session check and does
+      // not bounce the user straight back to the sign-in form they just left.
+      router.replace("/landing")
       router.refresh()
     })
   }

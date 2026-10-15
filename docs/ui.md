@@ -1,42 +1,145 @@
 # UI Context
 
+This file is the source of truth for identity, palette, typography, radius, motion and imagery. It
+was transcribed from the owner's decisions on 2026-10-15, and `DESIGN.md` has been folded into it —
+there is no second document to keep in sync.
+
+Dials in force: **ENERGY 2 / RHYTHM 2 / MOTION 2**.
+
+---
+
+## Identity
+
+Jkboard is an operational tool. It answers questions about work in flight: what is due, who is
+blocked, what slipped. It is not a lifestyle product and does not pretend to be one.
+
+The test: a visitor should be able to look at a screenshot for five seconds and know this is a tool
+someone runs, not a concept someone pitched.
+
+## Personality
+
+Precise. Dense where density helps (tables, task lists, numbers). Calm elsewhere. It does not perform
+enthusiasm, and it does not use the vocabulary of enterprise software.
+
+## Mood
+
+Operational. Closer to a well-made instrument than to a lifestyle brand.
+
+## Palette
+
+**Monochrome, with one accent.**
+
+- Core: near-black and white, carried by the shadcn neutral `oklch` base in `src/app/globals.css`.
+- Accent: **one.** `--primary` is the only chromatic colour permitted to carry meaning. It marks the
+  single most important element on a screen and nothing else.
+- Status colours (`--success`, `--warning`, `--info`, `--destructive`) are functional, never
+  decorative. They appear only where the state is real.
+- **Why:** the product's identity is precision, and precision is monochrome. A saturated colour that
+  decorates rather than informs contradicts the thing being sold.
+
+**No blue-to-purple, blue-to-cyan or purple-to-pink gradient as a primary treatment.** No radial orbs,
+no coloured glow backgrounds, no neon.
+
+## Radius
+
+`--radius: 0.625rem` is the base defined in `globals.css`. Derived steps (`sm`, `md`, `lg`, `xl`) come
+from it.
+
+Applied deliberately: cards and inputs use `md`. Pill shapes are reserved for genuinely small,
+fully-rounded elements such as status dots and avatar chips. Not every element is a pill.
+
+**Why:** a tool where every corner is round reads as decoration rather than as structure.
+
+## Typography
+
+Inter, exposed as `--font-inter`. Monospace is permitted only for values that are literal strings (a
+reference like `TSK-0042`, a credential, a code identifier). It is **not** a heading or body face.
+
+No uppercase wide-tracked labels. Section headings are set in sentence case at real sizes.
+
+## Texture
+
+**No dot grid, no blueprint pattern, no graph paper.** Identity comes from typography, spacing and
+the real product preview, not from a texture applied to empty space.
+
+## Imagery
+
+**The product's own UI is the imagery.** There are no illustrations, no 3D blobs, no stock
+photography, no fake terminal window. `src/app/landing/components/product-preview.tsx` renders real
+dashboard components and is the primary visual, because it cannot drift from what the app does.
+
+No generated avatars or profile photos anywhere. People appear as initials, which the app already
+does via `initialsFromName`.
+
+Remote images are restricted to `ui.shadcn.com` and `images.unsplash.com` (`next.config.ts`). Do not
+widen that list to add stock photography — the ban above is a product decision, not a technical one.
+
 ---
 
 ## Design direction
-
-`DESIGN.md` at the project root is the source of truth for identity, palette, typography, mood and
-the three dials. Read it before changing any UI. It is transcribed from the owner's decisions, so
-do not fill its unset fields on your own.
-
-Dials in force: **ENERGY 2 / RHYTHM 2 / MOTION 2**.
 
 ### Motion
 
 `src/components/reveal.tsx` is the scroll-reveal primitive, the only motion primitive on the landing
 page. It fires once on intersection, disconnects after firing, and never re-hides on scroll-out.
 
-The reduced-motion decision is made **during render**, not inside the effect. Deciding it in the
-effect calls `setState` synchronously inside an effect body, which trips
-`react-hooks/set-state-in-effect` and causes the cascading render React warns about.
+**Do not branch on `typeof window` inside a `useState` initializer here.** `Reveal` reads the
+environment through `useSyncExternalStore` with a `getServerSnapshot` that returns `false`, so the
+server render and the hydration render are identical and React has nothing to patch. A lazy
+initializer that tests `typeof window` gives the server `shown = true` and the client `false`, which
+is a hydration mismatch on every `Reveal` on the page — 26 of them on `/landing`. The same rule
+applies to anything else that reads the environment during render: decide it after mount, or give it
+a server snapshot.
 
-Permitted motion, per DESIGN.md: scroll-reveal, hover/focus feedback, and one transition on the hero
-product preview. **No parallax, no pinning, no floating or pulsing loops.**
+Reduced motion and a missing `IntersectionObserver` both resolve through the client snapshot, so
+those readers get the content visible rather than stuck at `opacity-0`.
+
+Permitted motion: scroll-reveal, hover/focus feedback, and one transition on the hero product preview.
+**No parallax, no pinning, no floating or pulsing loops, no scroll-jacking.** An element that moves
+forever competes with the content and never lets the reader rest. Adding a scroll-animation library
+for effect is out of scope for this direction — ask the owner first.
+
+### Interaction states
+
+- **Mutating buttons** use `src/components/async-button.tsx` (`AsyncButton`) with `useTransition` in
+  the caller. It disables and shows a spinner for the duration. Server actions here have no
+  idempotency key, so an unguarded second click writes a duplicate row.
+- **Failures** are toasted in `src/data/jkboard-store.tsx`, the single choke point all twelve
+  mutations pass through. Success toasts stay at the call sites, which have the created row's name.
+  Do not add a second error toast at a call site.
+- **Loading:** `src/app/(dashboard)/loading.tsx` is the route-group skeleton; `ContentArea` in
+  `dashboard-shell.tsx` wraps children in `Suspense` so the shell is interactive before page data
+  lands.
 
 ### Removed from the landing page
 
-These were deleted because DESIGN.md forbids them, and each was verified unused first:
+These were deleted because the direction above forbids them, and each was verified unused first:
 
 - `src/components/dot-pattern.tsx` — deleted. Zero importers after the landing page stopped using it.
-  DESIGN.md → Texture forbids dot grids.
 - The eyebrow badge above the H1, the `Badge` kicker pills on each feature block, and the
   `TrendingUp` badge in the CTA. All restated text already present (R-09).
 - The gradient headline phrase. Permitted as a hierarchy device, but it was paired with an
   underline bar and a second gradient in the CTA, which pushed it over into decoration.
+- Every image in `public/` — 12 PNGs and 5 SVGs, 4.3 MB, all verified unreferenced. The favicon is
+  `src/app/favicon.ico`, not `public/favicon.png`.
 
 ### Honesty constraints
 
-DESIGN.md → Honesty constraints binds every future change to this page. The following were **false**
-and are now corrected:
+These are not style preferences; they are correctness rules and they bind every future change.
+
+- **No invented numbers.** Every figure on the page comes from the seeded database.
+- **No unbuilt features.** CSV import, project templates, digest emails, Starter/Team plans, plan
+  cancellation, guest collaborators: none of these exist. The pricing and FAQ sections describe only
+  what is built, and say plainly that the product is early (R-28, R-38). "Early stage" is itself a
+  permitted claim: it is true, and more useful to a reader than a price table would be. What is not
+  permitted is dressing an early build as a finished one.
+- **No fake testimonials.** There is no testimonials section and none may be added without real,
+  verifiable quotes.
+- **No security or performance claims.** Nothing about SOC 2, uptime, encryption, or speed.
+- **No third-party logo marquees.** A "trusted by" strip is a claim about who uses the product. There
+  are no customers, so there is nothing truthful to put there.
+
+The following were **false** and are now corrected:
 
 | Claimed | Reality |
 | --- | --- |
@@ -47,6 +150,11 @@ and are now corrected:
 | Guest collaborators, task comments, saved views | Not built. Replaced with what exists. |
 | Privacy, Terms, Security footer links | No such pages. Removed rather than pointed at the FAQ. |
 | Newsletter subscription form | Resolved `Promise.resolve(email)` and toasted success without storing anything. Removed. |
+
+### Unset — do not invent
+
+*(unset)* — no decision recorded. Do not invent: specific brand colour beyond the neutral base, a
+display typeface, an illustration style, a logo mark, testimonial content, pricing tiers.
 
 ---
 
@@ -97,15 +205,13 @@ nobody notices. Check `globals.css` before introducing a name.
 
 - `next/image` for raster content; remote hosts allowed are `ui.shadcn.com` and
   `images.unsplash.com` only (`next.config.ts`).
-- **Inter is fetched from Google at build time** via `next/font/google` (`src/lib/fonts.ts`), so the
-  build is **not hermetic**. Proven both ways: with a warm `.next` a blackholed-egress build exits 0
-  and looks fine; after `rm -rf .next` the same command exits 1 with
-  `Error while requesting resource … fonts.googleapis.com/css2?family=Inter`. Always test cold:
+- **Inter is vendored**, not fetched. `src/lib/fonts.ts` uses `next/font/local` against
+  `src/lib/fonts/inter-latin-variable.woff2` (latin subset, variable weight 100–900), with
+  `OFL.txt` beside it. The build is **hermetic** — verified:
   ```bash
-  rm -rf .next && NODE_USE_ENV_PROXY=1 HTTPS_PROXY=http://127.0.0.1:9 pnpm build
+  rm -rf .next && NODE_USE_ENV_PROXY=1 HTTPS_PROXY=http://127.0.0.1:9 pnpm build   # exits 0
   ```
-  A sealed CI runner has no egress, so it will fail until the font is vendored or the fallback is
-  tolerated. Tracked in [target-state.md](./target-state.md).
+  Keep it that way: reintroducing `next/font/google` breaks any runner without egress.
 - Security headers are set globally in `next.config.ts`: `X-Frame-Options: DENY`,
   `X-Content-Type-Options: nosniff`, `Referrer-Policy: origin-when-cross-origin`.
 

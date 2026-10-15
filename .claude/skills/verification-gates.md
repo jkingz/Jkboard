@@ -22,8 +22,8 @@ Work is done when, in this order:
    - Report the command and the counts.
 
 4. **Production build passes** — `pnpm build`
-   - Anything the build fetches over the network is a latent CI failure. Inter comes from Google Fonts
-     (`src/lib/fonts.ts`), so this gate is **not hermetic** — see below.
+   - Anything the build fetches over the network is a latent CI failure. The build is hermetic:
+     Inter is vendored into `src/lib/fonts/`, so nothing is fetched. Keep it that way — see below.
 
 5. **Live exercise** — always
    - The four gates above do not prove the feature works in a browser.
@@ -57,16 +57,17 @@ in the browser; it persisted across reload
 
 ## A gate that only passes on your machine is not a gate
 
-**Test the build cold.** Inter is fetched from Google Fonts at build time, and **a warm `.next` masks
-it** — the blackholed build exits 0 until you clear the cache:
+**Test the build cold.** A warm `.next` masks anything fetched at build time, so the blackholed
+build can exit 0 on your machine and fail on a runner without egress:
 
 ```bash
 rm -rf .next && NODE_USE_ENV_PROXY=1 HTTPS_PROXY=http://127.0.0.1:9 pnpm build
 ```
 
-Verified: exit 0 warm, exit 1 cold with `Error while requesting resource … fonts.googleapis.com`.
-A sealed CI runner has no egress and will fail. Tracked in
-[docs/target-state.md](../../docs/target-state.md).
+Verified: exits 0. It used to exit 1 with
+`Error while requesting resource … fonts.googleapis.com` — that was `next/font/google`. Inter is
+vendored into `src/lib/fonts/` and loaded with `next/font/local`. Any new remote asset at build time
+reopens this gate.
 
 **Tests are just as machine-dependent.** The unit tier needs nothing; the integration tier needs a
 real database. Say which one you ran.
@@ -80,8 +81,10 @@ Never report "tests pass" when a tier skipped. Say so, and say why:
 
 ## CI verification
 
-None. There is no `.github/workflows/` and no remote configured, so these gates run locally only.
-Nothing runs on push or pull request today.
+`.github/workflows/ci.yml` runs the first four gates on push and pull request — `pnpm test:unit`
+in place of `pnpm test`, because the integration tier needs a `DATABASE_URL` this job deliberately
+does not carry. Report locally-run gates separately; CI is not a substitute for the integration
+tier or for the live exercise.
 
 ## Reference
 

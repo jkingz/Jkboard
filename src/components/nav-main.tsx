@@ -54,62 +54,71 @@ export function NavMain({
     <SidebarGroup>
       <SidebarGroupLabel>{label}</SidebarGroupLabel>
       <SidebarMenu>
-        {items.map((item) => (
-          <Collapsible
-            key={item.title}
-            defaultOpen={shouldBeOpen(item)}
-            className="group/collapsible"
-            render={<SidebarMenuItem />}
-          >
-            {item.items?.length ? (
-              <>
-                <CollapsibleTrigger
+        {items.map((item) => {
+          const open = shouldBeOpen(item)
+
+          return (
+            <Collapsible
+              // Keyed on `open`, not just the title: Base UI's uncontrolled
+              // Collapsible warns when `defaultOpen` changes after it has been
+              // initialised. A new key remounts the primitive so it re-reads
+              // `defaultOpen` from the route instead of mutating it, and the
+              // trigger still toggles the group freely.
+              key={`${item.title}:${open}`}
+              defaultOpen={open}
+              className="group/collapsible"
+              render={<SidebarMenuItem />}
+            >
+              {item.items?.length ? (
+                <>
+                  <CollapsibleTrigger
+                    render={
+                      <SidebarMenuButton
+                        tooltip={item.title}
+                        className="cursor-pointer"
+                      />
+                    }
+                  >
+                    {item.icon && <item.icon />}
+                    <span>{item.title}</span>
+                    <ChevronRight className="ml-auto transition-transform duration-200 group-data-open/collapsible:rotate-90" />
+                  </CollapsibleTrigger>
+                  <CollapsibleContent>
+                    <SidebarMenuSub>
+                      {item.items?.map((subItem) => (
+                        <SidebarMenuSubItem key={subItem.title}>
+                          <SidebarMenuSubButton
+                            className="cursor-pointer"
+                            isActive={isActive(subItem.url)}
+                            render={<Link href={subItem.url} />}
+                          >
+                            <span>{subItem.title}</span>
+                          </SidebarMenuSubButton>
+                        </SidebarMenuSubItem>
+                      ))}
+                    </SidebarMenuSub>
+                  </CollapsibleContent>
+                </>
+              ) : (
+                <SidebarMenuButton
+                  tooltip={item.title}
+                  className="cursor-pointer"
+                  isActive={isActive(item.url)}
                   render={
-                    <SidebarMenuButton
-                      tooltip={item.title}
-                      className="cursor-pointer"
+                    <Link
+                      href={item.url}
+                      target={item.target}
+                      rel={item.target ? "noopener noreferrer" : undefined}
                     />
                   }
                 >
                   {item.icon && <item.icon />}
                   <span>{item.title}</span>
-                  <ChevronRight className="ml-auto transition-transform duration-200 group-data-open/collapsible:rotate-90" />
-                </CollapsibleTrigger>
-                <CollapsibleContent>
-                  <SidebarMenuSub>
-                    {item.items?.map((subItem) => (
-                      <SidebarMenuSubItem key={subItem.title}>
-                        <SidebarMenuSubButton
-                          className="cursor-pointer"
-                          isActive={isActive(subItem.url)}
-                          render={<Link href={subItem.url} />}
-                        >
-                          <span>{subItem.title}</span>
-                        </SidebarMenuSubButton>
-                      </SidebarMenuSubItem>
-                    ))}
-                  </SidebarMenuSub>
-                </CollapsibleContent>
-              </>
-            ) : (
-              <SidebarMenuButton
-                tooltip={item.title}
-                className="cursor-pointer"
-                isActive={isActive(item.url)}
-                render={
-                  <Link
-                    href={item.url}
-                    target={item.target}
-                    rel={item.target ? "noopener noreferrer" : undefined}
-                  />
-                }
-              >
-                {item.icon && <item.icon />}
-                <span>{item.title}</span>
-              </SidebarMenuButton>
-            )}
-          </Collapsible>
-        ))}
+                </SidebarMenuButton>
+              )}
+            </Collapsible>
+          )
+        })}
       </SidebarMenu>
     </SidebarGroup>
   )

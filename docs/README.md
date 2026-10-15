@@ -38,8 +38,7 @@ specs/                 one feature spec per unit of work — specs/README.md, sp
 ```
 
 `tests/` exists with two tiers — see [project-context.md](./project-context.md) → Verification gates.
-`.github/` is absent: there is no remote, so a CI workflow would describe machinery that does not
-exist. It arrives with the feature that needs it.
+`.github/workflows/ci.yml` runs the gate chain on push; it runs the unit tier only.
 
 ## Health check
 
