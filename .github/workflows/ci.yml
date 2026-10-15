@@ -35,7 +35,14 @@ concurrency:
 jobs:
   gates:
     name: typecheck / lint / test / build
-    runs-on: ubuntu-latest
+    # Pinned, not `ubuntu-latest`. That label rolls from Ubuntu 24.04.5 to
+    # 26.04.1 over the weeks beginning 2026-10-19, completing 2026-11-19
+    # (actions/runner-images#14748). The network-sensitive step here is
+    # `pnpm install --frozen-lockfile`, which runs postinstall for esbuild and
+    # unrs-resolver — prebuilt platform binaries are exactly what a base-image
+    # jump breaks, and it would break on someone else's push, for a reason no
+    # one chose. Move up deliberately, on a run that can afford to fail.
+    runs-on: ubuntu-24.04
     env:
       # Non-secret placeholders. The build prerenders and only needs these
       # present; (dashboard) is force-dynamic so nothing connects at build time.
