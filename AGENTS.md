@@ -25,7 +25,7 @@ This file stays short so it stays read.
 
 **3. Scope is the request, not the opportunity.** The blast radius of a change equals the radius of what was asked. No drive-by cleanup, renames, formatting, "while I'm here" extractions, or predicted abstractions. A nearby problem you spotted is one line in your reply, never in the diff.
 
-**4. Delete unused, but prove it was unused.** Remove dead files, exports, imports, env vars, CSS, tokens, orphaned components. Grep for callers before deleting; state what you removed and how you checked. Known dead exports today: `countOwnedProjects`, `assertMemberExists` — see [`docs/target-state.md`](./docs/target-state.md).
+**4. Delete unused, but prove it was unused.** Remove dead files, exports, imports, env vars, CSS, tokens, orphaned components. Grep for callers before deleting; state what you removed and how you checked. Known dead code is tracked in [`docs/target-state.md`](./docs/target-state.md), not here.
 
 **5. End clean.** Kill or restart servers only during the current task. Clear stale processes on ports the app uses before starting your own. Leave no orphaned dev server, worker or background job.
 
@@ -54,31 +54,16 @@ This file stays short so it stays read.
 | [`/babysitting-a-pr`](./.claude/skills/babysitting-a-pr/SKILL.md) | watching an open PR |
 | [`/leaving-pr-comment`](./.claude/skills/leaving-pr-comment/SKILL.md) | before posting to a PR or issue |
 
-## Docs
+## Docs and specs
 
-Read the file that matches the question. Fill one section as you make each decision; never front-load a
-template you have no facts for. Unfilled slots are written in angle brackets.
-
-| File | Read it when |
-| --- | --- |
-| [`docs/product-overview.md`](./docs/product-overview.md) | what this is for, what is in and out of scope |
-| [`docs/architecture.md`](./docs/architecture.md) | touching data, routes, auth, or a cross-cutting rule |
-| [`docs/code-standards.md`](./docs/code-standards.md) | writing code |
-| [`docs/ui.md`](./docs/ui.md) | the change touches the interface |
-| [`docs/project-context.md`](./docs/project-context.md) | you need commands, gates, env vars, protected paths |
-| [`docs/target-state.md`](./docs/target-state.md) | the change builds something that does not exist yet |
-| [`docs/verification-standards.md`](./docs/verification-standards.md) | writing or editing any doc — and the health check |
-
-Specs live in [`specs/`](./specs/README.md) — one file per unit of work.
+Read the one file that governs the change; the map in [`docs/README.md`](./docs/README.md) says which
+and when to fill it. Work is specified in [`specs/`](./specs/README.md) — one numbered file per unit,
+ordered by what unblocks what.
 
 ## Before starting
 
-1. Read the rules above, then the one `docs/` file that governs the change.
-2. State the scope in one sentence: what changes, and what explicitly does not.
-3. Work the loop in `/development-workflow`.
-4. Verify with `/verification-gates` — all of it, in order.
-5. Update the doc your change made untrue, in the same change.
-6. Report what changed, what was verified, and what is still unknown.
+Load `/development-workflow` and work its loop. It is the same six steps in one place; this file does
+not restate them.
 
 ## Health check
 
@@ -86,25 +71,7 @@ Every angle-bracketed slot in `docs/` outside `verification-standards.md` is one
 this file contributes none, so zero hits is reachable:
 
 ```bash
-grep -rn '<[a-zA-Z_/]' AGENTS.md docs/ | grep -v verification-standards | grep -v antislop
+grep -rn '<[a-zA-Z_/]' AGENTS.md docs/ | grep -v verification-standards
 ```
 
 Zero hits means the docs describe this project and only this project.
-
-The `antislop` block below is third-party boilerplate, not a project doc, so its `<mode>` placeholders
-are template text rather than slots this project owes. The check excludes it alongside
-`verification-standards.md`.
-
-<!-- antislop:start -->
-## antislop
-For UI, copy, people, mobile layout, or code comments work, read `antislop.md` (core) and then the skill for the task:
-- UI / visual: `skills/antislop-ui/SKILL.md`
-- People: `skills/antislop-human/SKILL.md`
-- Mobile / responsive: `skills/antislop-layoutmobile/SKILL.md`
-- Code comments: `skills/antislop-code/SKILL.md`
-
-Before starting, follow the core's "Two Usage Modes" section in strict order: explicit session instruction first, then global preference, then ask. A session instruction always wins. For a resolved mode, say `antislop active: <mode> (session override).` or `antislop active: <mode> (global preference).` once before presenting findings or making edits, using the actual mode and source. Acknowledging the user's request without naming the source does not replace this notice.
-Only an explicit choice of antislop during or after selects a session mode. A request to review, audit, or avoid file edits does not select a mode; read the global preference in that case. Another skill's mode does not select antislop's mode.
-If the mode is unresolved, ask during/after and end the response; wait for the answer before any UI review, planning, or concept. For read-only tasks, put the active-mode notice only at the start of the final answer, never in progress messages. For editing tasks, announce before the first edit and omit it from the final answer.
-To update antislop later: download `antislop.md` again, or run `npx antislop-ai --update` if it was installed as skill folders.
-<!-- antislop:end -->

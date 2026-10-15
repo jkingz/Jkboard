@@ -8,6 +8,25 @@ If a line would be a lie if quoted out of context, it belongs in this file, or n
 
 ---
 
+## Where each entry is planned
+
+Sequencing, increments and the owner decision that gates each one live in
+[`specs/`](../specs/README.md). This file stays intent; a spec is the plan. Do not rename the headings
+below — `tests/platform/unit/action-revalidation.unit.test.ts` cites one by name.
+
+| Entry here | Spec |
+| --- | --- |
+| Scoping the demo account | [02](../specs/02-role-model-and-demo-scoping.md) |
+| Per-user workspace scoping | gated on Q1; the guard it needs is [01](../specs/01-session-identity-and-action-guards.md) |
+| Authorization on mutations | [01](../specs/01-session-identity-and-action-guards.md), then [02](../specs/02-role-model-and-demo-scoping.md) |
+| Behavioural tests for the server actions | [03](../specs/03-write-path-integration-tests.md), CI in [04](../specs/04-integration-tier-in-ci.md) |
+| Email on invite | [08](../specs/08-email-invite-verification-reset.md) |
+| CI | [04](../specs/04-integration-tier-in-ci.md) |
+| Runtime floor enforcement | [09](../specs/09-runtime-floor-migrations-deployment.md) |
+| Removing the seed arrays | [05](../specs/05-real-chart-data-or-no-chart.md) |
+| Wiring or deleting `countOwnedProjects` / `assertMemberExists` | [01](../specs/01-session-identity-and-action-guards.md) |
+| *(no entry — recorded only in product-overview as not built)* | settings pages in [07](../specs/07-settings-persist-or-delete.md), test tier for the interface in [06](../specs/06-interface-test-tier.md) |
+
 ---
 
 ## Scoping the demo account
@@ -109,14 +128,20 @@ A silent major bump is possible; nothing enforces Node 26.x or pnpm 10.
 
 ## Removing the seed arrays in `src/data/jkboard.ts`
 
-**Why:** `src/data/jkboard-store.tsx` seeds the whole client store from the hardcoded arrays in
-`src/data/jkboard.ts`. The ⌘K palette now reads the store rather than the array, but the store is
-still seeded, so every surface still lists sample data rather than the workspace. A user can click
-through to a project that does not exist in the database.
+**Why:** the store no longer seeds from those arrays — `JkboardProvider` takes `initialData` from
+`getWorkspaceData()` (`src/data/jkboard-store.tsx:129-139`, `src/app/(dashboard)/layout.tsx:31`), so
+the dashboard lists real rows. What is left is smaller and still false: `overview-charts.tsx:30`
+renders `taskCompletionTrend`, twelve hardcoded weeks from `src/data/jkboard.ts:531-543`, labelled as
+this workspace's completions; and `src/app/landing/components/product-preview.tsx:33` still imports
+the sample arrays. Neither is a store problem. It is a claim problem, in two places.
 
-**Blocked by:** nothing.
+**Blocked by:** nothing. Spec [05](../specs/05-real-chart-data-or-no-chart.md) notes one prerequisite
+it does not spell out here: the chart's real data needs `completedAt`/`createdAt` projected to the
+client, and `taskSchema` does not carry them today.
 
-**Done when:** the seed arrays are deleted and the store is hydrated from the database only.
+**Done when:** no dashboard surface renders a series that no query produced, and the landing preview is
+either computed or labelled a preview. See
+[specs/05](../specs/05-real-chart-data-or-no-chart.md).
 
 ---
 
