@@ -1,6 +1,6 @@
 # 07 — Settings: persist or delete
 
-Blocked by Q3 (`docs/product-overview.md:92`): which settings pages are meant to persist.
+Blocked by Q3 (`docs/product-overview.md:91`): which settings pages are meant to persist.
 
 ## Goal
 

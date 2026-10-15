@@ -14,7 +14,7 @@ as the demo cannot delete a project, remove a member, or invite a new one.
 (`src/app/(auth)/sign-in/components/login-form.tsx:152-156`). No action checks a role (spec 01), and
 there is no role to check: `member.role` is `text("role").notNull().default("Member")`
 (`src/db/schema/members.ts:34`), the Better Auth `user` table has no role column
-(`src/db/schema/auth.ts:18`), and `src/lib/auth.ts:105` loads `plugins: [nextCookies()]` — the admin
+(`src/db/schema/auth.ts:14-27`), and `src/lib/auth.ts:105` loads `plugins: [nextCookies()]` — the admin
 plugin is not installed. `isDemoEnvironment()` (`src/lib/demo.ts:34`) already gates which account the
 UI treats as demo and is covered by `tests/platform/unit/demo-account.unit.test.ts`.
 
