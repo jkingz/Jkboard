@@ -117,7 +117,7 @@ export function AddTaskModal({
           Add Task
         </DialogTrigger>
       )}
-      <DialogContent className="sm:max-w-[525px]">
+      <DialogContent className="sm:max-w-131.25">
         <DialogHeader>
           <DialogTitle>Add new task</DialogTitle>
           <DialogDescription>

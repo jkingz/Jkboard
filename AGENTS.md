@@ -19,7 +19,7 @@ This file stays short so it stays read.
 
 ## Standing rules
 
-**1. Be concise.** No preamble, no "here is what I did" essay. State the change, the result, and the one thing you need from me.
+**1. Be concise.** No preamble, no "here is what I did" essay. State the change, the result, and the one thing you need from me. Every unit of work — spec, feature, fix, PR — closes with the two-line **Done / Next** block in chat, unprompted; its shape is step 6 of [`/development-workflow`](./.claude/skills/development-workflow.md).
 
 **2. No "done" without a command behind it.** Every claim of completion names the command run and what it printed. Untested by you = unverified: say "not verified", never "should work". Type-checking proves types, not behavior.
 

@@ -13,7 +13,7 @@ without a session leaves the row in place.
 1. Resolve the caller's membership once, server-side. `src/app/(dashboard)/layout.tsx:25` already
    holds `auth.api.getSession({ headers: await headers() })`. Look up `member` by `user_id`, which is
    unique (`member_userId_uidx`, `src/db/schema/members.ts`), and pass the row into `JkboardProvider`.
-2. Remove the derivation `currentMember: members[0]` (`src/data/jkboard-store.tsx:325`) in favour of
+2. Remove the derivation `currentMember: members[0]` (`src/data/jkboard-store.tsx:326`) in favour of
    that prop. `members[0]` is the earliest `joinedAt` in the table — `getWorkspaceData()` orders by
    `joinedAt` — so it is the same person for every caller.
 3. Add one guard for the action layer. **Proposed name `requireMembership()` — no such symbol exists
