@@ -8,7 +8,7 @@ import { z } from "zod"
 
 import { db } from "@/db"
 import { member, project, projectMember } from "@/db/schema"
-import { getMemberId } from "@/db/queries/jkboard"
+import { requireMembership } from "@/db/actions/session"
 import type { Project } from "@/data/jkboard"
 
 const projectInputSchema = z.object({
@@ -68,15 +68,13 @@ async function syncMemberships(projectId: string, memberIds: string[]) {
 export async function createProjectAction(
   raw: ProjectInput
 ): Promise<Project> {
+  // The caller, not whoever joined first: `requireMembership()` throws when
+  // there is no membership, so a project always has an owner to attribute it to.
+  const callerId = await requireMembership()
+
   const input = projectInputSchema.parse(raw)
 
-  const ownerId = input.memberIds[0] ?? (await getMemberId())
-
-  if (!ownerId) {
-    throw new Error(
-      "No workspace member exists yet. Run `pnpm db:seed` before creating projects."
-    )
-  }
+  const ownerId = input.memberIds[0] ?? callerId
 
   const [row] = await db
     .insert(project)
@@ -104,6 +102,8 @@ export async function updateProjectAction(
   projectId: string,
   raw: Partial<ProjectInput>
 ): Promise<Project> {
+  await requireMembership()
+
   const input = projectInputSchema.partial().parse(raw)
 
   const [row] = await db
@@ -144,6 +144,8 @@ export async function setProjectStatusAction(
   projectId: string,
   status: Project["status"]
 ) {
+  await requireMembership()
+
   const [row] = await db
     .update(project)
     .set({ status })
@@ -157,6 +159,8 @@ export async function setProjectStatusAction(
 }
 
 export async function deleteProjectAction(projectId: string) {
+  await requireMembership()
+
   // Tasks and memberships cascade in the database.
   const deleted = await db
     .delete(project)

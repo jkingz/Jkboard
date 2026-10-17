@@ -15,6 +15,7 @@ import { UpgradeToProButton } from "@/components/upgrade-to-pro-button"
 import { useSidebarConfig } from "@/hooks/use-sidebar-config"
 import { JkboardProvider } from "@/data/jkboard-store"
 import type { WorkspaceData } from "@/db/queries/jkboard"
+import type { Member } from "@/data/jkboard"
 
 /**
  * Client shell. The data it works with is loaded by the server layout and
@@ -28,10 +29,12 @@ export interface SessionUser {
 
 export function DashboardShell({
   initialData,
+  currentMember,
   sessionUser,
   children,
 }: {
   initialData: WorkspaceData
+  currentMember: Member
   sessionUser: SessionUser
   children: React.ReactNode
 }) {
@@ -39,7 +42,7 @@ export function DashboardShell({
   const { config } = useSidebarConfig()
 
   return (
-    <JkboardProvider initialData={initialData}>
+    <JkboardProvider initialData={initialData} currentMember={currentMember}>
       <SidebarProvider
         style={
           {

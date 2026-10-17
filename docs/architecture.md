@@ -36,13 +36,18 @@ proxy.ts (cookie presence only, nodejs runtime) ───────┤
                                                        ▼
 (dashboard)/layout.tsx ── auth.api.getSession() ──► redirect("/sign-in") if null
         │
-        └── getWorkspaceData() ──► drizzle/neon-http ──► Postgres
+        ├── getWorkspaceData() ────── drizzle/neon-http ──► Postgres
+        │
+        └── getMemberByUserId() ───── drizzle/neon-http ──► Postgres
                  │
-                 └── initialData prop ──► DashboardShell ──► JkboardProvider (client ctx)
+                 ├── null ──► WorkspaceAccessNotice, nothing else renders
+                 └── row  ──┐
+                             ▼
+        initialData + currentMember props ──► DashboardShell ──► JkboardProvider (client ctx)
                                                         │
         ┌───────────────────────────────────────────────┘
         ▼  every page calls useJkboard()
-   actions.* ──► db/actions/*.ts ──► db ──► revalidatePath("/", "layout")
+   actions.* ──► db/actions/*.ts ──► requireMembership() first ──► db ──► revalidatePath("/", "layout")
 ```
 
 The database is imported **only** from `src/db/**` and `src/lib/auth.ts`. No client component may
@@ -85,7 +90,7 @@ DDL from `src/db/schema/*.ts`. Columns people commonly assume exist but do not:
   **is** read and rendered (`projects-grid.tsx:275`, `project-board.tsx:127`). Do not generalise one
   to the other.
 - **`task.completed_at` is set by application logic, not the database.** `updateTaskAction`
-  (`src/db/actions/tasks.ts:113`) writes it when status is `completed`, nulls it when `todo`, and
+  (`src/db/actions/tasks.ts:119`) writes it when status is `completed`, nulls it when `todo`, and
   writes a literal `sql\`null\`` for `in-progress` / `in-review` — deliberately preserving a prior
   completion timestamp for tasks moved back from `completed`.
 
@@ -120,7 +125,7 @@ The two delete behaviours are load-bearing and asymmetric:
 - `project.owner_id` is **RESTRICT** — a member who still owns a project cannot be deleted.
 - `task.assignee_id` is **SET NULL** — a departing member leaves their tasks in place, unassigned.
 
-`removeMemberAction` (`src/db/actions/members.ts:139`) therefore transfers owned projects to another
+`removeMemberAction` (`src/db/actions/members.ts:144`) therefore transfers owned projects to another
 member *before* deleting the `user` row, and throws if there is nobody left to transfer to. Note it
 deletes from **`user`**, not `member` — the membership and join rows go by cascade.
 
@@ -130,13 +135,16 @@ deletes from **`user`**, not `member` — the membership and join rows go by cas
 
 - **Identity**: Better Auth session cookie → `auth.api.getSession()`, backed by `user`.
   Role/ownership lives in the `member.role` **column**, which nothing currently reads.
-- **The single authority** for "may this caller see this record?" is
-  `src/app/(dashboard)/layout.tsx:25`. If it returns a session, the caller sees the entire workspace.
-  There is no second check anywhere.
-- **Deliberately unguarded**: server actions under `src/db/actions/` carry **no session check at
-  all**. They are reachable by any authenticated caller for any record ID, and are protected from
-  anonymous callers only by the route tree and the proxy. See
-  [target-state.md](./target-state.md).
+- **Two authorities, for two different questions.**
+  `src/app/(dashboard)/layout.tsx:26` decides whether a *page renders* and whose membership to hand
+  the client as `currentMember`. `requireMembership()` (`src/db/actions/session.ts`) decides whether
+  a *mutation may run*, and returns the caller's `member.id` or throws. Both read the same session
+  and the same unique `member_userId_uidx`, so the page and the action cannot disagree about who is
+  calling.
+- **What the guard is not**: authorization. Under one shared workspace any member may write any row,
+  so "there is a session and it belongs to a member" is the whole check. Role checks are
+  [specs/02](../specs/02-role-model-and-demo-scoping.md), and per-row ownership is recorded in
+  [specs/01](../specs/01-session-identity-and-action-guards.md) → "Later increments".
 - `src/proxy.ts` is an **optimistic** check only. It calls `getSessionCookie(request)` — presence, not
   validity — because the proxy bundle cannot import the database. A stale cookie passes it and is
   caught by the layout. It must never redirect signed-in users away from `/sign-in`; that produces an
@@ -162,17 +170,24 @@ Numbered. They get cited by number in commits and reviews.
    form.
 6. **Project ownership transfers before member deletion.** `owner_id` is `ON DELETE RESTRICT`;
    skipping the transfer makes `removeMemberAction` throw at the database.
+7. **Every mutation identifies its caller before it touches the database.** Each action exported from
+   `src/db/actions/` awaits `requireMembership()` ahead of its first write; `setTaskStatusAction`
+   inherits it by delegating to `updateTaskAction`. Skipping it does not break anything a user can
+   see — it silently reopens the anonymous-write hole `specs/01` closed.
 
 **Test coverage of these invariants:** 2, 3 and 6 are asserted against `information_schema` on a real
 database, in `tests/platform/integration/invariants.integration.test.ts` and
-`column-contracts.integration.test.ts`. 1 and 4 are covered in the unit tier by
+`column-contracts.integration.test.ts`. 1, 4 and 7 are covered in the unit tier by
 `module-boundaries.unit.test.ts` and `action-revalidation.unit.test.ts`, which read the source tree.
 5 is covered by `proxy.unit.test.ts`, which calls `proxy()` with real `NextRequest`s in-process — no
 browser and no running app were needed for any of the three.
 
-Read the strength of each. 1 and 4 are enforced **structurally**: the test walks the files and asserts
+Read the strength of each. 1, 4 and 7 are enforced **structurally**: the test walks the files and asserts
 the rule still holds, so it catches the edit that breaks the rule and nothing else — a runtime path
-that reaches the same data without passing a gated module fails no assertion. 5 is behavioural but
+that reaches the same data without passing a gated module fails no assertion. For 7 that gap is real:
+no test executes the guard. It has run exactly once, on a hand-driven replay of one action against a
+production build with an unverifiable session cookie (`specs/01` → Verification), which is evidence about
+that request and not a gate. 5 is behavioural but
 only for `proxy()` itself, which is an optimistic cookie-presence check; it cannot say anything about
 what a valid session does downstream. And nothing calls `removeMemberAction` on an owner of a project,
 so 6 is verified as a column constraint (`ON DELETE RESTRICT`), never as the app following the rule.
@@ -186,8 +201,10 @@ Update it in the same change that alters the surface.
 ## Request path
 
 ```
-route → proxy.ts (cookie presence) → (dashboard)/layout.tsx (getSession + getWorkspaceData)
-      → page component → useJkboard() → actions.* → db/actions/*.ts → Postgres
+route → proxy.ts (cookie presence) → (dashboard)/layout.tsx
+        (getSession + getWorkspaceData + getMemberByUserId)
+      → page component → useJkboard() → actions.* → db/actions/*.ts
+        (requireMembership() first) → Postgres
 ```
 
 ## Modules
@@ -199,14 +216,15 @@ route → proxy.ts (cookie presence) → (dashboard)/layout.tsx (getSession + ge
 | `src/lib/auth-client.ts` | implemented: client auth instance |
 | `src/db/index.ts` | implemented: `db`, `schema`, `Database`. `server-only`, dev hot-reload reuse via `globalThis`. |
 | `src/db/schema/*` | implemented: `user`, `session`, `account`, `verification`, `member`, `projectMember`, `project`, `task` |
-| `src/db/queries/jkboard.ts` | implemented: `getWorkspaceData()`, `getMemberId()`, `WorkspaceData` |
+| `src/db/queries/jkboard.ts` | implemented: `getWorkspaceData()`, `getMemberByUserId()`, `WorkspaceData` |
+| `src/db/actions/session.ts` | implemented: `requireMembership()` — the guard every mutation awaits first. Not `"use server"`: it is a helper the actions import, not an endpoint. |
 | `src/db/actions/projects.ts` | implemented: `createProjectAction`, `updateProjectAction`, `setProjectStatusAction`, `deleteProjectAction`, `countOwnedProjects`, `assertMemberExists` |
 | `src/db/actions/tasks.ts` | implemented: `createTaskAction`, `updateTaskAction`, `setTaskStatusAction`, `duplicateTaskAction`, `deleteTaskAction` |
 | `src/db/actions/members.ts` | implemented: `inviteMemberAction`, `setMemberStatusAction`, `removeMemberAction` |
 | `src/data/jkboard.ts` | implemented: `Project` / `Task` / `Member` types, `getTaskStats`, `getProjectProgress`, `getWorkload` |
 | `src/data/jkboard-store.tsx` | implemented: `JkboardProvider`, `useJkboard` |
 | `src/app/api/auth/[...all]/route.ts` | implemented: `GET`, `POST` |
-| `src/app/(dashboard)/layout.tsx` | implemented: `DashboardLayout` — session gate + data load |
+| `src/app/(dashboard)/layout.tsx` | implemented: `DashboardLayout` — session gate + workspace load + caller membership; renders `WorkspaceAccessNotice` when a session has no `member` row |
 
 **Zero-caller note:** `countOwnedProjects()` and `assertMemberExists()` in
 `src/db/actions/projects.ts` are exported but have **no callers** — `removeMemberAction` inlines its

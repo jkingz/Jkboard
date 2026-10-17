@@ -231,9 +231,11 @@ describe.skipIf(!available)("column contracts", () => {
 describe("not yet covered", () => {
   it.todo("createTaskAction writes a row that getWorkspaceData reads back")
   it.todo("a payload that fails the action's Zod schema is rejected, not coerced")
-  it.todo("an action called without a session is refused — docs/architecture.md: no action checks")
+  it.todo(
+    "an action called with an unverifiable session is refused by requireMembership() — no test has run it, and a cookie-less request never reaches the action (proxy.unit.test.ts shows why: src/proxy.ts checks presence only)"
+  )
   it.todo("the demo account cannot delete a project or invite a member")
-  it.todo("getMemberId returns the caller's membership, not members[0], for a second user")
+  it.todo("requireMembership() resolves the second user's membership, not whoever joined first")
 })
 
 describe.skipIf(available)("integration tier", () => {
