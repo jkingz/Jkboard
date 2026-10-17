@@ -125,13 +125,24 @@ describe("invariant 1: server-only modules stay off the client", () => {
     }
   })
 
-  it("every module under src/db/actions is a server-action module", () => {
+  it("src/db/actions holds the guard and three server-action modules", () => {
     const actionModules = sourceFiles("src/db/actions")
 
-    expect(actionModules.length).toBe(3)
-    for (const file of actionModules) {
+    expect(actionModules.map((file) => file.split("/").pop())).toEqual([
+      "members.ts",
+      "projects.ts",
+      // `specs/01`: the session guard every mutation calls.
+      "session.ts",
+      "tasks.ts",
+    ])
+
+    for (const file of actionModules.filter((file) => !file.endsWith("session.ts"))) {
       expect(isServerActionModule(readSource(file)), file).toBe(true)
     }
+
+    // The guard is a helper the actions import, not an action: `"use server"`
+    // would publish it as its own callable route.
+    expect(isServerActionModule(readSource("src/db/actions/session.ts"))).toBe(false)
   })
 
   it("no client module buries its directive below the imports, where Next would ignore it", () => {

@@ -27,11 +27,11 @@ UI treats as demo and is covered by `tests/platform/unit/demo-account.unit.test.
      `admin` has moved between versions.
    - **(b)** a real Postgres enum on `member.role`; stays in the app's own schema, costs a
      `pnpm db:generate` migration plus a plan for the live database — coordinate with spec 09.
-2. Enforce at three entries only, all in `src/db/actions/`: `deleteProjectAction` (`projects.ts:159`),
-   `removeMemberAction` (`members.ts:139`), `inviteMemberAction` (`members.ts:45`). One predicate,
+2. Enforce at three entries only, all in `src/db/actions/`: `deleteProjectAction` (`projects.ts:161`),
+   `removeMemberAction` (`members.ts:144`), `inviteMemberAction` (`members.ts:46`). One predicate,
    next to spec 01's guard, so there is one place to audit.
 3. Refuse the way the actions already refuse: `throw new Error()` with a sentence a person can read —
-   the pattern at `src/db/actions/members.ts:112` — which `errorMessage()`
+   the pattern at `src/db/actions/members.ts:117` — which `errorMessage()`
    (`src/lib/error-message.ts:15`) already turns into the client's copy. Do not invent a result union.
 
 ## Later increments

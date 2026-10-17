@@ -40,10 +40,15 @@ thing it depends on — 02 assumes 01 exists, and 04 assumes 03 produced somethi
 05 and 06 have no dependencies and no owner input, so they are the only work available while the
 questions below stay open.
 
-**Why 01 is first.** `auth.api.getSession` is called in exactly one place in the whole app —
-`src/app/(dashboard)/layout.tsx:25` — and none of the exports in `src/db/actions/` check a session
-(grep for `getSession|auth.api|headers()` across that directory: no matches). Every later
-permission spec is decoration until an action knows who is calling.
+**Why 01 is first.** It started from `auth.api.getSession` being called in exactly one place in the
+whole app — `src/app/(dashboard)/layout.tsx:26` — and no export in `src/db/actions/` checking a session
+at all. Every later permission spec is decoration until an action knows who is calling.
+
+The first increment has landed: the layout resolves the caller's membership and passes it down, and
+`requireMembership()` (`src/db/actions/session.ts`) is awaited first in every mutation. Re-running that
+grep over `src/db/actions` now matches exactly one file — the guard itself. What 01 still
+owes is in its "Later increments" — per-row ownership, and the two dead exports — and what every
+consumer of the guard still owes is proof it executes, which needs spec 03.
 
 **Why 03 precedes 04.** Giving CI a tier that asserts nothing about writes buys a green check and no
 proof. The tier has to write a row before running it somewhere shared is worth the secret.
@@ -58,7 +63,7 @@ target. **Answering these is the first increment of the whole roadmap** — each
 more than any code written while it stays open.
 
 - **Q1 — one shared workspace, or per-user scoping?** Multi-tenant means a tenant column, a migration,
-  and a rewrite of `getWorkspaceData()` (`src/db/queries/jkboard.ts:53-72`), whose selects have no
+  and a rewrite of `getWorkspaceData()` (`src/db/queries/jkboard.ts:91-100`), whose selects have no
   `where` clause at all today. Single workspace means 01 is a day of work and per-row ownership in
   01's "later increments" never arrives.
 - **Q2 — should `role` be real authorization?** Decides 02 exists, and whether 08's invite is a

@@ -5,40 +5,42 @@ Unblocked. Do this first: everything below that touches permissions assumes it.
 ## Goal
 
 A signed-in visitor acts as themselves, and nobody acts as nobody. Two observable outcomes: the
-account menu names the user who signed in rather than whoever joined first, and a mutation sent
-without a session leaves the row in place.
+workspace names the user who signed in rather than whoever joined first — visible on the settings
+pages, which read `currentMember.email` (the account menu was already fed by the session, so it named
+the right person even with this bug in place), and a mutation sent without a session leaves the row in
+place.
 
-## First increment
+## First increment — shipped
 
-1. Resolve the caller's membership once, server-side. `src/app/(dashboard)/layout.tsx:25` already
-   holds `auth.api.getSession({ headers: await headers() })`. Look up `member` by `user_id`, which is
-   unique (`member_userId_uidx`, `src/db/schema/members.ts`), and pass the row into `JkboardProvider`.
-2. Remove the derivation `currentMember: members[0]` (`src/data/jkboard-store.tsx:326`) in favour of
-   that prop. `members[0]` is the earliest `joinedAt` in the table — `getWorkspaceData()` orders by
-   `joinedAt` — so it is the same person for every caller.
-3. Add one guard for the action layer. **Proposed name `requireMembership()` — no such symbol exists
-   yet** — in a new `src/db/actions/session.ts`, built on the same `getSession` call, returning the
-   caller's `member.id` or throwing.
-4. Call it first in every mutation exported from `src/db/actions/` (the bare filenames below are those
-   action files, not the same-named ones in `src/db/schema/`): `inviteMemberAction`
-   (`members.ts:45`), `setMemberStatusAction` (`:99`), `removeMemberAction` (`:139`),
-   `createProjectAction` (`projects.ts:68`), `updateProjectAction` (`:103`), `setProjectStatusAction`
-   (`:143`), `deleteProjectAction` (`:159`), `createTaskAction` (`tasks.ts:62`), `updateTaskAction`
-   (`:87`), `duplicateTaskAction` (`:138`), `deleteTaskAction` (`:163`). `setTaskStatusAction` (`:131`)
-   delegates to `updateTaskAction` and inherits the guard.
-5. Retire `getMemberId()` (`src/db/queries/jkboard.ts:123` — `select … limit(1)`, no `where`) as the
-   `ownerId` fallback at `src/db/actions/projects.ts:73`, using the caller's member id instead, then
-   delete the function if nothing else calls it.
+1. `getMemberByUserId(userId)` (`src/db/queries/jkboard.ts`) resolves the caller's membership by the
+   unique `member_userId_uidx`, mapped through the same `member ⋈ user` projection the team list uses,
+   so "what a member is" has one definition.
+2. `src/app/(dashboard)/layout.tsx` calls it with `session.user.id` and hands the row to
+   `DashboardShell` → `JkboardProvider` as `currentMember`. `currentMember: members[0]` is gone from
+   `src/data/jkboard-store.tsx`; the provider takes it as a prop.
+3. A session with no membership gets `WorkspaceAccessNotice` instead of the dashboard. Sign-up normally
+   creates both rows (`src/lib/auth.ts:76`), so reaching it means the membership is missing — and the
+   alternative was rendering a workspace whose identity belongs to somebody else.
+4. `requireMembership()` (`src/db/actions/session.ts`) returns the caller's `member.id` or throws, and is
+   awaited first in every mutation: `inviteMemberAction`, `setMemberStatusAction`, `removeMemberAction`,
+   `createProjectAction`, `updateProjectAction`, `setProjectStatusAction`, `deleteProjectAction`,
+   `createTaskAction`, `updateTaskAction`, `duplicateTaskAction`, `deleteTaskAction`.
+   `setTaskStatusAction` inherits it by delegating to `updateTaskAction`. It is a plain server module,
+   not `"use server"` — a helper the actions import, not an endpoint of its own.
+5. `getMemberId()` is deleted, and `createProjectAction`'s `ownerId` fallback is the caller's id. Its
+   unreachable "No workspace member exists yet" branch went with it.
+
+Invariant 7 in `docs/architecture.md` records the rule; `action-revalidation.unit.test.ts` pins it.
 
 ## Later increments
 
 - **Per-row ownership, not just per-session.** The destructive actions take a raw id and act on it
-  (`deleteProjectAction(projectId)`, `projects.ts:159`). Under one shared workspace the honest check
+  (`deleteProjectAction(projectId)`). Under one shared workspace the honest check
   is "the row exists"; after tenancy it becomes "the row is the caller's". Written here so the guard
   in step 3 is not mistaken for authorization.
-- `countOwnedProjects` (`projects.ts:175`) and `assertMemberExists` (`:184`) exist for exactly this
-  purpose and have no callers — grep across `src/`, `scripts/`, `tests/` finds only the string list
-  at `tests/platform/unit/action-revalidation.unit.test.ts:29`. Wire them in, or delete both and drop
+- `countOwnedProjects` and `assertMemberExists` (both in `src/db/actions/projects.ts`) exist for exactly
+  this purpose and have no callers — grep across `src/`, `scripts/`, `tests/` finds only the string list
+  at `tests/platform/unit/action-revalidation.unit.test.ts:48`. Wire them in, or delete both and drop
   them from that list in the same change.
 - Brute force and rate limiting on the auth endpoints. **Unverified:** whether Better Auth 1.7.7
   applies any default. Measure before writing this increment.
@@ -48,8 +50,10 @@ without a session leaves the row in place.
 - Q1 and Q2 (`docs/product-overview.md:89-92`) decide whether the guard is session-only or
   session-plus-role. Session-only is required under either answer, which is why this spec is not
   blocked.
-- Whether any client path assumes `currentMember` is never null is unverified. Two read it for
-  display: `settings/account/page.tsx` and `settings/connections/page.tsx`.
+- Answered by the first increment: no client path sees a null `currentMember`. The two pages that read
+  it for display (`settings/account/page.tsx`, `settings/connections/page.tsx`) stay non-null because
+  `(dashboard)/layout.tsx` refuses to render `DashboardShell` at all without a membership, and
+  `requireMembership()` throws before any action writes. One check, above both surfaces.
 
 ## Security / permissions
 
@@ -57,18 +61,39 @@ Single authority is the guard, inside the action. Not `src/proxy.ts`, which only
 presence (`src/proxy.ts:29`), and not the layout, which guards rendering rather than invocation — a
 server action is reachable by POST to the route Next generates for it, from any page or none.
 
-Test: extend `tests/platform/unit/action-revalidation.unit.test.ts`, which already enumerates these
-exports and their `revalidatePath` calls, to assert each mutation calls the guard too. Structural
-proof only until spec 03 can invoke one with a real database.
+Test: `tests/platform/unit/action-revalidation.unit.test.ts` now asserts it — each mutation reaches the
+guard directly or by delegation; a mutation that calls it calls it before its first `db.` access;
+`src/db/actions/session.ts` exports the guard alone and is not `"use server"`; and identity arrives from
+`getMemberByUserId(session.user.id)` rather than from a position in the member list.
+`src/db/actions` holds four modules, asserted in `module-boundaries.unit.test.ts`. Structural proof only
+until spec 03 can invoke one with a real database.
 
 ## Verification
 
 - `pnpm typecheck` → `pnpm lint` → `pnpm test` → `pnpm build`, in that order
   (`docs/project-context.md` → Commits and PRs). Quote `pnpm test`'s per-tier counts.
-- Live, in a production build: `next dev` is not evidence (`docs/verification-standards.md`). Sign in
-  as a member who is not first by `joinedAt`; the account menu must name that user.
-- Sessionless call: clear the cookie and invoke a task delete from the browser, then reload and
-  confirm the task survives. A hand-built `curl` needs Next's `Next-Action` header, which is not
-  documented in this repo — do not write one until that value is read off a real request.
+- Identity, live in a production build (`next start -p 3100`; `next dev` is not evidence —
+  `docs/verification-standards.md`). **Done.** Signed in as `daniel.okafor@jkboard.app`, second by
+  `member.joined_at`; `settings/account` rendered "Manage your password and the sign-in details for
+  daniel.okafor@jkboard.app" — `currentMember` is the session's member, not `members[0]` (Maya Chen,
+  first by `joinedAt`, which is what every caller was shown before). The account menu is not this check;
+  it was already session-fed.
+- Sessionless call. **Done, but not the way this section first said.** Clearing the cookie is the wrong
+  probe: `src/proxy.ts` only checks that `better-auth.session_token` *exists*, and its redirect
+  short-circuits the action POST — the response is `200` with a two-byte body and `requireMembership()`
+  never runs. The valid probe is a **present-but-unverifiable** cookie, which passes the proxy and
+  reaches the action. One real `inviteMemberAction` request was replayed three ways (its `Next-Action`
+  id read off the wire, not hand-written):
+
+  | cookie | status | flight digest |
+  | --- | --- | --- |
+  | absent | 200, 2 bytes | none — refused by the proxy |
+  | `better-auth.session_token=forged` | 500 | `2033665256` |
+  | a real session | 500 | `2429649290` |
+
+  A production build replaces the message with a digest, so the two refusals are told apart by their
+  digests: the forged request threw *before* the duplicate-email check the authenticated one reached.
+  That is the guard executing on a request with no verifiable session. `member` and `user` counts re-read
+  after the replay: 8 and 8 — every probe wrote nothing, because the invite throws before its insert.
 - Still unverified after this: no test has written a row, so the guard's happy path is proven by
-  clicking, not by CI, until spec 03.
+  clicking and by one hand-driven replay, not by CI, until spec 03.

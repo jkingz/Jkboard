@@ -44,10 +44,10 @@ in each server action, or give the demo a scoped session that cannot write.
 
 ## Per-user workspace scoping
 
-**Why:** `getMemberId()` (`src/db/queries/jkboard.ts:123`) returns the first `member` row and
-`currentMember` is hardcoded to `members[0]` (`src/data/jkboard-store.tsx:325`), so every
-signed-in user sees and mutates one shared workspace. Real scoping needs the session's `user.id`
-threaded into every query.
+**Why:** identity is now resolved from the session (`currentMember`, `specs/01`), but nothing is scoped
+by it: `getWorkspaceData()` (`src/db/queries/jkboard.ts:90`) selects `project`, `task` and `member` with
+no `where` clause at all, so every member sees and writes the same rows. Real scoping needs the caller's
+membership threaded into every query.
 
 **Blocked by:** an owner decision on whether one shared workspace is the intended product — see
 [product-overview.md](./product-overview.md) → Open product questions.
@@ -58,10 +58,10 @@ threaded into every query.
 
 ## Authorization on mutations
 
-**Why:** no server action under `src/db/actions/` checks a session or a role. `member.role` is a
-free-text column nothing branches on. Any authenticated session can delete any project by id. The
-actions are shielded from anonymous callers only by the `(dashboard)` route tree and `src/proxy.ts`,
-not by the actions themselves — so an action called from anywhere else is fully open.
+**Why:** every action now checks *who* is calling — `requireMembership()`
+(`src/db/actions/session.ts`) is awaited first — and nothing checks *whether they may*. `member.role` is
+a free-text column nothing branches on, and each action still takes a raw id and acts on it, so any
+signed-in member can delete any project by id. Anonymous callers are no longer among them.
 
 **Blocked by:** the same owner decision as scoping, plus a role model (`role` is currently free text
 with default `"Member"`).
@@ -129,7 +129,7 @@ A silent major bump is possible; nothing enforces Node 26.x or pnpm 10.
 ## Removing the seed arrays in `src/data/jkboard.ts`
 
 **Why:** the store no longer seeds from those arrays — `JkboardProvider` takes `initialData` from
-`getWorkspaceData()` (`src/data/jkboard-store.tsx:129-139`, `src/app/(dashboard)/layout.tsx:31`), so
+`getWorkspaceData()` (`src/data/jkboard-store.tsx:130-143`, `src/app/(dashboard)/layout.tsx:32`), so
 the dashboard lists real rows. What is left is smaller and still false: `overview-charts.tsx:30`
 renders `taskCompletionTrend`, twelve hardcoded weeks from `src/data/jkboard.ts:531-543`, labelled as
 this workspace's completions; and `src/app/landing/components/product-preview.tsx:33` still imports

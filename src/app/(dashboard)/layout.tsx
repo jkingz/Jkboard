@@ -2,7 +2,8 @@ import { headers } from "next/headers"
 import { redirect } from "next/navigation"
 
 import { DashboardShell } from "./components/dashboard-shell"
-import { getWorkspaceData } from "@/db/queries/jkboard"
+import { WorkspaceAccessNotice } from "./components/workspace-access-notice"
+import { getMemberByUserId, getWorkspaceData } from "@/db/queries/jkboard"
 import { auth } from "@/lib/auth"
 
 /**
@@ -28,11 +29,22 @@ export default async function DashboardLayout({
     redirect("/sign-in")
   }
 
-  const initialData = await getWorkspaceData()
+  const [initialData, currentMember] = await Promise.all([
+    getWorkspaceData(),
+    // Whose identity this is, resolved from the session rather than from the
+    // member list: `member_userId_uidx` makes it one row, and it is the same
+    // read `requireMembership()` makes inside every action.
+    getMemberByUserId(session.user.id),
+  ])
+
+  if (!currentMember) {
+    return <WorkspaceAccessNotice email={session.user.email} />
+  }
 
   return (
     <DashboardShell
       initialData={initialData}
+      currentMember={currentMember}
       sessionUser={{
         name: session.user.name,
         email: session.user.email,

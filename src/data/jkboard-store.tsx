@@ -39,9 +39,10 @@ import {
 /**
  * Client-side view of the workspace.
  *
- * The server layout loads the rows once and passes them in as `initialData`.
- * Mutations call server actions and then update local state, so the UI stays
- * responsive while PostgreSQL stays the source of truth.
+ * The server layout loads the rows once and passes them in as `initialData`,
+ * along with `currentMember` — the membership of whoever is calling, resolved
+ * from the session. Mutations call server actions and then update local state,
+ * so the UI stays responsive while PostgreSQL stays the source of truth.
  *
  * The database itself is never imported here.
  */
@@ -128,9 +129,11 @@ function fail(error: unknown, fallback: string) {
 
 export function JkboardProvider({
   initialData,
+  currentMember,
   children,
 }: {
   initialData: WorkspaceData
+  currentMember: Member
   children: React.ReactNode
 }) {
   const router = useRouter()
@@ -322,7 +325,7 @@ export function JkboardProvider({
       projects,
       tasks,
       members,
-      currentMember: members[0],
+      currentMember,
       taskStats: getTaskStats(tasks),
       actions,
 
@@ -339,7 +342,7 @@ export function JkboardProvider({
       projectsForMember: (memberId) =>
         projects.filter((project) => project.memberIds.includes(memberId)),
     }),
-    [projects, tasks, members, actions]
+    [projects, tasks, members, currentMember, actions]
   )
 
   return (

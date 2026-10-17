@@ -96,15 +96,21 @@ appears as a skip, not as a silent pass.
 
 ## What's NOT tested yet
 
-Invariants 1, 4 and 5 all have tests now — 1 and 4 structurally in the unit tier, 5 by calling
+Invariants 1, 4, 5 and 7 all have tests now — 1, 4 and 7 structurally in the unit tier, 5 by calling
 `proxy()` directly in-process. None needed a browser, contrary to what this section used to claim.
 What is still uncovered:
 
 - **Server action behaviour.** No test has written a row. The integration tier is read-only, so
-  `createTaskAction` etc. are verified to *exist and revalidate*, never to produce the right data.
-- **Authorization.** Nothing checks a session before running an action; `getMemberId()` and the
-  hardcoded `currentMember = members[0]` in the store are the same hole. Recorded as `it.todo` in
-  `column-contracts.integration.test.ts`.
+  `createTaskAction` etc. are verified to *exist, guard and revalidate*, never to produce the right data.
+- **No test runs the guard.** `requireMembership()` refuses a caller with no session or no membership,
+  and invariant 7 proves it is still *written* first in every mutation. It has executed once, on a
+  hand-driven replay of one action with an unverifiable cookie (`specs/01` → Verification); that is a
+  reading, not a gate, and a test still needs a disposable database, so it is `it.todo` in
+  `column-contracts.integration.test.ts`. Dropping the cookie entirely is not a probe: `src/proxy.ts`
+  checks only presence, so the action never runs and a refusal proves nothing about the guard.
+- **Permission.** No check decides whether the caller *may* touch the row in front of them.
+  `member.role` is stored and displayed and nothing branches on it, and each action still takes a raw id
+  and acts on it. That is specs/02, not a test gap.
 - **Any of the interface.** No `e2e/` tier exists. `pnpm test` never renders a component.
 - **Invariant 6 behaviourally.** `ON DELETE RESTRICT` on `owner_id` is asserted as a constraint;
   nothing exercises a member who owns a project being removed.

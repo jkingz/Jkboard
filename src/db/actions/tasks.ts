@@ -8,6 +8,7 @@ import { z } from "zod"
 
 import { db } from "@/db"
 import { task } from "@/db/schema"
+import { requireMembership } from "@/db/actions/session"
 import type { Task } from "@/data/jkboard"
 
 const taskInputSchema = z.object({
@@ -60,6 +61,8 @@ async function nextPosition(projectId: string, status: Task["status"]) {
 }
 
 export async function createTaskAction(raw: TaskInput): Promise<Task> {
+  await requireMembership()
+
   const input = taskInputSchema.parse(raw)
   const position = await nextPosition(input.projectId, input.status)
 
@@ -88,6 +91,8 @@ export async function updateTaskAction(
   taskId: string,
   raw: Partial<TaskInput>
 ): Promise<Task> {
+  await requireMembership()
+
   const input = taskInputSchema.partial().parse(raw)
 
   const [current] = await db
@@ -136,6 +141,8 @@ export async function setTaskStatusAction(
 }
 
 export async function duplicateTaskAction(taskId: string): Promise<Task> {
+  await requireMembership()
+
   const [source] = await db.select().from(task).where(eq(task.id, taskId)).limit(1)
 
   if (!source) throw new Error(`Task ${taskId} was not found.`)
@@ -161,6 +168,8 @@ export async function duplicateTaskAction(taskId: string): Promise<Task> {
 }
 
 export async function deleteTaskAction(taskId: string) {
+  await requireMembership()
+
   const deleted = await db
     .delete(task)
     .where(eq(task.id, taskId))

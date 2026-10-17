@@ -8,6 +8,7 @@ import { z } from "zod"
 
 import { db } from "@/db"
 import { member, project, user } from "@/db/schema"
+import { requireMembership } from "@/db/actions/session"
 import type { Member } from "@/data/jkboard"
 
 const inviteSchema = z.object({
@@ -43,6 +44,8 @@ function toISO(value: Date | string) {
  * pre-creates the account that the invitee will claim by signing in.
  */
 export async function inviteMemberAction(raw: InviteInput): Promise<Member> {
+  await requireMembership()
+
   const input = inviteSchema.parse(raw)
   const email = input.email.toLowerCase()
 
@@ -100,6 +103,8 @@ export async function setMemberStatusAction(
   memberId: string,
   status: Member["status"]
 ): Promise<Member> {
+  await requireMembership()
+
   const dbStatus =
     status === "Active" ? "active" : status === "Invited" ? "invited" : "away"
 
@@ -137,6 +142,8 @@ export async function setMemberStatusAction(
  * `ON DELETE RESTRICT` on project.owner_id cannot block the delete.
  */
 export async function removeMemberAction(memberId: string) {
+  await requireMembership()
+
   const [target] = await db
     .select()
     .from(member)

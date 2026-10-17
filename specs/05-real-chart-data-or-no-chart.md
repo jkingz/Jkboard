@@ -13,7 +13,7 @@ completion chart either reflects real tasks or is gone.
 which is twelve hardcoded weeks in `src/data/jkboard.ts:531-543` (`{ week: "W1", completed: 12,
 created: 15 }` …), rendered inside a `Card` whose description reads "Tasks completed against tasks
 created" (`overview-charts.tsx:49-55`). The database behind that chart is real: `task.completed_at` (`src/db/schema/tasks.ts:65`) is written by
-`createTaskAction` (`src/db/actions/tasks.ts:77`) and kept in step by `updateTaskAction` (`:112-114`),
+`createTaskAction` (`src/db/actions/tasks.ts:80`) and kept in step by `updateTaskAction` (`:118-125`),
 and `created_at` is a column on the table. Neither reaches the client, which is the actual reason the
 series is hardcoded rather than merely stale.
 
@@ -24,11 +24,11 @@ imports the seed arrays and `projectProgressSeries` from `src/data/jkboard.ts`.
 
 1. Close the gap that makes this chart fake in the first place: **the timestamps it needs never reach
    the client.** `taskSchema` (`src/data/jkboard.ts:61-72`) has no `createdAt` or `completedAt`, and
-   the task projection in `getWorkspaceData()` (`src/db/queries/jkboard.ts:93-103`) selects neither,
+   the task projection in `getWorkspaceData()` (`src/db/queries/jkboard.ts:122-132`) selects neither,
    so `useJkboard().tasks` cannot tell a completion week from a creation week. Two ways to fix that —
    add both columns to `taskSchema` and the projection (it is only read for the `Task` type and by
    `tests/platform/unit/view-model.unit.test.ts`, so widening it is low-risk), or aggregate the series
-   in SQL and pass it as a separate prop from `layout.tsx:31`. Prefer the second if a full-table
+   in SQL and pass it as a separate prop from `layout.tsx:32`. Prefer the second if a full-table
    weekly aggregate is acceptable; prefer the first if the selector should stay pure and testable.
 2. Build the weekly completed/created series from whichever of those lands, as a pure selector in
    `src/data/jkboard.ts` so it joins the functions already covered by
@@ -43,7 +43,7 @@ imports the seed arrays and `projectProgressSeries` from `src/data/jkboard.ts`.
 - Audit the remaining exports of `src/data/jkboard.ts` that are shaped like data rather than like
   code — `docs/target-state.md` → "Removing the seed arrays" describes the residue, not the whole
   module: the store no longer seeds from those arrays, it hydrates from `getWorkspaceData()` through
-  `initialData` (`src/data/jkboard-store.tsx:129-139`, `src/app/(dashboard)/layout.tsx:31`).
+  `initialData` (`src/data/jkboard-store.tsx:130-143`, `src/app/(dashboard)/layout.tsx:32`).
 - `task.description` is written by both task actions and read nowhere
   (`docs/architecture.md` → Persistence schema). Either render it or stop writing it.
 

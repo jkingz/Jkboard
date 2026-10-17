@@ -5,6 +5,22 @@ when: "user starts a new task, needs to scope work, or asks about development pr
 
 # Development Workflow
 
+## Overview: The Pipeline
+
+This project follows a structured **Plan → Design → Tickets → Build → Verify → Review** workflow as defined in [docs/pipeline.md](../../docs/pipeline.md).
+
+All units of work flow through these stages:
+1. **PLAN** - Clarify scope and dependencies
+2. **DESIGN** - Define approach and integration points
+3. **TICKETS** - Create tracking items with acceptance criteria
+4. **BUILD** - Implement with test-first approach
+5. **VERIFY** - Prove implementation meets requirements
+6. **REVIEW** - External validation before merging
+
+Refer to [docs/pipeline.md](../../docs/pipeline.md) for detailed stage descriptions and guardrails.
+
+---
+
 ## The loop, per unit of work
 
 1. **Read what governs the change** — `AGENTS.md` rules first, then the `docs/` file for the touched module.
@@ -61,6 +77,7 @@ when: "user starts a new task, needs to scope work, or asks about development pr
 ## Reference
 
 - `AGENTS.md` for the constraints on every change
+- [docs/pipeline.md](../../docs/pipeline.md) for the full pipeline workflow
 - [docs/verification-standards.md](../../docs/verification-standards.md) before writing or editing any doc
 - `/verification-gates` for the exact chain that must pass
 - `/testing` for tier structure and what is currently untested

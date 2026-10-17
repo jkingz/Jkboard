@@ -9,8 +9,8 @@ never both at once.
 
 ## Why it is open
 
-- `inviteMemberAction` (`src/db/actions/members.ts:45`) inserts a `user` row (`:62-70`) and a `member`
-  row (`:74-81`), revalidates (`:85`), and stops. The invitee has to already know to sign in.
+- `inviteMemberAction` (`src/db/actions/members.ts:46`) inserts a `user` row (`:65-73`) and a `member`
+  row (`:77-84`), revalidates (`:88`), and stops. The invitee has to already know to sign in.
 - The interface already promises otherwise: `src/app/(dashboard)/users/components/team-table.tsx:293`
   renders a **"Resend invite"** control, and `src/components/sidebar-notification.tsx:41` tells the
   user to "resend their invitation". Nothing is ever sent, so both are dead affordances.

@@ -26,7 +26,7 @@ nothing, so `pnpm test` passing says nothing about `createTaskAction`.
    `tests/platform/integration/column-contracts.integration.test.ts:232-236`:
    - `createTaskAction` writes a row that `getWorkspaceData()` reads back.
    - A payload that fails the Zod parse is rejected — `updateTaskAction` calls
-     `taskInputSchema.partial().parse()` (`src/db/actions/tasks.ts:91`).
+     `taskInputSchema.partial().parse()` (`src/db/actions/tasks.ts:96`).
    - Deleting a project cascades to its tasks (`task.project_id` is `on delete cascade`) and
      deleting a member nulls `task.assignee_id` rather than removing the task.
    - The spec 01 guard refuses a sessionless call — the only way to test that guard for real.

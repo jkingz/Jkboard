@@ -50,22 +50,50 @@ function humaniseLastActive(value: Date | null) {
   return value.toISOString().slice(0, 10)
 }
 
+/**
+ * The `member ⋈ user` projection: every `member` column plus the identity
+ * fields the UI shows. Shared by the workspace read and by
+ * `getMemberByUserId`, so "what a member is" has exactly one definition.
+ */
+const memberColumns = {
+  id: member.id,
+  userId: member.userId,
+  role: member.role,
+  status: member.status,
+  joinedAt: member.joinedAt,
+  lastActiveAt: member.lastActiveAt,
+  name: user.name,
+  email: user.email,
+}
+
+/** Typed as the schema itself, so adding a column here cannot go unnoticed. */
+function toMember(
+  row: typeof member.$inferSelect & { name: string; email: string }
+): Member {
+  return {
+    id: row.id,
+    name: row.name,
+    email: row.email,
+    initials: initialsFromName(row.name),
+    role: row.role,
+    status:
+      row.status === "active"
+        ? "Active"
+        : row.status === "invited"
+          ? "Invited"
+          : "Away",
+    joinedDate: toISODate(row.joinedAt),
+    lastActive: humaniseLastActive(row.lastActiveAt),
+  }
+}
+
 export async function getWorkspaceData(): Promise<WorkspaceData> {
   const [projectRows, taskRows, memberRows, projectMemberRows] =
     await Promise.all([
       db.select().from(project).orderBy(asc(project.dueDate)),
       db.select().from(task).orderBy(asc(task.dueDate)),
       db
-        .select({
-          id: member.id,
-          userId: member.userId,
-          role: member.role,
-          status: member.status,
-          joinedAt: member.joinedAt,
-          lastActiveAt: member.lastActiveAt,
-          name: user.name,
-          email: user.email,
-        })
+        .select(memberColumns)
         .from(member)
         .innerJoin(user, eq(member.userId, user.id))
         .orderBy(asc(member.joinedAt)),
@@ -102,25 +130,30 @@ export async function getWorkspaceData(): Promise<WorkspaceData> {
       assigneeId: row.assigneeId ?? "",
       dueDate: toISODate(row.dueDate),
     })),
-    members: memberRows.map((row) => ({
-      id: row.id,
-      name: row.name,
-      email: row.email,
-      initials: initialsFromName(row.name),
-      role: row.role,
-      status:
-        row.status === "active"
-          ? "Active"
-          : row.status === "invited"
-            ? "Invited"
-            : "Away",
-      joinedDate: toISODate(row.joinedAt),
-      lastActive: humaniseLastActive(row.lastActiveAt),
-    })),
+    members: memberRows.map(toMember),
   }
 }
 
-export async function getMemberId() {
-  const [first] = await db.select({ id: member.id }).from(member).limit(1)
-  return first?.id ?? null
+/**
+ * The caller's own membership, addressed by the unique `member_userId_uidx`.
+ *
+ * Returns `null` for a `user` row with no `member` row. Sign-up normally makes
+ * both at once (`src/lib/auth.ts:76`, `databaseHooks.user.create.after`), so a
+ * null means the membership is missing rather than the account being new — the
+ * state a pre-hook row or a hand-inserted `user` ends up in. Callers must handle
+ * it rather than falling back to a positional guess: the read this replaces,
+ * `getMemberId()`, selected the first `member` row with no `where`, so every
+ * caller in the workspace was treated as whoever joined earliest.
+ */
+export async function getMemberByUserId(
+  userId: string
+): Promise<Member | null> {
+  const [row] = await db
+    .select(memberColumns)
+    .from(member)
+    .innerJoin(user, eq(member.userId, user.id))
+    .where(eq(member.userId, userId))
+    .limit(1)
+
+  return row ? toMember(row) : null
 }

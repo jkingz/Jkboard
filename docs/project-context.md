@@ -224,19 +224,23 @@ Each rule gets exactly one authority. No module may re-implement it in its own l
 
 | Rule | Single authority | Notes |
 | --- | --- | --- |
-| Session validity | `src/app/(dashboard)/layout.tsx:25` — `auth.api.getSession()` | The only such call site in `src/`. Verified by grep. |
+| Whether a page may render | `src/app/(dashboard)/layout.tsx:26` — `auth.api.getSession()` | Also resolves `currentMember` from that session; no session means `redirect("/sign-in")`, a session with no membership means `WorkspaceAccessNotice`. |
+| Whether a mutation may run | `src/db/actions/session.ts` — `requireMembership()` | Awaited first in every action. The second `auth.api.getSession()` call site in `src/` — deliberate: the layout cannot guard an action invocation. |
 | Cookie presence | `src/proxy.ts:14` — `proxy()` | Presence only, not validity — the proxy bundle cannot import the database. |
 | Workspace read model | `src/db/queries/jkboard.ts` — `getWorkspaceData()` | All joins happen here so the UI stays on flat arrays. |
-| Mutation entrypoint | `src/db/actions/*.ts` | Zod-parse, write, `revalidatePath("/", "layout")`. Nothing writes outside these files. |
+| Mutation entrypoint | `src/db/actions/*.ts` | Guard, Zod-parse, write, `revalidatePath("/", "layout")`. Nothing writes outside these files. |
 | Input validation | the Zod schema atop each `src/db/actions/*.ts` | Do not re-validate in a component or in the store. |
 
 Identity lives in Better Auth's `user` table; workspace membership lives in `member`. Neither is
-duplicated.
+duplicated. `member.user_id` is unique (`member_userId_uidx`), which is what makes "the caller's own
+membership" a one-row lookup.
 
-**Deliberate bypass:** server actions carry no session check of their own. They are shielded from
-anonymous callers by the `(dashboard)` route tree and the proxy, not by the action. If one is ever
-called from outside `(dashboard)`, it is fully open. This is tracked in
-[target-state.md](./target-state.md), not fixed.
+**What the guard proves, and what it does not.** `requireMembership()` answers "is there a session, and
+does a membership exist for it?" — nothing else. It is not authorization: under one shared workspace any
+member may write any row, and every action still takes a raw id and acts on it. Role checks are
+[specs/02](../specs/02-role-model-and-demo-scoping.md); per-row ownership is
+[specs/01](../specs/01-session-identity-and-action-guards.md) → "Later increments". Both are tracked in
+[target-state.md](./target-state.md).
 
 ---
 

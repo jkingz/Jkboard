@@ -17,13 +17,14 @@ marketing landing page; light/dark theming with a runtime theme customizer.
 
 **Not built** — verified by reading the code, not assumed:
 
-- **Multi-tenancy / per-user scoping.** There is exactly one workspace. `getMemberId()`
-  (`src/db/queries/jkboard.ts:123`) returns the *first* `member` row, and `currentMember` is
-  hardcoded to `members[0]` (`src/data/jkboard-store.tsx:325`). Every signed-in user — including
-  every anonymous demo visitor — sees and can mutate the same data.
+- **Multi-tenancy / per-user scoping.** There is exactly one workspace: `getWorkspaceData()`
+  (`src/db/queries/jkboard.ts:90`) selects `project`, `task` and `member` with no `where` clause at all.
+  Identity is resolved from the session — `currentMember` is whoever signed in, not whoever joined first
+  — but nothing is scoped by it, so every signed-in account sees and can mutate the same data.
 - **Authorization.** No role check guards any mutation. `role` is a free-text column with default
-  `"Member"`; nothing branches on it. Any authenticated session can delete any project. Combined with
-  public demo credentials, that means a visitor can empty the demo workspace.
+  `"Member"`; nothing branches on it. Every action now awaits `requireMembership()` first, so an
+  *unsigned* caller is refused, but any signed-in session can still delete any project by id. Combined
+  with public demo credentials, that means a visitor can empty the demo workspace.
 - **Email delivery.** `inviteMemberAction` creates the `user` + `member` rows and stops. No message is
   sent; the invitee must already know to sign in.
 - **Tests.** A unit tier and a read-only integration tier exist and run, but there is **no e2e tier** —
