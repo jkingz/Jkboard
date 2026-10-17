@@ -110,11 +110,11 @@ tier is not a pass.
 
 ## Where the logic sits
 
-`src/proxy.ts` gates on cookie presence → `(dashboard)/layout.tsx` is the only place a session is
-verified → `src/db/queries/jkboard.ts` performs every join → `src/data/jkboard-store.tsx` is the only
-client state → `src/db/actions/*.ts` are the only writers. One authority per rule, the table of them and
-the deliberate bypass that goes with it:
-[`docs/project-context.md`](./docs/project-context.md) → Cross-cutting authority.
+`src/proxy.ts` gates on cookie presence → `(dashboard)/layout.tsx` verifies the session before anything
+renders, and `src/db/actions/session.ts` verifies it again before anything writes →
+`src/db/queries/jkboard.ts` performs every join → `src/data/jkboard-store.tsx` is the only
+client state → `src/db/actions/*.ts` are the only writers. One authority per rule, and what each one
+refuses to prove: [`docs/project-context.md`](./docs/project-context.md) → Cross-cutting authority.
 
 ## Production readiness — what is missing
 
@@ -122,7 +122,7 @@ Each row is a gap that exists today, and the spec that closes it. Not advice.
 
 | Gap | Spec |
 | --- | --- |
-| Server actions take `memberId` from the client and trust it; the store falls back to `members[0]` on an empty roster | [`01`](./specs/01-session-identity-and-action-guards.md) |
+| Actions prove the caller is a member, not that the row is theirs or that they may touch it; and no test executes the guard — it has run once, in a hand-driven replay ([`01`](./specs/01-session-identity-and-action-guards.md) → Verification) | [`01`](./specs/01-session-identity-and-action-guards.md) |
 | No role is enforced; `role` is stored and displayed but never branched on | [`02`](./specs/02-role-model-and-demo-scoping.md) |
 | No test has ever written a row | [`03`](./specs/03-write-path-integration-tests.md) |
 | The integration tier runs in no CI job, and that job has no Postgres service | [`04`](./specs/04-integration-tier-in-ci.md) |

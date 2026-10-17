@@ -60,6 +60,8 @@ Read the one file that governs the change; the map in [`docs/README.md`](./docs/
 and when to fill it. Work is specified in [`specs/`](./specs/README.md) — one numbered file per unit,
 ordered by what unblocks what.
 
+**Pipeline workflow:** Plan → Design → Tickets → Build → Verify → Review (see [docs/pipeline.md](./docs/pipeline.md))
+
 ## Before starting
 
 Load `/development-workflow` and work its loop. It is the same six steps in one place; this file does
@@ -75,3 +77,16 @@ grep -rn '<[a-zA-Z_/]' AGENTS.md docs/ | grep -v verification-standards
 ```
 
 Zero hits means the docs describe this project and only this project.
+
+---
+
+## Pipeline commands
+
+Verify full gate chain before creating PR:
+
+```bash
+pnpm pipeline:verify    # Run all gates (typecheck / lint / test / build)
+pnpm pipeline:build     # Build gates only
+pnpm pipeline:review    # Pre-flight review checks
+./scripts/pipeline-verify.sh --all  # Full pipeline validation
+```
