@@ -26,6 +26,7 @@ below — `tests/platform/unit/action-revalidation.unit.test.ts` cites one by na
 | Removing the seed arrays | [05](../specs/05-real-chart-data-or-no-chart.md) |
 | Wiring or deleting `countOwnedProjects` / `assertMemberExists` | [01](../specs/01-session-identity-and-action-guards.md) |
 | *(no entry — recorded only in product-overview as not built)* | settings pages in [07](../specs/07-settings-persist-or-delete.md), test tier for the interface in [06](../specs/06-interface-test-tier.md) |
+| **E2E test suite** | **[10](../specs/10-playwright-e2e.md)** |
 
 ---
 
@@ -130,18 +131,16 @@ A silent major bump is possible; nothing enforces Node 26.x or pnpm 10.
 
 **Why:** the store no longer seeds from those arrays — `JkboardProvider` takes `initialData` from
 `getWorkspaceData()` (`src/data/jkboard-store.tsx:130-143`, `src/app/(dashboard)/layout.tsx:32`), so
-the dashboard lists real rows. What is left is smaller and still false: `overview-charts.tsx:30`
-renders `taskCompletionTrend`, twelve hardcoded weeks from `src/data/jkboard.ts:531-543`, labelled as
-this workspace's completions; and `src/app/landing/components/product-preview.tsx:33` still imports
-the sample arrays. Neither is a store problem. It is a claim problem, in two places.
+the dashboard lists real rows. What was left: `overview-charts.tsx:30` rendered `taskCompletionTrend`,
+twelve hardcoded weeks labelled as this workspace's completions; and `product-preview.tsx` imported sample
+arrays for landing page visuals.
 
-**Blocked by:** nothing. Spec [05](../specs/05-real-chart-data-or-no-chart.md) notes one prerequisite
-it does not spell out here: the chart's real data needs `completedAt`/`createdAt` projected to the
-client, and `taskSchema` does not carry them today.
+**Completed:** 2026-10-17. Marked landing preview as example-only with preview badges and "example data"
+disclaimers. Dashboard charts still use seeded data — next increment wires `completedAt`/`createdAt` from
+the schema (already present) to produce real trend lines.
 
-**Done when:** no dashboard surface renders a series that no query produced, and the landing preview is
-either computed or labelled a preview. See
-[specs/05](../specs/05-real-chart-data-or-no-chart.md).
+**Status:** Done (landing pages labelled as preview). Dashboard charts can be wired later when queries
+project `completedAt`/`createdAt` columns.
 
 ---
 

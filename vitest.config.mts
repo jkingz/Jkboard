@@ -2,7 +2,7 @@ import { defineConfig } from "vitest/config"
 import { fileURLToPath } from "node:url"
 
 /**
- * Two tiers, split the way they are split on disk.
+ * Three tiers, split the way they are split on disk.
  *
  * `unit` runs anywhere — no database, no network. It covers the pure modules
  * (selectors, date helpers, Zod/view-model coherence), `proxy()` called
@@ -14,6 +14,10 @@ import { fileURLToPath } from "node:url"
  * and skips with a stated reason, so the tier never exits 0 having silently
  * collected nothing. See `docs/project-context.md` → Verification gates for the
  * gap this leaves in CI.
+ *
+ * `interface` renders components in jsdom to catch DOM-tier defects like
+ * hydration mismatches and uncontrolled component warnings that unit tests
+ * cannot see. Runs alongside unit tests in CI as part of `pnpm test`.
  */
 export default defineConfig({
   test: {
@@ -36,6 +40,20 @@ export default defineConfig({
           include: ["tests/**/*.integration.test.ts"],
           environment: "node",
           setupFiles: ["tests/setup-env.ts"],
+        },
+        resolve: {
+          alias: {
+            "@": fileURLToPath(new URL("./src", import.meta.url)),
+          },
+        },
+      },
+      {
+        test: {
+          name: "interface",
+          include: ["tests/**/*.interface.test.{ts,tsx}"],
+          environment: "jsdom",
+          globals: true,
+          jsx: true,
         },
         resolve: {
           alias: {

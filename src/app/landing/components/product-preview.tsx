@@ -1,15 +1,7 @@
 "use client"
 
-import {
-  Area,
-  AreaChart,
-  Bar,
-  BarChart,
-  CartesianGrid,
-  XAxis,
-  YAxis,
-} from "recharts"
-import { CalendarClock } from "lucide-react"
+import { Area, AreaChart, Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts"
+import { CalendarClock, Info } from "lucide-react"
 
 import { Badge } from "@/components/ui/badge"
 import {
@@ -31,6 +23,10 @@ import {
   taskCompletionTrend,
   tasks,
 } from "@/data/jkboard"
+
+/** Label for preview visuals on the marketing landing page. These show example layouts,
+ * not actual workspace data — live dashboards pull from your database instead. */
+const PREVIEW_LABEL = "Preview visual • Data shown is example only"
 
 export type PreviewKind = "overview" | "board" | "tasks" | "team" | "analytics"
 
@@ -87,9 +83,13 @@ function PreviewFrame({
         <span className="size-2.5 rounded-full bg-destructive/60" />
         <span className="size-2.5 rounded-full bg-warning/60" />
         <span className="size-2.5 rounded-full bg-success/60" />
-        <span className="ml-3 truncate text-xs font-medium text-muted-foreground">
+        <span className="ml-3 flex-1 truncate text-xs font-medium text-muted-foreground">
           {title}
         </span>
+        <Badge variant="outline" className="hidden md:flex items-center gap-1 text-[9px] px-1.5 py-0.5">
+          <Info className="size-3" />
+          Preview
+        </Badge>
       </div>
       <div className="p-4 sm:p-5">{children}</div>
     </div>
@@ -142,6 +142,12 @@ function OverviewPreview() {
             />
           </AreaChart>
         </ChartContainer>
+        <div className="mt-2 flex items-center gap-1.5 rounded-md bg-muted/30 px-3 py-2">
+          <Info className="size-3.5 text-muted-foreground/70" />
+          <span className="text-[10px] text-muted-foreground">
+            Example data shown — your live dashboard will display real metrics
+          </span>
+        </div>
       </div>
 
       <div className="flex flex-col gap-3">

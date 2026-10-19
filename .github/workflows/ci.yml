@@ -10,9 +10,6 @@ name: CI
 #      schema assertion would let a fork and a first clone fail for a reason
 #      that is not a defect. The gap is recorded in docs/project-context.md →
 #      Verification gates and must stay there until the tier is credential-free.
-#   2. Versions are pinned literally below because package.json declares no
-#      `engines` or `packageManager` — see docs/target-state.md → Runtime floor
-#      enforcement. When those land, switch to the pins they define.
 #
 # Keep the build hermetic. Anything fetched over the network at build time fails
 # on a sealed runner. It was true of `next/font/google` and is now fixed by
