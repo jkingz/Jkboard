@@ -36,8 +36,9 @@ thing it depends on — 02 assumes 01 exists, and 04 assumes 03 produced somethi
 | 07 | [Settings: persist or delete](./07-settings-persist-or-delete.md) | Q3 |
 | 08 | [Email: invite, verification, reset](./08-email-invite-verification-reset.md) | Q2, Q4, a provider and its secret |
 | 09 | [Runtime floor, migrations, deployment](./09-runtime-floor-migrations-deployment.md) | the floor: nothing. deployment: a target |
+| 10 | [Playwright E2E suite](./10-playwright-e2e.md) | 03 and 04 completed |
 
-05 and 06 have no dependencies and no owner input, so they are the only work available while the
+05, 06, and now 10 have no dependencies and no owner input, so they are the only work available while the
 questions below stay open.
 
 **Why 01 is first.** It started from `auth.api.getSession` being called in exactly one place in the

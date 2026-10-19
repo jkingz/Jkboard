@@ -2,7 +2,7 @@
 
 import "server-only"
 
-import { and, eq, sql } from "drizzle-orm"
+import { eq } from "drizzle-orm"
 import { revalidatePath } from "next/cache"
 import { z } from "zod"
 
@@ -173,24 +173,4 @@ export async function deleteProjectAction(projectId: string) {
 
   revalidatePath("/", "layout")
   return deleted[0].id
-}
-
-/** Frees an owner id if the member still owns nothing (used by the team page). */
-export async function countOwnedProjects(memberId: string) {
-  const [row] = await db
-    .select({ count: sql<number>`count(*)::int` })
-    .from(project)
-    .where(eq(project.ownerId, memberId))
-
-  return row?.count ?? 0
-}
-
-export async function assertMemberExists(memberId: string) {
-  const [row] = await db
-    .select({ id: member.id })
-    .from(member)
-    .where(and(eq(member.id, memberId)))
-    .limit(1)
-
-  return Boolean(row)
 }

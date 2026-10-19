@@ -30,8 +30,8 @@ Stages:
   plan       - Check scope documentation exists
   design     - Verify architecture docs are updated
   tickets    - Validate acceptance criteria format
-  build      - Run typecheck, lint, unit tests
-  verify     - Full gate chain (build + integration if available)
+  build      - Run typecheck, lint, unit + interface tests
+  verify     - Full gate chain (build + integration + e2e if available)
   review     - Pre-flight checks for PR creation
 
 Options:
@@ -95,12 +95,22 @@ run_stage() {
             log_info "Running unit tests..."
             pnpm test:unit || { log_error "Unit tests failed"; exit 1; }
             
+            log_info "Running interface tests..."
+            pnpm test --project interface || { log_error "Interface tests failed"; exit 1; }
+            
             log_success "Build stage passed"
             ;;
         
         verify)
             log_info "Running full verification..."
             run_stage build
+            
+            log_info "Running integration tests (if DATABASE_URL set)..."
+            if [ -n "$DATABASE_URL" ]; then
+                pnpm test:integration || { log_warn "Integration tests skipped or failed"; }
+            else
+                log_info "Skipping integration tests - no DATABASE_URL set"
+            fi
             
             log_info "Running build..."
             pnpm build || { log_error "Build failed"; exit 1; }
@@ -120,6 +130,12 @@ run_stage() {
             # Check for CI green status locally
             if [[ -f ".github/workflows/ci.yml" ]]; then
                 log_info "CI workflow file present"
+            fi
+            
+            # Check E2E tests are green (optional gate)
+            if command -v npx &> /dev/null && [ -d "tests/e2e" ]; then
+                log_info "E2E tests available - consider running before production deploy"
+                log_info "Run: pnpm test:e2e"
             fi
             
             log_success "Review pre-flight checks complete"

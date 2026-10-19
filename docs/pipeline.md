@@ -60,7 +60,9 @@ This document defines the end-to-end workflow for working on features, fixes, an
 - TypeScript compilation (`pnpm typecheck`)
 - ESLint pass (`pnpm lint`)
 - Unit tests (`pnpm test:unit`)
+- Interface tests (`pnpm test --project interface`)
 - Integration tests (`pnpm test:integration` if applicable)
+- E2E tests (`pnpm test:e2e` for critical paths)
 - Build succeeds (`pnpm build`)
 
 **Output:** Green CI locally, all tests passing
@@ -74,8 +76,9 @@ This document defines the end-to-end workflow for working on features, fixes, an
 - [ ] Type checking passes
 - [ ] Linting passes  
 - [ ] All unit tests pass
+- [ ] Interface tests cover rendering and DOM behavior
 - [ ] Integration tests cover write paths
-- [ ] E2E flows work as expected
+- [ ] E2E tests verify critical user journeys (when applicable)
 - [ ] Build completes successfully
 - [ ] Code and docs are in sync
 - [ ] No dead code or unused exports
@@ -139,6 +142,10 @@ This document defines the end-to-end workflow for working on features, fixes, an
 - **Specs:** `specs/` directory - numbered by dependency order
 - **Architecture:** `docs/architecture.md` - system design
 - **Verification Gates:** `/verification-gates` skill - exact test chain
+  - Unit tests: `pnpm test:unit`
+  - Interface tests: `pnpm test --project interface`
+  - Integration tests: `pnpm test:integration`
+  - E2E tests: `pnpm test:e2e` (runs against all browsers)
 - **Git Workflow:** `/git-workflow` skill - commit, push, PR procedure
 - **Development Workflow:** `/development-workflow` skill - work loop
 
