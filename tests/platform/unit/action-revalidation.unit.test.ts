@@ -45,7 +45,7 @@ const REVALIDATE = 'revalidatePath("/", "layout")'
  * `docs/target-state.md` → "Wiring or deleting countOwnedProjects /
  * assertMemberExists"; this list is where that claim is checked.
  */
-const READ_ONLY_EXPORTS = ["countOwnedProjects", "assertMemberExists"]
+const READ_ONLY_EXPORTS: string[] = []
 
 /** Actions grouped by the module that declares them. */
 const actionsByModule = new Map(

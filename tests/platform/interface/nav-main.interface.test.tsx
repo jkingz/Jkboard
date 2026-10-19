@@ -1,5 +1,5 @@
 import "react"
-import { describe, it, expect, vi } from "vitest"
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest"
 import { render, screen } from "@testing-library/react"
 import * as Navigation from "next/navigation"
 import { NavMain } from "@/components/nav-main"
@@ -36,7 +36,7 @@ describe("NavMain", () => {
     try {
       render(<NavMain label="Main" items={mockItems} />)
 
-      expect(screen.getByText(/Home/i)).toBeInTheDocument()
+      expect(screen.getByText(/Home/i)).toBeTruthy()
 
       // Check for Base UI uncontrolled Collapsible warnings
       const uncontrolledWarnings = consoleWarnSpy.mock.calls.filter((call) =>
@@ -53,9 +53,9 @@ describe("NavMain", () => {
     render(<NavMain label="Main" items={mockItems} />)
 
     const homeLink = screen.getByText(/Home/i)
-    expect(homeLink).toBeInTheDocument()
+    expect(homeLink).toBeTruthy()
 
     const trigger = screen.getByRole("button", { name: /home/i })
-    expect(trigger).toBeInTheDocument()
+    expect(trigger).toBeTruthy()
   })
 })
