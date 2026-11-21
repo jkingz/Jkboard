@@ -131,6 +131,53 @@
   --sidebar-ring: oklch(0.556 0 0);
 }
 
+/* Landing page only: teal palette from the Paper "Jkboard design reference" board.
+   Ink #101B20, Deep teal #19333A, Tide #28515A, Slate teal #47777B, Mist #91AAA0, Foam #DCE2D5.
+   `.landing-invert` sections take the opposite palette, so the page alternates dark and light bands. */
+.landing,
+.dark .landing .landing-invert {
+  --background: #dce2d5;
+  --foreground: #101b20;
+  /* shortcut: the board has no lighter-than-Foam surface; cards mix Foam with white until one is chosen. */
+  --card: color-mix(in oklab, #dce2d5 55%, white);
+  --card-foreground: #101b20;
+  --popover: color-mix(in oklab, #dce2d5 55%, white);
+  --popover-foreground: #101b20;
+  --primary: #101b20;
+  --primary-foreground: #dce2d5;
+  --secondary: color-mix(in oklab, #91aaa0 35%, #dce2d5);
+  --secondary-foreground: #101b20;
+  --muted: color-mix(in oklab, #91aaa0 35%, #dce2d5);
+  /* Mist on Foam fails contrast; the board says "Use Ink or Deep teal on Foam". */
+  --muted-foreground: #19333a;
+  --accent: color-mix(in oklab, #91aaa0 35%, #dce2d5);
+  --accent-foreground: #101b20;
+  --border: #91aaa0;
+  --input: #91aaa0;
+  --ring: #47777b;
+}
+
+.dark .landing,
+.landing .landing-invert {
+  --background: #101b20;
+  --foreground: #dce2d5;
+  --card: #19333a;
+  --card-foreground: #dce2d5;
+  --popover: #19333a;
+  --popover-foreground: #dce2d5;
+  --primary: #dce2d5;
+  --primary-foreground: #101b20;
+  --secondary: #28515a;
+  --secondary-foreground: #dce2d5;
+  --muted: #19333a;
+  --muted-foreground: #91aaa0;
+  --accent: #28515a;
+  --accent-foreground: #dce2d5;
+  --border: #47777b;
+  --input: #47777b;
+  --ring: #91aaa0;
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;
@@ -190,4 +237,30 @@ html {
 
 .animate-logo-scroll:hover {
   animation-play-state: paused;
+}
+
+/* Landing layout helpers, from the teal board's type scale and 72px desktop inset. */
+@layer components {
+  .landing-band {
+    @apply bg-background text-foreground;
+  }
+  .landing-container {
+    @apply mx-auto w-full max-w-[1440px] px-6 lg:px-18;
+  }
+  .landing-display {
+    @apply text-5xl/[1.02] font-semibold tracking-[-0.03em] text-balance lg:text-[76px]/[77px];
+  }
+  .landing-heading {
+    @apply text-4xl/[1.03] font-semibold tracking-[-0.03em] text-balance lg:text-[64px]/[65px];
+  }
+}
+
+/* Nav anchors glide on the landing page and land below the sticky header. */
+html:has(.landing) {
+  scroll-padding-top: 4rem;
+}
+@media (prefers-reduced-motion: no-preference) {
+  html:has(.landing) {
+    scroll-behavior: smooth;
+  }
 }
