@@ -3,9 +3,9 @@
 A project and task management dashboard: Next.js 16 (App Router), React 19, Better Auth, Drizzle over
 Neon Postgres, and shadcn UI on Base UI.
 
-**Status: pre-production, and deployed nowhere.** Everything below runs against one shared workspace
-with one seeded dataset. There is no tenant model, no role enforced on any write, no live customer and
-no hosting configured. The gaps are listed at the bottom of this file rather than hidden.
+**Status: pre-production, deployed on Vercel.** Everything below runs against one shared workspace
+with one seeded dataset. There is no tenant model, no role enforced on any write, and no live customer
+yet. The gaps are listed at the bottom of this file rather than hidden.
 
 ## What is real, and what is not
 
@@ -22,7 +22,7 @@ Read this before trusting any feature list, including the one below it.
 | Landing product preview | **Fabricated** by design — it renders sample arrays. |
 | Settings | Not wired to the database. `user`, `account`, `notifications` and `connections` have no persistence; `billing` renders committed JSON. |
 | Tests over the interface | None. No test has ever rendered a component or written a row. |
-| Production hosting | Not configured. |
+| Production hosting | Vercel: a preview per PR, production from `main`, built on Node 26.x from `engines.node`. |
 
 Kept honest by the files that own these claims:
 [`docs/architecture.md`](./docs/architecture.md) and
@@ -127,7 +127,7 @@ Each row is a gap that exists today. Not advice.
 | Nothing tests rendered UI |
 | Settings routes that never call a server action |
 | No email transport, so invites are never sent |
-| No rule for which migration verb production uses, no deployment target |
+| No rule for which migration verb production uses |
 
 The open product questions that gate that list are recorded in
 [`docs/product-overview.md`](./docs/product-overview.md) → Open product questions. The one that changes the shape of the work:

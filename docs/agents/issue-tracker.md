@@ -9,6 +9,19 @@ The spec and its tickets live as markdown files in the repo root.
 - Triage state is recorded as a `Status:` line near the top of each issue file (see `triage-labels.md` for the role strings)
 - Comments and conversation history append to the bottom of the file under a `## Comments` heading
 
+## Ticking and closing tickets
+
+At the start of every session, and after every PR merges, reconcile `issues/` against `main` before
+picking the next ticket:
+
+1. For each open ticket, tick every criterion that merged work or a run you can cite proves (CI run,
+   command output, deploy log). Unproven boxes stay unticked.
+2. Append the evidence under `## Comments`: date, PR number, and the command or log line.
+3. When every box is ticked, set `Status: resolved`.
+4. A ticket whose `Blocked by:` tickets are all `resolved` is unblocked; name the next one to pick.
+
+The ticket edits travel in the next PR; never commit them straight to `main`.
+
 ## When a skill says "publish to the issue tracker"
 
 Create a new file under `issues/` (creating the directory if needed).

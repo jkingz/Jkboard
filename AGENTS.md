@@ -41,6 +41,7 @@ Ponytail (full) is on for all coding: smallest complete change; known limits get
 | Review | `/code-review` (vs spec), `/ponytail-review` (bloat, safety) |
 | Domain terms and decisions | `/domain-modeling` → `GLOSSARY.md`, `docs/adr/` |
 | PR body | `/pr` |
+| After merge | Tick proven criteria, resolve tickets, name the next one (`docs/agents/issue-tracker.md`) |
 
 ## Checks
 
