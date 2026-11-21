@@ -9,3 +9,6 @@
 onlyBuiltDependencies:
   - esbuild
   - unrs-resolver
+
+# Fail the install when the project or a non-optional dependency rejects this Node in engines.node.
+engineStrict: true
