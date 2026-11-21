@@ -33,7 +33,7 @@ marketing landing page; light/dark theming with a runtime theme customizer.
 - **Settings are static.** `settings/billing` reads from `data/*.json` files committed to the repo.
   `settings/user`, `settings/account`, `settings/notifications`, `settings/connections` have no
   persistence.
-- **Deployment.** CI runs the gate chain on push, unit tier only. No deployment target is configured.
+- **Deployment.** CI runs the gate chain on push, unit tier only. Vercel builds a preview per PR and production from `main`.
 
 Verified: 2026-10-15, against the repo at `a70a95d`.
 
