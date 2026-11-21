@@ -43,3 +43,7 @@ next-env.d.ts
 
 # Browser automation artefacts (playwright-cli)
 .playwright-cli/
+
+# egm working notes (grilling summary, review report); kept local
+discussion_summary.md
+implementation_readiness_report.md

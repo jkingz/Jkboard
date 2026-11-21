@@ -50,6 +50,8 @@ pnpm typecheck && pnpm lint && pnpm test:unit && pnpm build   # same chain as CI
 
 ## Agent skills
 
+Where the mattpocock skills read and write. The workflow table above lists the skills.
+
 ### Issue tracker
 
 Spec is `./design_draft.md`; tickets are local markdown in `issues/`. See `docs/agents/issue-tracker.md`.
