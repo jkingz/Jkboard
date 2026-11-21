@@ -59,8 +59,8 @@ Base UI portals). They are listed once, with the reason, in
 `pnpm` is the only package manager: `pnpm-lock.yaml` is the single committed lockfile, and a second
 lockfile is a bug rather than a style choice.
 
-**No runtime floor is declared in the repo** — no `engines`, no `packageManager`, no `.nvmrc`. CI
-supplies its own pinned Node and pnpm in the job. Declaring the floor is an open gap (see Production readiness below).
+**Node 26.x is pinned** in `engines.node` and `.nvmrc`, and `engineStrict` makes `pnpm install`
+refuse any other Node. CI reads Node from `.nvmrc` and pnpm 10.18.3 from `packageManager`.
 
 `pnpm-workspace.yaml` is not a workspace. It exists because pnpm 10 refuses dependency postinstall
 scripts unless they are allowlisted, and `esbuild` and `unrs-resolver` need theirs to place a native
@@ -127,7 +127,7 @@ Each row is a gap that exists today. Not advice.
 | Nothing tests rendered UI |
 | Settings routes that never call a server action |
 | No email transport, so invites are never sent |
-| No declared runtime floor, no rule for which migration verb production uses, no deployment target |
+| No rule for which migration verb production uses, no deployment target |
 
 The open product questions that gate that list are recorded in
 [`docs/product-overview.md`](./docs/product-overview.md) → Open product questions. The one that changes the shape of the work:

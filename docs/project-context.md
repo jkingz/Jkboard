@@ -40,11 +40,10 @@ To retire the demo without touching the code, set `NEXT_PUBLIC_DEMO_MODE=false` 
 `pnpm` — `pnpm-lock.yaml` is the single lockfile (lockfileVersion `9.0`) and the only one committed.
 Do not generate `package-lock.json` or `yarn.lock`.
 
-**No runtime floor is declared.** `package.json` has no `engines` field and no `packageManager` pin,
-and there is no `.nvmrc`, `mise.toml` or equivalent. Verified working on Node v26.8.2 with pnpm
-10.18.3. Adding `engines` + `packageManager` is a deliberate open item in
-[target-state.md](./target-state.md), not an oversight — until then, nothing mechanically enforces a
-floor and a silent major bump is possible.
+**Runtime is pinned.** `package.json` declares `engines.node: "26.x"` and `.nvmrc` holds `26`; keep
+the two in step. `engineStrict: true` in `pnpm-workspace.yaml` fails `pnpm install` on any other Node
+major with `ERR_PNPM_UNSUPPORTED_ENGINE`. pnpm must be `>=10.0.0` (`engines.pnpm`); CI runs the
+exact `pnpm@10.18.3` from `packageManager` and the Node major from `.nvmrc`.
 
 Two lockfiles is not a style opinion, it is a bug: the resolver picks one and the other rots.
 
@@ -78,7 +77,7 @@ Per-file map: [../tests/README.md](../tests/README.md).
 Every `db:*` and seed script runs through `node --env-file=.env.local`, so `.env.local` must exist
 before any of them will start.
 
-`pnpm.onlyBuiltDependencies` in `package.json` allowlists `esbuild` and `unrs-resolver`. pnpm 10
+`onlyBuiltDependencies` in `pnpm-workspace.yaml` allowlists `esbuild` and `unrs-resolver`. pnpm 10
 blocks postinstall scripts by default and fails the install with `ERR_PNPM_IGNORED_BUILDS` without
 that allowlist; both packages ship native binaries that need their postinstall to run.
 

@@ -94,17 +94,6 @@ here as final rather than open.
 
 ---
 
-## Runtime floor enforcement
-
-**Why:** `package.json` has no `engines` field and no `packageManager` pin, and there is no `.nvmrc`.
-A silent major bump is possible; nothing enforces Node 26.x or pnpm 10.
-
-**Blocked by:** nothing.
-
-**Done when:** `engines` and `packageManager` are declared and CI installs from them.
-
----
-
 ## Removing the seed arrays in `src/data/jkboard.ts`
 
 **Why:** the store no longer seeds from those arrays — `JkboardProvider` takes `initialData` from
