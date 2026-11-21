@@ -36,6 +36,10 @@ Operational. Closer to a well-made instrument than to a lifestyle brand.
   decorative. They appear only where the state is real.
 - **Why:** the product's identity is precision, and precision is monochrome. A saturated colour that
   decorates rather than informs contradicts the thing being sold.
+- **Landing page exception:** `/landing` uses the low-saturation teal ramp from the Paper "Jkboard
+  design reference" board (Ink `#101B20` → Foam `#DCE2D5`), scoped by the `.landing` and
+  `.landing-invert` classes in `globals.css`. Sections alternate dark and light bands. The dashboard
+  keeps the neutral base.
 
 **No blue-to-purple, blue-to-cyan or purple-to-pink gradient as a primary treatment.** No radial orbs,
 no coloured glow backgrounds, no neon.
@@ -80,7 +84,7 @@ widen that list to add stock photography — the ban above is a product decision
 
 ### Motion
 
-`src/components/reveal.tsx` is the scroll-reveal primitive, the only motion primitive on the landing
+`src/components/reveal.tsx` is the scroll-reveal primitive for section headings on the landing
 page. It fires once on intersection, disconnects after firing, and never re-hides on scroll-out.
 
 **Do not branch on `typeof window` inside a `useState` initializer here.** `Reveal` reads the
@@ -94,10 +98,22 @@ a server snapshot.
 Reduced motion and a missing `IntersectionObserver` both resolve through the client snapshot, so
 those readers get the content visible rather than stuck at `opacity-0`.
 
-Permitted motion: scroll-reveal, hover/focus feedback, and one transition on the hero product preview.
-**No parallax, no pinning, no floating or pulsing loops, no scroll-jacking.** An element that moves
-forever competes with the content and never lets the reader rest. Adding a scroll-animation library
-for effect is out of scope for this direction — ask the owner first.
+Permitted motion on `/landing` (the owner asked for a more premium, animated page, 2026-11-22):
+
+- `motion` (`motion/react`) for entrances, `whileInView` staggers, count-up numbers
+  (`CountUp` in `src/app/landing/components/landing-motion.tsx`) and layout moves.
+- The product previews act out a workflow while on screen (`useTicker`): the overview completes
+  tasks and its progress and activity feed follow, a board card walks through the four stages, the
+  task table re-sorts, and the calendar spotlights each upcoming deadline. All stop off screen.
+- "Open the live demo" (`demo-button.tsx`) signs in as the demo user in one click; a signed-in
+  visitor gets "Open your workspace" instead.
+- The hero has a scroll-linked drift on the product preview and a React Three Fiber backdrop
+  (`hero-scene.tsx`, one instanced mesh, client-only via `next/dynamic`). The render loop stops once
+  the hero leaves the viewport.
+- `MotionConfig reducedMotion="user"` wraps the page; reduced-motion visitors get still previews
+  and a single static 3D frame.
+
+Still out: pinning, scroll-jacking, and motion anywhere outside `/landing`.
 
 ### Interaction states
 
@@ -186,10 +202,9 @@ nobody notices. Check `globals.css` before introducing a name.
 - Aliases (`components.json`): `@/components`, `@/lib/utils`, `@/components/ui`, `@/lib`, `@/hooks`.
 - Feature components live beside their route in a `components/` subfolder.
 - Icons: `lucide-react`, tree-shaken via `optimizePackageImports` in `next.config.ts`.
-- Two theme systems coexist: a runtime **theme customizer** (`src/components/theme-customizer/`,
-  View Transitions circular wipe) and **theme presets** (`src/config/theme-data.ts`,
-  `src/utils/{shadcn-ui,tweakcn}-theme-presets.ts`). Editing a preset changes the customizer's
-  starting point.
+- One theme system: light/dark via `ModeToggle` (View Transitions circular wipe,
+  `src/components/circular-transition.css`). The runtime theme customizer and its presets were
+  removed on 2026-11-22.
 
 ---
 

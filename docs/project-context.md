@@ -266,7 +266,6 @@ src/app/(auth)/                  sign-in, sign-up, error pages
 src/app/landing/                 marketing page
 src/app/api/auth/[...all]/       Better Auth handler — the only API route
 src/components/ui/               shadcn Base UI primitives
-src/components/theme-customizer/ runtime theme editor
 src/components/*.tsx             app-shell pieces (sidebar, header, dialogs)
 src/contexts/                    sidebar + theme React contexts
 src/data/jkboard.ts            types (Zod schemas) + pure selectors; no I/O
@@ -276,7 +275,6 @@ src/db/actions/                  writes, one file per entity
 src/db/queries/                  reads
 src/hooks/                       use-mobile, use-theme, use-email-password, sidebar/theme
 src/lib/                         auth.ts, auth-client.ts, utils.ts, fonts.ts, data-table.ts
-src/config/  src/types/  src/utils/  theme presets and types
 ```
 
 Protected: as listed above.
