@@ -13,7 +13,6 @@ concern, so that the file an agent must read is never larger than the question b
 | [ui.md](./ui.md) | the change touches the interface | as the design system settles |
 | [target-state.md](./target-state.md) | the change builds something that does not exist yet | whenever design intent outpaces code |
 | [project-context.md](./project-context.md) | you need commands, gates, env vars or protected paths | day one, then as they change |
-| [verification-standards.md](./verification-standards.md) | you are writing or editing any doc in this folder | once, then grow the table |
 
 ## The one rule
 
@@ -24,17 +23,13 @@ in the same change you fix the code.
 
 1. **Implemented and planned never share a document.** A line that reads as current behavior must be
    true today. Design intent goes in [target-state.md](./target-state.md).
-2. **A sentence earns its place only if its author read the thing this session.** See
-   [verification-standards.md](./verification-standards.md) for the table of claims that shipped and
-   the check that kills each one.
+2. **A sentence earns its place only if its author read the thing this session.**
 
 ## Folder layout
 
 ```
 AGENTS.md              rules 1–10, and this index
 docs/                  project knowledge, one file per concern
-specs/                 one feature spec per unit of work — specs/README.md, specs/00-template.md
-.claude/skills/        the skills AGENTS.md rule 9 points at
 ```
 
 `tests/` exists with two tiers — see [project-context.md](./project-context.md) → Verification gates.
@@ -43,7 +38,7 @@ specs/                 one feature spec per unit of work — specs/README.md, sp
 ## Health check
 
 ```bash
-grep -rn '<[a-zA-Z_/]' docs/ AGENTS.md | grep -v verification-standards
+grep -rn '<[a-zA-Z_/]' docs/ AGENTS.md
 ```
 
 Every hit is an unfilled slot. Zero hits means the docs are done.

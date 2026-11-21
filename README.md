@@ -5,8 +5,7 @@ Neon Postgres, and shadcn UI on Base UI.
 
 **Status: pre-production, and deployed nowhere.** Everything below runs against one shared workspace
 with one seeded dataset. There is no tenant model, no role enforced on any write, no live customer and
-no hosting configured. The way out is specified in [`specs/`](./specs/README.md), numbered by what
-unblocks what, and the gaps are listed at the bottom of this file rather than hidden.
+no hosting configured. The gaps are listed at the bottom of this file rather than hidden.
 
 ## What is real, and what is not
 
@@ -61,8 +60,7 @@ Base UI portals). They are listed once, with the reason, in
 lockfile is a bug rather than a style choice.
 
 **No runtime floor is declared in the repo** — no `engines`, no `packageManager`, no `.nvmrc`. CI
-supplies its own pinned Node and pnpm in the job. Declaring the floor is
-[`specs/09`](./specs/09-runtime-floor-migrations-deployment.md).
+supplies its own pinned Node and pnpm in the job. Declaring the floor is an open gap (see Production readiness below).
 
 `pnpm-workspace.yaml` is not a workspace. It exists because pnpm 10 refuses dependency postinstall
 scripts unless they are allowlisted, and `esbuild` and `unrs-resolver` need theirs to place a native
@@ -104,8 +102,7 @@ pnpm typecheck && pnpm lint && pnpm test && pnpm build
 That chain is necessary and not sufficient: it proves nothing in a browser, so every unit of work ends
 with a live exercise too. The chain, the two test tiers, the reason CI runs only the unit tier, and the
 command that proves the build needs no network are all specified once in
-[`docs/project-context.md`](./docs/project-context.md) → Verification gates and
-[`/verification-gates`](./.claude/skills/verification-gates.md). Report the tier that ran; a skipped
+[`docs/project-context.md`](./docs/project-context.md) → Verification gates. Report the tier that ran; a skipped
 tier is not a pass.
 
 ## Where the logic sits
@@ -118,23 +115,22 @@ refuses to prove: [`docs/project-context.md`](./docs/project-context.md) → Cro
 
 ## Production readiness — what is missing
 
-Each row is a gap that exists today, and the spec that closes it. Not advice.
+Each row is a gap that exists today. Not advice.
 
-| Gap | Spec |
-| --- | --- |
-| Actions prove the caller is a member, not that the row is theirs or that they may touch it; and no test executes the guard — it has run once, in a hand-driven replay ([`01`](./specs/01-session-identity-and-action-guards.md) → Verification) | [`01`](./specs/01-session-identity-and-action-guards.md) |
-| No role is enforced; `role` is stored and displayed but never branched on | [`02`](./specs/02-role-model-and-demo-scoping.md) |
-| No test has ever written a row | [`03`](./specs/03-write-path-integration-tests.md) |
-| The integration tier runs in no CI job, and that job has no Postgres service | [`04`](./specs/04-integration-tier-in-ci.md) |
-| The overview chart is a hardcoded array | [`05`](./specs/05-real-chart-data-or-no-chart.md) |
-| Nothing tests rendered UI | [`06`](./specs/06-interface-test-tier.md) |
-| Settings routes that never call a server action | [`07`](./specs/07-settings-persist-or-delete.md) |
-| No email transport, so invites are never sent | [`08`](./specs/08-email-invite-verification-reset.md) |
-| No declared runtime floor, no rule for which migration verb production uses, no deployment target | [`09`](./specs/09-runtime-floor-migrations-deployment.md) |
+| Gap |
+| --- |
+| Actions prove the caller is a member, not that the row is theirs or that they may touch it; and no test executes the guard — it has run once, in a hand-driven replay |
+| No role is enforced; `role` is stored and displayed but never branched on |
+| No test has ever written a row |
+| The integration tier runs in no CI job, and that job has no Postgres service |
+| The overview chart is a hardcoded array |
+| Nothing tests rendered UI |
+| Settings routes that never call a server action |
+| No email transport, so invites are never sent |
+| No declared runtime floor, no rule for which migration verb production uses, no deployment target |
 
 The open product questions that gate that list are recorded in
-[`docs/product-overview.md`](./docs/product-overview.md) → Open product questions and numbered Q1–Q4 in
-[`specs/README.md`](./specs/README.md) → Gating decisions. The one that changes the shape of the work:
+[`docs/product-overview.md`](./docs/product-overview.md) → Open product questions. The one that changes the shape of the work:
 **single shared workspace, or multi-tenant?**
 
 ## Where the knowledge lives
@@ -143,14 +139,10 @@ The open product questions that gate that list are recorded in
 | --- | --- |
 | [`AGENTS.md`](./AGENTS.md) | the rules every change obeys |
 | [`docs/`](./docs/README.md) | commands, schema, routes, conventions — one file per concern |
-| [`specs/`](./specs/README.md) | one numbered file per unit of work, ordered by dependency |
 | [`tests/README.md`](./tests/README.md) | the test tree and the traps it has already hit |
-| [`.claude/skills/`](./.claude/skills/) | the workflows agents load: development loop, gates, testing, git, PRs |
 
 Contributing: Conventional Commits, subject says *why*, body ≤ 4 lines; PR titles are
-`type(scope): imperative summary`; one PR per unit; **draft until CI is green**. Every unit closes with
-the two-line Done / Next block in [`/development-workflow`](./.claude/skills/development-workflow.md)
-step 6.
+`type(scope): imperative summary`; one PR per unit; **draft until CI is green**.
 
 ## Provenance and license
 

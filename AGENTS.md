@@ -10,83 +10,54 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 
 # AGENTS.md
 
-The rules every change obeys. Read them before any taskable request.
+The rules every change obeys. Project knowledge (commands, schema, routes, conventions) lives in
+[`docs/`](./docs/README.md).
 
-The project's own knowledge — commands, schema, routes, conventions — lives in [`docs/`](./docs/README.md).
-This file stays short so it stays read.
+## Rules
 
----
+1. **Be concise.** State the change, the result, and the one thing you need from me.
+2. **No "done" without a command.** Name the command run and what it printed. Untested = "not verified".
+3. **Scope is the request.** A nearby problem is one line in the reply, never in the diff.
+4. **Delete unused, but prove it.** Grep callers first; say what you removed and how you checked.
+5. **End clean.** No orphaned dev server or background job.
+6. **Secrets stay secret.** Reference by name, never value. `.env*` never enters git.
+7. **Git actions need my go-ahead.** Commit, push, PR or merge only when asked. No `--no-verify`, no force-push to a shared branch.
+8. **Unknowns are labelled, not invented.** Code is truth; when a doc disagrees, fix the doc.
 
-## Standing rules
+## Coding mode
 
-**1. Be concise.** No preamble, no "here is what I did" essay. State the change, the result, and the one thing you need from me. Every unit of work — spec, feature, fix, PR — closes with the two-line **Done / Next** block in chat, unprompted; its shape is step 6 of [`/development-workflow`](./.claude/skills/development-workflow.md).
+Ponytail (full) is on for all coding: smallest complete change; known limits get a `shortcut:` comment.
 
-**2. No "done" without a command behind it.** Every claim of completion names the command run and what it printed. Untested by you = unverified: say "not verified", never "should work". Type-checking proves types, not behavior.
+## Workflow
 
-**3. Scope is the request, not the opportunity.** The blast radius of a change equals the radius of what was asked. No drive-by cleanup, renames, formatting, "while I'm here" extractions, or predicted abstractions. A nearby problem you spotted is one line in your reply, never in the diff.
-
-**4. Delete unused, but prove it was unused.** Remove dead files, exports, imports, env vars, CSS, tokens, orphaned components. Grep for callers before deleting; state what you removed and how you checked. Known dead code is tracked in [`docs/target-state.md`](./docs/target-state.md), not here.
-
-**5. End clean.** Kill or restart servers only during the current task. Clear stale processes on ports the app uses before starting your own. Leave no orphaned dev server, worker or background job.
-
-**6. Secrets stay secret.** Reference a secret by name, never by value. `.env*` never enters git; committed files carry names and empty placeholders only. If a value reaches a client bundle or a public response, it is not a secret.
-
-**7. Git actions need authorization.** Commit, push, open or merge a PR only when asked. Before pushing a working branch: pull from main, merge, resolve, then push. No `--no-verify`, no bypassed signing. Never force-push a shared branch, and never `reset --hard` / `clean -f` / `checkout --` over work you did not write.
-
-**8. Every posted comment is a contract.** Watch a PR with `/babysitting-a-pr`, and anything posted to a PR or issue goes through `/leaving-pr-comment` — triggers, body contract, AI-authorship disclaimer. No filler comments; a declined finding gets a written decline and a resolved thread.
-
-**9. Use the harness.** Check the skills before starting; if one applies, load it instead of re-deriving the workflow. Never hand-write a loop the platform already provides.
-
-**10. Unknowns are labelled, not invented.** No fabricated thresholds, policies, precedents, APIs or file paths. State the assumption plus the step that would verify it. When the code and the docs disagree, the code is truth and the doc is the defect.
-
----
-
-## Skills
-
-`.claude/skills/` — load when the context applies.
-
-| Skill | Use when |
+| Stage | Skill |
 | --- | --- |
-| [`/development-workflow`](./.claude/skills/development-workflow.md) | scoping a task, or deciding what "done" means for a unit of work |
-| [`/verification-gates`](./.claude/skills/verification-gates.md) | finishing implementation, or deciding what to run and how to report it |
-| [`/testing`](./.claude/skills/testing.md) | writing, running or restructuring tests |
-| [`/git-workflow`](./.claude/skills/git-workflow.md) | committing, pushing, or opening a PR; commit conventions live in [`docs/project-context.md`](./docs/project-context.md) |
-| [`/babysitting-a-pr`](./.claude/skills/babysitting-a-pr/SKILL.md) | watching an open PR |
-| [`/leaving-pr-comment`](./.claude/skills/leaving-pr-comment/SKILL.md) | before posting to a PR or issue |
+| Stress-test an idea | `/grilling` or `/egm-brainstorm` |
+| Spec | `/egm-draft` → `/egm-review`; move the approved `design_draft.md` to `.scratch/<feature>/spec.md` |
+| Tickets | `/to-tickets` → `.scratch/<feature>/issues/` |
+| Triage | `/triage` |
+| Build | `/implement`, or `/tdd` for risky logic |
+| Bug | `/diagnosing-bugs` |
+| Review | `/code-review` (vs spec), `/ponytail-review` (bloat, safety) |
+| Domain terms and decisions | `/domain-modeling` → `GLOSSARY.md`, `docs/adr/` |
+| PR body | `/pr` |
 
-## Docs and specs
-
-Read the one file that governs the change; the map in [`docs/README.md`](./docs/README.md) says which
-and when to fill it. Work is specified in [`specs/`](./specs/README.md) — one numbered file per unit,
-ordered by what unblocks what.
-
-**Pipeline workflow:** Plan → Design → Tickets → Build → Verify → Review (see [docs/pipeline.md](./docs/pipeline.md))
-
-## Before starting
-
-Load `/development-workflow` and work its loop. It is the same six steps in one place; this file does
-not restate them.
-
-## Health check
-
-Every angle-bracketed slot in `docs/` outside `verification-standards.md` is one you still owe — and
-this file contributes none, so zero hits is reachable:
+## Checks
 
 ```bash
-grep -rn '<[a-zA-Z_/]' AGENTS.md docs/ | grep -v verification-standards
+pnpm typecheck && pnpm lint && pnpm test:unit && pnpm build   # same chain as CI
 ```
 
-Zero hits means the docs describe this project and only this project.
+## Agent skills
 
----
+### Issue tracker
 
-## Pipeline commands
+Issues live as local markdown files under `.scratch/<feature>/`. See `docs/agents/issue-tracker.md`.
 
-Verify full gate chain before creating PR:
+### Triage labels
 
-```bash
-pnpm pipeline:verify    # Run all gates (typecheck / lint / test / build)
-pnpm pipeline:build     # Build gates only
-pnpm pipeline:review    # Pre-flight review checks
-./scripts/pipeline-verify.sh --all  # Full pipeline validation
-```
+Default five roles (`needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, `wontfix`) as `Status:` lines. See `docs/agents/triage-labels.md`.
+
+### Domain docs
+
+Single-context: `GLOSSARY.md` + `docs/adr/` at the repo root, created lazily. See `docs/agents/domain.md`.

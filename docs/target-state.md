@@ -8,28 +8,6 @@ If a line would be a lie if quoted out of context, it belongs in this file, or n
 
 ---
 
-## Where each entry is planned
-
-Sequencing, increments and the owner decision that gates each one live in
-[`specs/`](../specs/README.md). This file stays intent; a spec is the plan. Do not rename the headings
-below — `tests/platform/unit/action-revalidation.unit.test.ts` cites one by name.
-
-| Entry here | Spec |
-| --- | --- |
-| Scoping the demo account | [02](../specs/02-role-model-and-demo-scoping.md) |
-| Per-user workspace scoping | gated on Q1; the guard it needs is [01](../specs/01-session-identity-and-action-guards.md) |
-| Authorization on mutations | [01](../specs/01-session-identity-and-action-guards.md), then [02](../specs/02-role-model-and-demo-scoping.md) |
-| Behavioural tests for the server actions | [03](../specs/03-write-path-integration-tests.md), CI in [04](../specs/04-integration-tier-in-ci.md) |
-| Email on invite | [08](../specs/08-email-invite-verification-reset.md) |
-| CI | [04](../specs/04-integration-tier-in-ci.md) |
-| Runtime floor enforcement | [09](../specs/09-runtime-floor-migrations-deployment.md) |
-| Removing the seed arrays | [05](../specs/05-real-chart-data-or-no-chart.md) |
-| Wiring or deleting `countOwnedProjects` / `assertMemberExists` | [01](../specs/01-session-identity-and-action-guards.md) |
-| *(no entry — recorded only in product-overview as not built)* | settings pages in [07](../specs/07-settings-persist-or-delete.md), test tier for the interface in [06](../specs/06-interface-test-tier.md) |
-| **E2E test suite** | **[10](../specs/10-playwright-e2e.md)** |
-
----
-
 ## Scoping the demo account
 
 **Why:** the demo credentials are printed on a public landing page, and **no server action checks a
@@ -45,7 +23,7 @@ in each server action, or give the demo a scoped session that cannot write.
 
 ## Per-user workspace scoping
 
-**Why:** identity is now resolved from the session (`currentMember`, `specs/01`), but nothing is scoped
+**Why:** identity is now resolved from the session (`currentMember`), but nothing is scoped
 by it: `getWorkspaceData()` (`src/db/queries/jkboard.ts:90`) selects `project`, `task` and `member` with
 no `where` clause at all, so every member sees and writes the same rows. Real scoping needs the caller's
 membership threaded into every query.

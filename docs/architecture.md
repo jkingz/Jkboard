@@ -142,9 +142,8 @@ deletes from **`user`**, not `member` — the membership and join rows go by cas
   and the same unique `member_userId_uidx`, so the page and the action cannot disagree about who is
   calling.
 - **What the guard is not**: authorization. Under one shared workspace any member may write any row,
-  so "there is a session and it belongs to a member" is the whole check. Role checks are
-  [specs/02](../specs/02-role-model-and-demo-scoping.md), and per-row ownership is recorded in
-  [specs/01](../specs/01-session-identity-and-action-guards.md) → "Later increments".
+  so "there is a session and it belongs to a member" is the whole check. Role checks and per-row
+  ownership are tracked in [target-state.md](./target-state.md).
 - `src/proxy.ts` is an **optimistic** check only. It calls `getSessionCookie(request)` — presence, not
   validity — because the proxy bundle cannot import the database. A stale cookie passes it and is
   caught by the layout. It must never redirect signed-in users away from `/sign-in`; that produces an
@@ -173,7 +172,7 @@ Numbered. They get cited by number in commits and reviews.
 7. **Every mutation identifies its caller before it touches the database.** Each action exported from
    `src/db/actions/` awaits `requireMembership()` ahead of its first write; `setTaskStatusAction`
    inherits it by delegating to `updateTaskAction`. Skipping it does not break anything a user can
-   see — it silently reopens the anonymous-write hole `specs/01` closed.
+   see — it silently reopens the anonymous-write hole the guard closed.
 
 **Test coverage of these invariants:** 2, 3 and 6 are asserted against `information_schema` on a real
 database, in `tests/platform/integration/invariants.integration.test.ts` and
@@ -186,7 +185,7 @@ Read the strength of each. 1, 4 and 7 are enforced **structurally**: the test wa
 the rule still holds, so it catches the edit that breaks the rule and nothing else — a runtime path
 that reaches the same data without passing a gated module fails no assertion. For 7 that gap is real:
 no test executes the guard. It has run exactly once, on a hand-driven replay of one action against a
-production build with an unverifiable session cookie (`specs/01` → Verification), which is evidence about
+production build with an unverifiable session cookie which is evidence about
 that request and not a gate. 5 is behavioural but
 only for `proxy()` itself, which is an optimistic cookie-presence check; it cannot say anything about
 what a valid session does downstream. And nothing calls `removeMemberAction` on an owner of a project,

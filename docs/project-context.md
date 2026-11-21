@@ -237,10 +237,8 @@ membership" a one-row lookup.
 
 **What the guard proves, and what it does not.** `requireMembership()` answers "is there a session, and
 does a membership exist for it?" — nothing else. It is not authorization: under one shared workspace any
-member may write any row, and every action still takes a raw id and acts on it. Role checks are
-[specs/02](../specs/02-role-model-and-demo-scoping.md); per-row ownership is
-[specs/01](../specs/01-session-identity-and-action-guards.md) → "Later increments". Both are tracked in
-[target-state.md](./target-state.md).
+member may write any row, and every action still takes a raw id and acts on it. Role checks and per-row ownership
+are tracked in [target-state.md](./target-state.md).
 
 ---
 
