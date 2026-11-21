@@ -22,8 +22,8 @@ tests/
         └── column-contracts.integration.test.ts declared defaults, enums, indexes, nullability
 ```
 
-There is no `e2e/` tier. Nothing covers the interface; `docs/verification-standards.md` records that
-the UI was verified by clicking it, not by a test.
+There is no `e2e/` tier. Nothing covers the interface; it was verified by clicking it,
+not by a test.
 
 ## Test organization
 

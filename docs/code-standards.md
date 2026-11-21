@@ -94,12 +94,12 @@ for the full tree.
 
 ## Testing
 
-`/testing` is the source of truth for test organization, tier definitions, mocking, and how to run
-tests.
+[`tests/README.md`](../tests/README.md) is the source of truth for test organization, tier definitions,
+mocking, and how to run tests.
 
 **A runner exists** — Vitest with a `unit` and an `integration` tier, the unit tier wired into CI.
 That does not relax the rule: do not report "tests pass" as coverage. Name the tier that ran, and say
-what no tier reaches. Nothing renders a component, so `/verification-gates` keeps its mandatory live
+what no tier reaches. Nothing renders a component, so every change still needs a live
 browser exercise; nothing writes a row, so the integration tier proves schema shape, not action
 behaviour.
 
@@ -115,4 +115,3 @@ the boundary in the unit tier only.
 - Do not restate a spec in a doc — link it.
 - No rotting literals: quote command output instead of typing counts, versions or file paths from
   memory.
-- Full standards for writing these docs: [verification-standards.md](./verification-standards.md).

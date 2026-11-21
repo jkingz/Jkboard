@@ -14,8 +14,8 @@ import { authClient } from "@/lib/auth-client"
  *
  * The dashboard cannot render without a membership: `currentMember` is what names
  * the caller and owns whatever they create, and every action throws without it.
- * The alternative — falling back to the first member in the table — is the bug
- * `specs/01` removes, so the request stops here, visibly, rather than showing a
+ * The alternative — falling back to the first member in the table — is a removed
+ * bug, so the request stops here, visibly, rather than showing a
  * workspace that belongs to someone else.
  */
 export function WorkspaceAccessNotice({ email }: { email: string }) {
