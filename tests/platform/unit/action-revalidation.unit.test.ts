@@ -18,7 +18,7 @@ import {
  *   docs recorded as "remains a hope".
  * - **The caller is identified before anything is written** — every mutation
  *   calls `requireMembership()`, and calls it ahead of its first database
- *   access. Added by `specs/01`; before it, an anonymous POST to an action's
+ *   access. Before it, an anonymous POST to an action's
  *   generated route reached `db.delete()` with nothing in between.
  *
  * Both are structural checks, not execution checks, for the same reason the

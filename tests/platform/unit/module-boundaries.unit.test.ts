@@ -131,7 +131,7 @@ describe("invariant 1: server-only modules stay off the client", () => {
     expect(actionModules.map((file) => file.split("/").pop())).toEqual([
       "members.ts",
       "projects.ts",
-      // `specs/01`: the session guard every mutation calls.
+      // the session guard every mutation calls.
       "session.ts",
       "tasks.ts",
     ])

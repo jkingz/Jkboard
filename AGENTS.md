@@ -33,8 +33,8 @@ Ponytail (full) is on for all coding: smallest complete change; known limits get
 | Stage | Skill |
 | --- | --- |
 | Stress-test an idea | `/grilling` or `/egm-brainstorm` |
-| Spec | `/egm-draft` → `/egm-review`; move the approved `design_draft.md` to `.scratch/<feature>/spec.md` |
-| Tickets | `/to-tickets` → `.scratch/<feature>/issues/` |
+| Spec | `/egm-draft` → `/egm-review`; the spec is `./design_draft.md` |
+| Tickets | `/to-tickets` → `issues/NN-slug.md` |
 | Triage | `/triage` |
 | Build | `/implement`, or `/tdd` for risky logic |
 | Bug | `/diagnosing-bugs` |
@@ -52,7 +52,7 @@ pnpm typecheck && pnpm lint && pnpm test:unit && pnpm build   # same chain as CI
 
 ### Issue tracker
 
-Issues live as local markdown files under `.scratch/<feature>/`. See `docs/agents/issue-tracker.md`.
+Spec is `./design_draft.md`; tickets are local markdown in `issues/`. See `docs/agents/issue-tracker.md`.
 
 ### Triage labels
 
