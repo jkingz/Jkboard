@@ -2,14 +2,14 @@
 
 import "server-only"
 
-import { eq, sql } from "drizzle-orm"
+import { eq } from "drizzle-orm"
 import { revalidatePath } from "next/cache"
 import { z } from "zod"
 
 import { db } from "@/db"
-import { member, project, user } from "@/db/schema"
+import { member, project, projectMember, user } from "@/db/schema"
 import { requireMembership } from "@/db/actions/session"
-import type { Member } from "@/data/jkboard"
+import { removalSuccessor, type Member } from "@/data/jkboard"
 
 const inviteSchema = z.object({
   name: z.string().min(2).max(120),
@@ -138,11 +138,11 @@ export async function setMemberStatusAction(
 
 /**
  * Removing a teammate deletes the auth user row, which cascades to the
- * membership and the join table. Projects they own are transferred first so the
- * `ON DELETE RESTRICT` on project.owner_id cannot block the delete.
+ * membership and the join table. Projects they own pass to the caller first so
+ * the `ON DELETE RESTRICT` on project.owner_id cannot block the delete.
  */
 export async function removeMemberAction(memberId: string) {
-  await requireMembership()
+  const successorId = removalSuccessor(memberId, await requireMembership())
 
   const [target] = await db
     .select()
@@ -153,27 +153,17 @@ export async function removeMemberAction(memberId: string) {
   if (!target) throw new Error(`Member ${memberId} was not found.`)
 
   const owned = await db
-    .select({ id: project.id })
-    .from(project)
+    .update(project)
+    .set({ ownerId: successorId })
     .where(eq(project.ownerId, memberId))
+    .returning({ id: project.id })
 
+  // The new Owner joins each team they now own (GLOSSARY.md → Owner).
   if (owned.length > 0) {
-    const [successor] = await db
-      .select({ id: member.id })
-      .from(member)
-      .where(sql`${member.id} <> ${memberId}`)
-      .limit(1)
-
-    if (!successor) {
-      throw new Error(
-        "This member owns projects and there is nobody left to transfer them to."
-      )
-    }
-
     await db
-      .update(project)
-      .set({ ownerId: successor.id })
-      .where(eq(project.ownerId, memberId))
+      .insert(projectMember)
+      .values(owned.map(({ id }) => ({ projectId: id, memberId: successorId })))
+      .onConflictDoNothing()
   }
 
   // Tasks keep their place with a null assignee (ON DELETE SET NULL).

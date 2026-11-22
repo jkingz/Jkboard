@@ -1,11 +1,11 @@
 import { describe, expect, it } from "vitest"
 
-import { canOwnProject, projectTeam } from "@/data/jkboard"
+import { canOwnProject, projectTeam, removalSuccessor } from "@/data/jkboard"
 
 /**
- * Owner rules from GLOSSARY.md, issue #14. The actions in
- * `src/db/actions/projects.ts` are server-only and cannot be called here, so
- * these test the two functions every create and update goes through.
+ * Owner rules from GLOSSARY.md, issues #14 and #16. The actions in
+ * `src/db/actions/` are server-only and cannot be called here, so
+ * these test the pure rules those actions call.
  */
 describe("projectTeam", () => {
   it("adds the Owner when the member list is empty (create with no members)", () => {
@@ -29,5 +29,15 @@ describe("canOwnProject", () => {
   it("allows Active and Away Members", () => {
     expect(canOwnProject("active")).toBe(true)
     expect(canOwnProject("away")).toBe(true)
+  })
+})
+
+describe("removalSuccessor", () => {
+  it("hands a Removed Member's Projects to the caller", () => {
+    expect(removalSuccessor("removed", "caller")).toBe("caller")
+  })
+
+  it("refuses self-removal, since nobody would take the Projects", () => {
+    expect(() => removalSuccessor("me", "me")).toThrow(/cannot remove yourself/)
   })
 })
