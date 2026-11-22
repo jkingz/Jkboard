@@ -9,7 +9,7 @@ import { z } from "zod"
 import { db } from "@/db"
 import { task } from "@/db/schema"
 import { requireMembership } from "@/db/actions/session"
-import type { Task } from "@/data/jkboard"
+import { completedAtFor, type Task } from "@/data/jkboard"
 
 const taskInputSchema = z.object({
   projectId: z.string().uuid(),
@@ -96,12 +96,14 @@ export async function updateTaskAction(
   const input = taskInputSchema.partial().parse(raw)
 
   const [current] = await db
-    .select({ id: task.id })
+    .select({ status: task.status })
     .from(task)
     .where(eq(task.id, taskId))
     .limit(1)
 
   if (!current) throw new Error(`Task ${taskId} was not found.`)
+
+  const completedAt = completedAtFor(current.status, input.status, new Date())
 
   const [row] = await db
     .update(task)
@@ -114,15 +116,7 @@ export async function updateTaskAction(
       ...(input.assigneeId !== undefined && {
         assigneeId: input.assigneeId || null,
       }),
-      // Keep completedAt in step with the status.
-      ...(input.status !== undefined && {
-        completedAt:
-          input.status === "completed"
-            ? new Date()
-            : input.status === "todo"
-              ? null
-              : sql`null`,
-      }),
+      ...(completedAt !== undefined && { completedAt }),
     })
     .where(eq(task.id, taskId))
     .returning()
