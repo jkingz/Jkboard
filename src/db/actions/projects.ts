@@ -9,7 +9,7 @@ import { z } from "zod"
 import { db } from "@/db"
 import { member, project, projectMember } from "@/db/schema"
 import { requireMembership } from "@/db/actions/session"
-import type { Project } from "@/data/jkboard"
+import { canOwnProject, projectTeam, type Project } from "@/data/jkboard"
 
 const projectInputSchema = z.object({
   name: z.string().min(2).max(120),
@@ -55,6 +55,21 @@ function toISO(value: Date | string) {
   return `${date.getUTCFullYear()}-${month}-${day}`
 }
 
+async function assertCanOwn(memberId: string) {
+  const [owner] = await db
+    .select({ status: member.status })
+    .from(member)
+    .where(eq(member.id, memberId))
+    .limit(1)
+
+  if (!owner) throw new Error(`Member ${memberId} was not found.`)
+  if (!canOwnProject(owner.status)) {
+    throw new Error(
+      "An invited member cannot own a project until they have signed in. Put someone else first."
+    )
+  }
+}
+
 async function syncMemberships(projectId: string, memberIds: string[]) {
   await db.delete(projectMember).where(eq(projectMember.projectId, projectId))
 
@@ -75,6 +90,8 @@ export async function createProjectAction(
   const input = projectInputSchema.parse(raw)
 
   const ownerId = input.memberIds[0] ?? callerId
+  await assertCanOwn(ownerId)
+  const team = projectTeam(ownerId, input.memberIds)
 
   const [row] = await db
     .insert(project)
@@ -92,10 +109,10 @@ export async function createProjectAction(
 
   if (!row) throw new Error("Project insert returned no row.")
 
-  await syncMemberships(row.id, input.memberIds)
+  await syncMemberships(row.id, team)
 
   revalidatePath("/", "layout")
-  return toProject(row, input.memberIds)
+  return toProject(row, team)
 }
 
 export async function updateProjectAction(
@@ -123,13 +140,19 @@ export async function updateProjectAction(
 
   if (!row) throw new Error(`Project ${projectId} was not found.`)
 
-  if (input.memberIds !== undefined) {
-    await syncMemberships(projectId, input.memberIds)
+  // Leaving the Owner out of the list keeps them on the team rather than failing.
+  const team =
+    input.memberIds === undefined
+      ? undefined
+      : projectTeam(row.ownerId, input.memberIds)
+
+  if (team !== undefined) {
+    await syncMemberships(projectId, team)
   }
 
   revalidatePath("/", "layout")
 
-  const memberships = input.memberIds ??
+  const memberships = team ??
     (
       await db
         .select({ memberId: projectMember.memberId })
