@@ -435,6 +435,26 @@ export function getMember(memberId: string, source: Member[] = members) {
   return source.find((member) => member.id === memberId)
 }
 
+/** A Project team always includes its Owner, listed first (GLOSSARY.md → Owner). */
+export function projectTeam(ownerId: string, memberIds: string[]) {
+  return [ownerId, ...new Set(memberIds.filter((id) => id !== ownerId))]
+}
+
+/** A Removed Member's Projects pass to whoever removed them (GLOSSARY.md → Removed). */
+export function removalSuccessor(removedId: string, callerId: string) {
+  if (removedId === callerId) {
+    throw new Error(
+      "You cannot remove yourself. Ask another member to remove you so your projects have someone to pass to."
+    )
+  }
+  return callerId
+}
+
+/** An Invited Member can be on a team but cannot be an Owner (GLOSSARY.md → Invited). */
+export function canOwnProject(status: "active" | "invited" | "away") {
+  return status !== "invited"
+}
+
 export function getTaskStatus(value: TaskStatus) {
   return taskStatuses.find((status) => status.value === value)!
 }
