@@ -450,6 +450,21 @@ export function removalSuccessor(removedId: string, callerId: string) {
   return callerId
 }
 
+/**
+ * The completion date a status change writes (GLOSSARY.md → Completed):
+ * set on entering Completed, cleared on leaving it, untouched otherwise.
+ * `undefined` means leave the stored date alone.
+ */
+export function completedAtFor(
+  previous: TaskStatus,
+  next: TaskStatus | undefined,
+  now: Date
+) {
+  if (next === undefined) return undefined
+  if (next !== "completed") return null
+  return previous === "completed" ? undefined : now
+}
+
 /** An Invited Member can be on a team but cannot be an Owner (GLOSSARY.md → Invited). */
 export function canOwnProject(status: "active" | "invited" | "away") {
   return status !== "invited"
