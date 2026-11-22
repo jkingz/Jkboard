@@ -23,6 +23,11 @@ const taskInputSchema = z.object({
 
 export type TaskInput = z.infer<typeof taskInputSchema>
 
+// A Task stays in one Project for life (GLOSSARY.md), so updates cannot carry one.
+const taskUpdateSchema = taskInputSchema.omit({ projectId: true }).partial()
+
+export type TaskUpdate = z.infer<typeof taskUpdateSchema>
+
 function toTask(row: typeof task.$inferSelect): Task {
   return {
     id: row.id,
@@ -89,11 +94,11 @@ export async function createTaskAction(raw: TaskInput): Promise<Task> {
 
 export async function updateTaskAction(
   taskId: string,
-  raw: Partial<TaskInput>
+  raw: TaskUpdate
 ): Promise<Task> {
   await requireMembership()
 
-  const input = taskInputSchema.partial().parse(raw)
+  const input = taskUpdateSchema.parse(raw)
 
   const [current] = await db
     .select({ status: task.status })

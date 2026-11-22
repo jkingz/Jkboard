@@ -81,7 +81,10 @@ export interface JkboardActions {
   setProjectStatus: (projectId: string, status: Project["status"]) => Promise<void>
 
   createTask: (task: TaskInput) => Promise<Task>
-  updateTask: (taskId: string, patch: Partial<TaskInput>) => Promise<void>
+  updateTask: (
+    taskId: string,
+    patch: Partial<Omit<TaskInput, "projectId">>
+  ) => Promise<void>
   deleteTask: (taskId: string) => Promise<void>
   duplicateTask: (taskId: string) => Promise<Task | undefined>
   setTaskStatus: (taskId: string, status: Task["status"]) => Promise<void>
