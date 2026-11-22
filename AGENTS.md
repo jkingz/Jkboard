@@ -34,14 +34,34 @@ Ponytail (full) is on for all coding: smallest complete change; known limits get
 | --- | --- |
 | Stress-test an idea | `/grilling` or `/egm-brainstorm` |
 | Spec | `/egm-draft` → `/egm-review`; the spec is `./design_draft.md` |
-| Tickets | `/to-tickets` → `issues/NN-slug.md` |
+| Tickets | `/to-tickets` → GitHub issues on `jkingz/Jkboard` |
 | Triage | `/triage` |
 | Build | `/implement`, or `/tdd` for risky logic |
 | Bug | `/diagnosing-bugs` |
 | Review | `/code-review` (vs spec), `/ponytail-review` (bloat, safety) |
 | Domain terms and decisions | `/domain-modeling` → `GLOSSARY.md`, `docs/adr/` |
 | PR body | `/pr` |
-| After merge | Tick proven criteria, resolve tickets, name the next one (`docs/agents/issue-tracker.md`) |
+| After merge | Tick proven criteria, close issues, name the next one (`docs/agents/issue-tracker.md`) |
+
+## Status
+
+When I ask "status" or "where are we", answer only from these commands. They are the record; memory is not:
+
+```bash
+gh issue list --state open --limit 100 --json number,title,labels,body
+gh issue list --state closed --search "closed:>=$(date -v-30d +%F)" --json number,title,closedAt
+gh pr list --state open --json number,title,headRefName,isDraft
+gh pr list --state merged --search "merged:>=$(date -v-30d +%F)" --json number,title,mergedAt
+git status --short && git log --oneline -5 main
+```
+
+Reply with these lists, in this order. Every item is `#NN title` plus one line on why it is there, and an empty list says "none":
+
+1. **Done in the last 30 days**: closed issues and merged PRs.
+2. **In flight**: open PRs, plus the current branch if it has uncommitted or unpushed work.
+3. **Waiting on me**: `needs-triage`, `needs-info` and `ready-for-human` issues, each with the question I owe an answer to.
+4. **Ready next**: `ready-for-agent` issues whose `Blocked by:` issues are all closed, lowest number first. The first one is the recommendation.
+5. **Blocked**: open issues with an open `Blocked by:` issue, naming the blocker.
 
 ## Checks
 
@@ -55,11 +75,11 @@ Where the mattpocock skills read and write. The workflow table above lists the s
 
 ### Issue tracker
 
-Spec is `./design_draft.md`; tickets are local markdown in `issues/`. See `docs/agents/issue-tracker.md`.
+Spec is `./design_draft.md`; tickets are GitHub issues on `jkingz/Jkboard`, read and written with `gh`. See `docs/agents/issue-tracker.md`.
 
 ### Triage labels
 
-Default five roles (`needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, `wontfix`) as `Status:` lines. See `docs/agents/triage-labels.md`.
+Default five roles (`needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, `wontfix`) as GitHub labels. See `docs/agents/triage-labels.md`.
 
 ### Domain docs
 

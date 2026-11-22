@@ -1,42 +1,41 @@
-# Issue tracker: Local Markdown
+# Issue tracker: GitHub Issues
 
-The spec and its tickets live as markdown files in the repo root.
+Tickets are GitHub issues on `jkingz/Jkboard`, read and written with the `gh` CLI.
 
 ## Conventions
 
-- The spec is `./design_draft.md` (written by `/egm-draft`)
-- Implementation issues are one file per ticket at `issues/<NN>-<slug>.md`, numbered from `01`, never a single combined tickets file
-- Triage state is recorded as a `Status:` line near the top of each issue file (see `triage-labels.md` for the role strings)
-- Comments and conversation history append to the bottom of the file under a `## Comments` heading
+- The spec is `./design_draft.md` (written by `/egm-draft`).
+- One issue per ticket. The body has **What to build**, a **Blocked by:** line (`#NN, #NN` or `None`) and a checklist of acceptance criteria.
+- Triage state is a label, exactly one per open issue (see `triage-labels.md`).
+- Conversation and evidence go in issue comments (`gh issue comment NN`).
+- Tickets 01–03 (Node 26 runtime pin) were local markdown files that closed before the move. They are in git history under `issues/`, deleted on 2026-11-23.
 
 ## Ticking and closing tickets
 
-At the start of every session, and after every PR merges, reconcile `issues/` against `main` before
+At the start of every session, and after every PR merges, reconcile open issues against `main` before
 picking the next ticket:
 
-1. For each open ticket, tick every criterion that merged work or a run you can cite proves (CI run,
-   command output, deploy log). Unproven boxes stay unticked.
-2. Append the evidence under `## Comments`: date, PR number, and the command or log line.
-3. When every box is ticked, set `Status: resolved`.
-4. A ticket whose `Blocked by:` tickets are all `resolved` is unblocked; name the next one to pick.
-
-The ticket edits travel in the next PR; never commit them straight to `main`.
+1. For each open issue, tick every criterion that merged work or a run you can cite proves (CI run,
+   command output, deploy log). Edit the body with `gh issue edit NN --body-file`. Unproven boxes stay unticked.
+2. Comment the evidence: date, PR number, and the command or log line.
+3. When every box is ticked, close it with `gh issue close NN`. A PR body with `Closes #NN` does this on merge.
+4. An issue whose `Blocked by:` issues are all closed is unblocked. Name the next one to pick.
 
 ## When a skill says "publish to the issue tracker"
 
-Create a new file under `issues/` (creating the directory if needed).
+`gh issue create --title "…" --label <triage-label> --body-file <file>`
 
 ## When a skill says "fetch the relevant ticket"
 
-Read the file at the referenced path. The user will normally pass the path or the issue number directly.
+`gh issue view NN --comments`. The user will normally pass the issue number directly.
 
 ## Wayfinding operations
 
-Used by `/wayfinder`. The **map** is a file with one **child** file per ticket.
+Used by `/wayfinder`. The **map** is one issue with one **child** issue per ticket.
 
-- **Map**: `issues/map.md` (the Notes / Decisions-so-far / Fog body).
-- **Child ticket**: `issues/NN-<slug>.md`, numbered from `01`, with the question in the body. A `Type:` line records the ticket type (`research`/`prototype`/`grilling`/`task`); a `Status:` line records `claimed`/`resolved`.
-- **Blocking**: a `Blocked by: NN, NN` line near the top. A ticket is unblocked when every file it lists is `resolved`.
-- **Frontier**: scan `issues/` for files that are open, unblocked, and unclaimed; first by number wins.
-- **Claim**: set `Status: claimed` and save before any work.
-- **Resolve**: append the answer under an `## Answer` heading, set `Status: resolved`, then append a context pointer (gist + link) to the map's Decisions-so-far in `issues/map.md`.
+- **Map**: an issue titled `Map: <topic>`, labelled `map`, holding the Notes / Decisions-so-far / Fog body.
+- **Child ticket**: an issue with the question in the body, a `Type:` line (`research`/`prototype`/`grilling`/`task`), and a `Map: #NN` line pointing at the map.
+- **Blocking**: a `Blocked by: #NN, #NN` line in the body. An issue is unblocked when every issue it lists is closed.
+- **Frontier**: open, unblocked, unassigned issues; lowest number wins.
+- **Claim**: assign yourself (`gh issue edit NN --add-assignee @me`) before any work.
+- **Resolve**: comment the answer under an `## Answer` heading, close the issue, then add a context pointer (gist + link) to the map's Decisions-so-far.

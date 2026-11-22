@@ -88,7 +88,8 @@ None recorded. No owner has stated a measurable target, so none is written here.
 
 A guessed answer here is a defect. An unanswered question is fine; an invented answer is not.
 
-- Should `role` become real authorization, or is Jkboard intentionally a single-trust-team tool?
 - Should invites send email, or is "sign in with the address you were invited with" the intended flow?
 - Which settings pages are meant to persist, and which are permanent template decoration?
 - Is one shared workspace the intended product, or an artifact of how far the build has got?
+  **Answered 2026-11-23:** one Workspace, single-trust team. See [ADR 0001](./adr/0001-single-trust-team.md)
+  and [GLOSSARY.md](../GLOSSARY.md).
