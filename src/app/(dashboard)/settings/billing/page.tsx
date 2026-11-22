@@ -1,5 +1,7 @@
 "use client"
 
+import { SettingsPreviewHeader } from "../settings-preview-header"
+
 import * as React from "react"
 
 import {
@@ -22,12 +24,11 @@ export default function BillingSettings() {
 
   return (
     <div className="flex flex-col gap-6 px-4 lg:px-6">
-      <div>
-        <h1 className="text-3xl font-bold">Plans &amp; Billing</h1>
-        <p className="text-muted-foreground">
-          Manage your Jkboard subscription, invoices and payment details.
-        </p>
-      </div>
+      <SettingsPreviewHeader
+        title="Plans & Billing"
+        description="Explore subscription plans and example invoices."
+        preview="The plan controls and billing history use sample data."
+      />
 
       <div className="grid gap-6 grid-cols-1 lg:grid-cols-2">
         <CurrentPlanCard plan={currentPlanData} />

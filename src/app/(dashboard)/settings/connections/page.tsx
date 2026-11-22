@@ -1,5 +1,7 @@
 "use client"
 
+import { SettingsPreviewHeader } from "../settings-preview-header"
+
 import { useState } from "react"
 import {
   CalendarClock,
@@ -87,9 +89,7 @@ export default function IntegrationSettings() {
     toast.add({
       type: next ? "success" : "info",
       title: next ? `${name} connected` : `${name} disconnected`,
-      description: next
-        ? "Jkboard will start syncing as soon as OAuth is connected."
-        : "Jkboard will stop syncing with this service.",
+      description: "This change applies to the integration preview.",
     })
   }
 
@@ -121,19 +121,17 @@ export default function IntegrationSettings() {
     toast.add({
       type: "warning",
       title: `${label} regenerated`,
-      description: "Update any services still using the previous key.",
+      description: "This example key is for the preview.",
     })
   }
 
   return (
     <div className="flex flex-col gap-6 px-4 lg:px-6">
-      <div>
-        <h1 className="text-3xl font-bold">Integrations</h1>
-        <p className="text-muted-foreground">
-          Connect the tools your team already uses to keep projects and
-          deadlines in sync.
-        </p>
-      </div>
+      <SettingsPreviewHeader
+        title="Integrations"
+        description="Explore connected services and API key controls."
+        preview="Services and keys use example data for this session."
+      />
 
       <Card>
         <CardHeader>

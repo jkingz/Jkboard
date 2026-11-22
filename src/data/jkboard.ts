@@ -527,22 +527,6 @@ export function getWorkload(memberId: string, source: Task[] = tasks) {
 /*                                Chart datasets                              */
 /* -------------------------------------------------------------------------- */
 
-/** Completed vs. newly created tasks over the last twelve weeks. */
-export const taskCompletionTrend = [
-  { week: "W1", completed: 12, created: 15 },
-  { week: "W2", completed: 16, created: 14 },
-  { week: "W3", completed: 14, created: 18 },
-  { week: "W4", completed: 21, created: 17 },
-  { week: "W5", completed: 19, created: 22 },
-  { week: "W6", completed: 24, created: 20 },
-  { week: "W7", completed: 22, created: 25 },
-  { week: "W8", completed: 28, created: 23 },
-  { week: "W9", completed: 26, created: 27 },
-  { week: "W10", completed: 31, created: 26 },
-  { week: "W11", completed: 29, created: 30 },
-  { week: "W12", completed: 34, created: 28 },
-]
-
 /** Per-project completion, derived so the chart always matches the fixtures. */
 export const projectProgressSeries = projects.map((project) => {
   const { progress, total } = getProjectProgress(project.id)

@@ -11,18 +11,16 @@ export const metadata = {
 export default async function SignInPage({
   searchParams,
 }: {
-  searchParams: Promise<{ redirect?: string }>
+  searchParams: Promise<{ redirect?: string | string[] }>
 }) {
   const { redirect } = await searchParams
-
-  /**
-   * Only same-origin paths are honoured, so this value can never be used as an
-   * open redirect to another site.
-   */
-  const target =
-    redirect && redirect.startsWith("/") && !redirect.startsWith("//")
-      ? redirect
-      : "/dashboard"
+  const base = "https://jkboard.invalid"
+  const next = typeof redirect === "string" && redirect.startsWith("/") && !redirect.startsWith("//")
+    ? URL.parse(redirect, base)
+    : null
+  const target = next?.origin === base && !next.pathname.startsWith("//")
+    ? `${next.pathname}${next.search}${next.hash}`
+    : "/dashboard"
 
   return (
     <div className="bg-muted flex min-h-svh flex-col items-center justify-center gap-6 p-6 md:p-10">

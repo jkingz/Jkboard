@@ -60,27 +60,32 @@ export function useEmailPasswordAuth() {
       startTransition(async () => {
         setError(null)
 
-        const result =
-          mode === "sign-up"
-            ? await authClient.signUp.email({
-                email: values.email,
-                password: values.password,
-                name: values.name?.trim() || values.email.split("@")[0],
-              })
-            : await authClient.signIn.email({
-                email: values.email,
-                password: values.password,
-              })
+        const errorTitle = mode === "sign-up" ? "Could not create account" : "Sign-in failed"
 
-        if (result.error) {
-          const message = describe(result.error)
+        function showRequestError(message: string) {
           setError(message)
-          toast.add({
-            type: "error",
-            title:
-              mode === "sign-up" ? "Could not create account" : "Sign-in failed",
-            description: message,
-          })
+          toast.add({ type: "error", title: errorTitle, description: message })
+        }
+
+        try {
+          const result =
+            mode === "sign-up"
+              ? await authClient.signUp.email({
+                  email: values.email,
+                  password: values.password,
+                  name: values.name?.trim() || values.email.split("@")[0],
+                })
+              : await authClient.signIn.email({
+                  email: values.email,
+                  password: values.password,
+                })
+
+          if (result.error) {
+            showRequestError(describe(result.error))
+            return
+          }
+        } catch {
+          showRequestError("Could not reach Jkboard. Check your connection and try again.")
           return
         }
 
@@ -93,8 +98,10 @@ export function useEmailPasswordAuth() {
               : "You are signed in.",
         })
 
-        router.replace(redirectTo)
-        router.refresh()
+        startTransition(() => {
+          router.replace(redirectTo)
+          router.refresh()
+        })
       })
     },
     [router]

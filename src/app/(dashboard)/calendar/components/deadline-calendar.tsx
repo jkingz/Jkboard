@@ -3,9 +3,10 @@
 import * as React from "react"
 import Link from "next/link"
 import { format, parseISO } from "date-fns"
-import { CalendarClock, TriangleAlert } from "lucide-react"
+import { TriangleAlert } from "lucide-react"
 
 import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
 import { Calendar } from "@/components/ui/calendar"
 import {
   Card,
@@ -19,9 +20,10 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { cn } from "@/lib/utils"
 import { useJkboard } from "@/data/jkboard-store"
 import {
+  dateFromToday,
   daysUntil,
   formatDate,
-  getProject,
+  formatShortDate,
   getTaskStatus,
   isOverdue,
   priorityClasses,
@@ -29,10 +31,10 @@ import {
   type Task,
 } from "@/data/jkboard"
 
-export function DeadlineCalendar() {
+export function DeadlineCalendar({ initialDate }: { initialDate: string }) {
   const { tasks, projects } = useJkboard()
-  const [selected, setSelected] = React.useState<Date>(new Date())
-  const [month, setMonth] = React.useState<Date>(new Date())
+  const [selected, setSelected] = React.useState(() => parseISO(initialDate))
+  const [month, setMonth] = React.useState(() => parseISO(initialDate))
 
   const deadlinesByDay = React.useMemo(() => {
     const map = new Map<string, Task[]>()
@@ -44,6 +46,10 @@ export function DeadlineCalendar() {
 
     return map
   }, [tasks])
+
+  const selectedKey = format(selected, "yyyy-MM-dd")
+  const selectedTargets = projects.filter(({ dueDate }) => dueDate === selectedKey)
+  const targetDays = projects.map(({ dueDate }) => parseISO(dueDate))
 
   const busyDays = React.useMemo(
     () => [...deadlinesByDay.keys()].map((key) => parseISO(key)),
@@ -59,133 +65,122 @@ export function DeadlineCalendar() {
   )
 
   const selectedTasks = React.useMemo(
-    () => deadlinesByDay.get(format(selected, "yyyy-MM-dd")) ?? [],
-    [deadlinesByDay, selected]
+    () => deadlinesByDay.get(selectedKey) ?? [],
+    [deadlinesByDay, selectedKey]
   )
 
   const upcoming = React.useMemo(
     () =>
       [...tasks]
-        .filter((task) => task.status !== "completed")
+        .filter((task) => task.status !== "completed" && !isOverdue(task))
         .sort((a, b) => a.dueDate.localeCompare(b.dueDate))
         .slice(0, 8),
     [tasks]
   )
 
   const openProjects = projects
-    .filter((project) => project.status !== "completed")
+    .filter((project) => project.status !== "completed" && daysUntil(project.dueDate) >= 0)
     .sort((a, b) => a.dueDate.localeCompare(b.dueDate))
 
   return (
-    <div className="grid gap-6 @4xl:grid-cols-[minmax(0,1fr)_360px]">
-      <Card className="@container/card">
+    <div className="grid items-start gap-3 lg:grid-cols-[minmax(0,1.65fr)_minmax(0,1fr)]">
+      <Card size="sm" className="min-w-0">
         <CardHeader>
           <CardTitle>Deadline calendar</CardTitle>
-          <CardDescription>
-            Select a day to see every task due on it. Dotted days have
-            deadlines; red days include overdue work.
-          </CardDescription>
+          <CardDescription>Select a date to open its agenda.</CardDescription>
           <CardAction>
-            <Badge variant="outline">
-              <CalendarClock />
-              {busyDays.length} days with deadlines
-            </Badge>
+            <Button size="sm" variant="outline" onClick={() => {
+              const today = parseISO(dateFromToday(0))
+              setSelected(today)
+              setMonth(today)
+            }}>Today</Button>
           </CardAction>
         </CardHeader>
-        <CardContent className="flex flex-col gap-6">
+        <CardContent>
           <Calendar
             mode="single"
+            today={parseISO(initialDate)}
             month={month}
             onMonthChange={setMonth}
             selected={selected}
             onSelect={(date) => date && setSelected(date)}
-            className="w-full [--cell-size:--spacing(11)]"
+            className="w-full px-0 [--cell-size:clamp(1.75rem,8vw,3.75rem)]"
             modifiers={{
               busy: busyDays,
+              target: targetDays,
               overdue: overdueDays,
             }}
             modifiersClassNames={{
               busy:
                 "after:absolute after:bottom-1 after:size-1 after:rounded-full after:bg-primary",
               overdue: "text-destructive",
+              target: "ring-1 ring-inset ring-ring rounded-md",
             }}
           />
 
-          <div className="flex flex-col gap-3 border-t pt-4">
-            <div className="flex items-center gap-2">
-              <h3 className="text-sm font-medium">
-                {format(selected, "EEEE, MMMM d")}
-              </h3>
-              <Badge variant="secondary">{selectedTasks.length} due</Badge>
-            </div>
-
-            {selectedTasks.length === 0 ? (
-              <p className="text-sm text-muted-foreground">
-                Nothing is due on this day.
-              </p>
-            ) : (
-              <ul className="flex flex-col gap-2">
-                {selectedTasks.map((task) => (
-                  <DeadlineRow key={task.id} task={task} />
-                ))}
-              </ul>
-            )}
+          <div aria-label="Calendar legend" className="flex flex-wrap gap-3 border-t pt-3 text-xs text-muted-foreground">
+            <span className="inline-flex items-center gap-1.5"><span aria-hidden="true" className="size-1.5 rounded-full bg-primary" /> Task deadline</span>
+            <span className="inline-flex items-center gap-1.5"><span aria-hidden="true" className="size-2.5 rounded-sm border border-ring" /> Project target</span>
           </div>
         </CardContent>
       </Card>
 
-      <div className="flex flex-col gap-6">
-        <Card>
+      <div className="flex min-w-0 flex-col gap-3">
+        <Card size="sm" className="bg-muted">
           <CardHeader>
-            <CardTitle>Next up</CardTitle>
-            <CardDescription>Closest open deadlines</CardDescription>
+            <CardTitle>{format(selected, "EEEE, MMMM d")}</CardTitle>
+            <CardDescription>Selected date</CardDescription>
           </CardHeader>
+          <CardContent className="space-y-3">
+            {selectedTasks.length ? (
+              <ul className="space-y-2">
+                {selectedTasks.map((task) => <DeadlineRow key={task.id} task={task} />)}
+              </ul>
+            ) : (
+              <p className="text-sm text-muted-foreground">No tasks due on this date.</p>
+            )}
+            {selectedTargets.length > 0 && (
+              <ul className="space-y-2 border-t pt-3">
+                {selectedTargets.map((project) => (
+                  <li key={project.id} className="flex flex-wrap items-center gap-2 text-sm">
+                    <Badge variant="secondary">Project target</Badge>
+                    <Link href={`/projects/${project.id}`} className="font-medium hover:underline">{project.name}</Link>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </CardContent>
+        </Card>
+        <Card size="sm">
+          <CardHeader><CardTitle>Upcoming project targets</CardTitle></CardHeader>
           <CardContent>
-            <ul className="flex flex-col gap-3">
-              {upcoming.map((task) => (
-                <DeadlineRow key={task.id} task={task} showProject />
-              ))}
-            </ul>
+            {openProjects.length ? (
+              <ul className="divide-y border-t">
+                {openProjects.map((project) => (
+                  <li key={project.id}>
+                    <Link href={`/projects/${project.id}`} className="flex gap-2 py-2 text-sm hover:underline">
+                      <time dateTime={project.dueDate} className="w-12 shrink-0 text-xs font-medium tabular-nums">{formatShortDate(project.dueDate)}</time>
+                      {project.name}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="text-sm text-muted-foreground">No upcoming targets for open projects.</p>
+            )}
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Project milestones</CardTitle>
-            <CardDescription>Target dates for open projects</CardDescription>
-          </CardHeader>
+        <Card size="sm">
+          <CardHeader><CardTitle>Upcoming task deadlines</CardTitle></CardHeader>
           <CardContent>
-            <ul className="flex flex-col gap-3">
-              {openProjects.map((project) => {
-                const remaining = daysUntil(project.dueDate)
-
-                return (
-                  <li
-                    key={project.id}
-                    className="flex items-center gap-3 text-sm"
-                  >
-                    <span
-                      className="size-2 shrink-0 rounded-full"
-                      style={{ backgroundColor: project.color }}
-                      aria-hidden="true"
-                    />
-                    <span className="min-w-0 flex-1 truncate">
-                      {project.name}
-                    </span>
-                    <span
-                      className={cn(
-                        "shrink-0 text-xs tabular-nums",
-                        remaining < 0
-                          ? "text-destructive"
-                          : "text-muted-foreground"
-                      )}
-                    >
-                      {formatDate(project.dueDate)}
-                    </span>
-                  </li>
-                )
-              })}
-            </ul>
+            {upcoming.length ? (
+              <ul className="space-y-2">
+                {upcoming.map((task) => <DeadlineRow key={task.id} task={task} showProject />)}
+              </ul>
+            ) : (
+              <p className="text-sm text-muted-foreground">No upcoming task deadlines.</p>
+            )}
           </CardContent>
         </Card>
       </div>
@@ -200,10 +195,10 @@ function DeadlineRow({
   task: Task
   showProject?: boolean
 }) {
-  const { memberById } = useJkboard()
+  const { memberById, projectById } = useJkboard()
   const status = getTaskStatus(task.status)
   const PriorityIcon = priorityIcons[task.priority]
-  const project = getProject(task.projectId)
+  const project = projectById(task.projectId)
   const assignee = memberById(task.assigneeId)
   const overdue = isOverdue(task)
 
@@ -211,7 +206,7 @@ function DeadlineRow({
     <li className="flex items-center gap-3 rounded-md border bg-background/60 px-3 py-2">
       <div className="flex min-w-0 flex-1 flex-col">
         <Link
-          href="/tasks"
+          href={`/tasks?task=${encodeURIComponent(task.id)}`}
           className="truncate text-sm font-medium hover:underline"
         >
           {task.title}

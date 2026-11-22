@@ -223,7 +223,7 @@ Each rule gets exactly one authority. No module may re-implement it in its own l
 
 | Rule | Single authority | Notes |
 | --- | --- | --- |
-| Whether a page may render | `src/app/(dashboard)/layout.tsx:26` — `auth.api.getSession()` | Also resolves `currentMember` from that session; no session means `redirect("/sign-in")`, a session with no membership means `WorkspaceAccessNotice`. |
+| Whether a page may render | `src/app/(dashboard)/workspace-request.ts` — request-scoped session and membership | The workspace layout redirects if the session is absent and shows `WorkspaceAccessNotice` if membership is absent. The project route shares those reads before checking the project ID. |
 | Whether a mutation may run | `src/db/actions/session.ts` — `requireMembership()` | Awaited first in every action. The second `auth.api.getSession()` call site in `src/` — deliberate: the layout cannot guard an action invocation. |
 | Cookie presence | `src/proxy.ts:14` — `proxy()` | Presence only, not validity — the proxy bundle cannot import the database. |
 | Workspace read model | `src/db/queries/jkboard.ts` — `getWorkspaceData()` | All joins happen here so the UI stays on flat arrays. |

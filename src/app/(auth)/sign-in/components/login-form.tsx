@@ -1,5 +1,7 @@
 "use client"
 
+import Link from "next/link"
+
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Controller, useForm } from "react-hook-form"
 import { z } from "zod"
@@ -222,8 +224,8 @@ export function LoginForm({
         </CardContent>
       </Card>
       <div className="text-muted-foreground *:[a]:hover:text-primary text-center text-xs text-balance *:[a]:underline *:[a]:underline-offset-4">
-        By clicking continue, you agree to our <a href="#">Terms of Service</a>{" "}
-        and <a href="#">Privacy Policy</a>.
+        Review the <Link href="/terms">Terms of Service</Link>{" "}
+        and <Link href="/privacy">Privacy Policy</Link>.
       </div>
     </div>
   )

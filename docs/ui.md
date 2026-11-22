@@ -27,19 +27,16 @@ Operational. Closer to a well-made instrument than to a lifestyle brand.
 
 ## Palette
 
-**Monochrome, with one accent.**
+**Low-saturation teal, with semantic status colours.**
 
-- Core: near-black and white, carried by the shadcn neutral `oklch` base in `src/app/globals.css`.
-- Accent: **one.** `--primary` is the only chromatic colour permitted to carry meaning. It marks the
-  single most important element on a screen and nothing else.
-- Status colours (`--success`, `--warning`, `--info`, `--destructive`) are functional, never
-  decorative. They appear only where the state is real.
-- **Why:** the product's identity is precision, and precision is monochrome. A saturated colour that
-  decorates rather than informs contradicts the thing being sold.
-- **Landing page exception:** `/landing` uses the low-saturation teal ramp from the Paper "Jkboard
-  design reference" board (Ink `#101B20` → Foam `#DCE2D5`), scoped by the `.landing` and
-  `.landing-invert` classes in `globals.css`. Sections alternate dark and light bands. The dashboard
-  keeps the neutral base.
+- The landing page and workspace apply Sea Glass from Paper. Fog #F3F7F4 and white form
+  the light surfaces. Ink #142824 is the text, teal #176B60 is the primary action, and pale
+  sea glass #DCEFE7 marks selection. Clay #9A482D identifies overdue dates.
+- Dark mode uses the same roles against deep green surfaces. The workspace sets its palette
+  at the root so dialogs, menus, and toasts inherit the theme.
+- The workspace uses a searchable desktop rail and mobile bottom navigation. Overview
+  prioritizes overdue work and project targets. Task details stay alongside the list on
+  desktop and open as a sheet on narrow screens. Settings uses route-linked tabs.
 
 **No blue-to-purple, blue-to-cyan or purple-to-pink gradient as a primary treatment.** No radial orbs,
 no coloured glow backgrounds, no neon.
@@ -107,13 +104,13 @@ Permitted motion on `/landing` (the owner asked for a more premium, animated pag
   task table re-sorts, and the calendar spotlights each upcoming deadline. All stop off screen.
 - "Open the live demo" (`demo-button.tsx`) signs in as the demo user in one click; a signed-in
   visitor gets "Open your workspace" instead.
-- The hero has a scroll-linked drift on the product preview and a React Three Fiber backdrop
-  (`hero-scene.tsx`, one instanced mesh, client-only via `next/dynamic`). The render loop stops once
-  the hero leaves the viewport.
+- GSAP ScrollTrigger lifts and tilts the hero board preview as the desktop page scrolls. The
+  effect is skipped for reduced motion. The Three.js backdrop (`hero-scene.tsx`) renders one client-only
+  instanced mesh with `THREE.Timer` and stops animating when it leaves the viewport.
 - `MotionConfig reducedMotion="user"` wraps the page; reduced-motion visitors get still previews
   and a single static 3D frame.
 
-Still out: pinning, scroll-jacking, and motion anywhere outside `/landing`.
+The workspace uses a small Motion entrance when the route changes and respects reduced motion.
 
 ### Interaction states
 

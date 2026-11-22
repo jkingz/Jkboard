@@ -1,5 +1,7 @@
 "use client"
 
+import { SettingsPreviewHeader } from "../settings-preview-header"
+
 import { useState } from "react"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Controller, useForm } from "react-hook-form"
@@ -64,20 +66,18 @@ export default function SecuritySettings() {
   function onSubmit() {
     toast.add({
       type: "success",
-      title: "Password updated",
-      description: "Use your new password the next time you sign in.",
+      title: "Password form previewed",
     })
     form.reset()
   }
 
   return (
     <div className="flex flex-col gap-6 px-4 lg:px-6">
-      <div>
-        <h1 className="text-3xl font-bold">Security</h1>
-        <p className="text-muted-foreground">
-          Manage your password and the sign-in details for {currentMember.email}.
-        </p>
-      </div>
+      <SettingsPreviewHeader
+        title="Security"
+        description="Review password and account security options."
+        preview="These controls demonstrate password and account settings."
+      />
 
       <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-6">
         <Card>

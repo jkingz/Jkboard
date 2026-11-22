@@ -11,6 +11,8 @@
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
   --color-background: var(--background);
+  --color-tide: var(--tide);
+  --color-tide-foreground: var(--tide-foreground);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
   --color-card-foreground: var(--card-foreground);
@@ -131,51 +133,126 @@
   --sidebar-ring: oklch(0.556 0 0);
 }
 
-/* Landing page only: teal palette from the Paper "Jkboard design reference" board.
-   Ink #101B20, Deep teal #19333A, Tide #28515A, Slate teal #47777B, Mist #91AAA0, Foam #DCE2D5.
-   `.landing-invert` sections take the opposite palette, so the page alternates dark and light bands. */
+/* Sea Glass from Jkboard-designs. Workspace colors live at the root for portals. */
 .landing,
-.dark .landing .landing-invert {
-  --background: #dce2d5;
-  --foreground: #101b20;
-  /* shortcut: the board has no lighter-than-Foam surface; cards mix Foam with white until one is chosen. */
-  --card: color-mix(in oklab, #dce2d5 55%, white);
-  --card-foreground: #101b20;
-  --popover: color-mix(in oklab, #dce2d5 55%, white);
-  --popover-foreground: #101b20;
-  --primary: #101b20;
-  --primary-foreground: #dce2d5;
-  --secondary: color-mix(in oklab, #91aaa0 35%, #dce2d5);
-  --secondary-foreground: #101b20;
-  --muted: color-mix(in oklab, #91aaa0 35%, #dce2d5);
-  /* Mist on Foam fails contrast; the board says "Use Ink or Deep teal on Foam". */
-  --muted-foreground: #19333a;
-  --accent: color-mix(in oklab, #91aaa0 35%, #dce2d5);
-  --accent-foreground: #101b20;
-  --border: #91aaa0;
-  --input: #91aaa0;
-  --ring: #47777b;
+.dark .landing .landing-invert,
+:root:not(.dark):has(.workspace) {
+  --background: #f3f7f4;
+  --foreground: #142824;
+  --card: #fff;
+  --card-foreground: #142824;
+  --popover: #fff;
+  --popover-foreground: #142824;
+  --primary: #176b60;
+  --primary-foreground: #fff;
+  --secondary: #dcefe7;
+  --secondary-foreground: #173c35;
+  --muted: #f3f7f4;
+  --muted-foreground: #49645e;
+  --accent: #dcefe7;
+  --accent-foreground: #173c35;
+  --border: #cdded6;
+  --input: #92aea4;
+  --ring: #176b60;
+  --destructive: #9a482d;
+  --warning: #88440e;
+  --info: #176b60;
+  --tide: #173c35;
+  --tide-foreground: #fff;
 }
 
 .dark .landing,
-.landing .landing-invert {
-  --background: #101b20;
-  --foreground: #dce2d5;
-  --card: #19333a;
-  --card-foreground: #dce2d5;
-  --popover: #19333a;
-  --popover-foreground: #dce2d5;
-  --primary: #dce2d5;
-  --primary-foreground: #101b20;
-  --secondary: #28515a;
-  --secondary-foreground: #dce2d5;
-  --muted: #19333a;
-  --muted-foreground: #91aaa0;
-  --accent: #28515a;
-  --accent-foreground: #dce2d5;
-  --border: #47777b;
-  --input: #47777b;
-  --ring: #91aaa0;
+.landing .landing-invert,
+:root.dark:has(.workspace) {
+  --background: #102621;
+  --foreground: #e7f3ec;
+  --card: #173c35;
+  --card-foreground: #e7f3ec;
+  --popover: #193a34;
+  --popover-foreground: #e7f3ec;
+  --primary: #a5d9c5;
+  --primary-foreground: #142824;
+  --secondary: #265248;
+  --secondary-foreground: #e7f3ec;
+  --muted: #1b342e;
+  --muted-foreground: #a9c3b8;
+  --accent: #265248;
+  --accent-foreground: #e7f3ec;
+  --border: #385c51;
+  --input: #557a6e;
+  --ring: #a5d9c5;
+  --destructive: #ffb28f;
+  --warning: #f2bb82;
+  --info: #a5d9c5;
+  --tide: #265248;
+  --tide-foreground: #e7f3ec;
+}
+
+:root:not(.dark):has(.workspace) {
+  --background: #fff;
+}
+
+:root:has(.workspace) {
+  --sidebar: var(--muted);
+  --sidebar-foreground: var(--foreground);
+  --sidebar-primary: var(--primary);
+  --sidebar-primary-foreground: var(--primary-foreground);
+  --sidebar-accent: var(--accent);
+  --sidebar-accent-foreground: var(--accent-foreground);
+  --sidebar-border: var(--border);
+  --sidebar-ring: var(--ring);
+}
+
+.workspace [data-slot="table-header"] {
+  background: var(--muted);
+}
+
+.workspace [data-slot="table-row"][data-inspected="true"] {
+  background: var(--accent);
+}
+
+@layer components {
+  .workspace-view-tab {
+    @apply inline-flex shrink-0 items-center gap-1.5 border-b-2 border-transparent px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground;
+  }
+
+  .workspace-view-tab:is([aria-current], [aria-pressed="true"]) {
+    @apply border-primary font-semibold text-primary;
+  }
+}
+
+:root:has(.task-detail) [data-slot="sheet-overlay"] {
+  backdrop-filter: none;
+}
+
+@media (max-width: 47.999rem) {
+  .workspace-task-table,
+  .workspace-task-table tbody {
+    display: block;
+  }
+
+  .workspace-task-table tbody tr {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 0.375rem 0.625rem;
+    padding: 0.625rem;
+  }
+
+  .workspace-task-table td {
+    min-width: 0;
+    padding: 0;
+  }
+
+  .workspace-task-table td[data-column="title"] { grid-column: 2 / 4; grid-row: 1; }
+  .workspace-task-table td[data-column="select"] { grid-column: 1; grid-row: 1; }
+  .workspace-task-table td[data-column="actions"] { grid-column: 4; grid-row: 1; }
+  .workspace-task-table td[data-column="projectId"] { grid-column: 2; grid-row: 2; }
+  .workspace-task-table td[data-column="dueDate"] { grid-column: 3 / 5; grid-row: 2; }
+  .workspace-task-table td[data-column="status"] { grid-column: 2; grid-row: 3; }
+  .workspace-task-table td[data-column="priority"] { grid-column: 3 / 5; grid-row: 3; }
+  .workspace-task-table td[data-column="assigneeId"] { grid-column: 2 / 5; grid-row: 4; }
+  .workspace-task-table td[colspan] { grid-column: 1 / -1; }
 }
 
 @layer base {
@@ -214,11 +291,6 @@
     ~ [data-slot="sidebar-inset"] {
     margin-right: 0.5rem !important;
   }
-}
-
-/* Smooth scrolling for the entire page */
-html {
-  scroll-behavior: smooth;
 }
 
 /* Logo carousel animation */
@@ -260,7 +332,13 @@ html:has(.landing) {
   scroll-padding-top: 4rem;
 }
 @media (prefers-reduced-motion: no-preference) {
-  html:has(.landing) {
+  html:has(.landing, .workspace) {
     scroll-behavior: smooth;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .workspace [data-slot="skeleton"] {
+    animation: none;
   }
 }

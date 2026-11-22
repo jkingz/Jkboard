@@ -76,7 +76,7 @@ export function buildTaskColumns({
           <button
             type="button"
             onClick={() => onViewTask(row.original.id)}
-            className="max-w-[320px] truncate text-left font-medium hover:underline"
+            className="whitespace-normal text-left sm:max-w-[320px] sm:truncate font-medium hover:underline"
           >
             {row.getValue("title")}
           </button>
@@ -96,7 +96,7 @@ export function buildTaskColumns({
         if (!project) return null
 
         return (
-          <div className="flex w-[140px] items-center gap-2">
+          <div className="flex min-w-0 items-center gap-2">
             <span
               className="size-2 shrink-0 rounded-full"
               style={{ backgroundColor: project.color }}
@@ -117,7 +117,7 @@ export function buildTaskColumns({
         const status = getTaskStatus(row.getValue("status"))
 
         return (
-          <div className="flex w-[130px] items-center">
+          <div className="flex items-center">
             <status.icon className="mr-2 size-4 text-muted-foreground" />
             <span className="text-sm">{status.label}</span>
           </div>
@@ -155,7 +155,7 @@ export function buildTaskColumns({
         return (
           <div
             className={cn(
-              "flex w-[120px] items-center gap-1.5 text-sm tabular-nums",
+              "flex items-center gap-1.5 text-sm tabular-nums",
               overdue ? "text-destructive" : "text-muted-foreground"
             )}
           >
@@ -165,6 +165,7 @@ export function buildTaskColumns({
               <CalendarClock className="size-3.5" />
             )}
             {formatShortDate(task.dueDate)}
+            {overdue && <span className="sr-only"> · Overdue</span>}
           </div>
         )
       },
@@ -181,7 +182,7 @@ export function buildTaskColumns({
         if (!member) return null
 
         return (
-          <div className="flex w-[160px] items-center gap-2">
+          <div className="flex min-w-0 items-center gap-2">
             <Avatar className="size-6">
               <AvatarFallback className="text-[10px]">
                 {member.initials}

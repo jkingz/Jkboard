@@ -1,76 +1,67 @@
 "use client"
 
-import * as React from "react"
 import Link from "next/link"
-import { CalendarClock, Plus } from "lucide-react"
+import { usePathname } from "next/navigation"
+import { CalendarClock } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
-import { Separator } from "@/components/ui/separator"
 import { SidebarTrigger } from "@/components/ui/sidebar"
-import { CommandSearch, SearchTrigger } from "@/components/command-search"
+import { SearchTrigger } from "@/components/command-search"
 import { ModeToggle } from "@/components/mode-toggle"
-import { ProjectDialog } from "@/components/project-dialog"
+import { navGroups, settingsNavItems } from "@/components/app-sidebar"
+import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+import { useJkboard } from "@/data/jkboard-store"
 
 export function SiteHeader({
   user,
+  onSearch,
 }: {
   user?: { name: string; email: string; image: string | null }
+  onSearch: () => void
 }) {
-  const [searchOpen, setSearchOpen] = React.useState(false)
-
-  React.useEffect(() => {
-    const down = (e: KeyboardEvent) => {
-      if (e.key === "k" && (e.metaKey || e.ctrlKey)) {
-        e.preventDefault()
-        setSearchOpen((open) => !open)
-      }
-    }
-
-    document.addEventListener("keydown", down)
-    return () => document.removeEventListener("keydown", down)
-  }, [])
+  const pathname = usePathname()
+  const { currentMember, projectById } = useJkboard()
+  const [, section, detail] = pathname.split("/")
+  const item = navGroups[0].items.find(({ url }) => url === `/${section}`)
+  const settings = settingsNavItems.find(({ url }) => url === pathname)
+  const trail = settings
+    ? `Settings / ${settings.title}`
+    : section === "projects" && detail
+      ? `Projects / ${projectById(detail)?.name ?? "Project"}`
+      : `Workspace / ${item?.title ?? "Overview"}`
 
   return (
-    <>
-      <header className="flex h-(--header-height) shrink-0 items-center gap-2 border-b transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-(--header-height)">
-        <div className="flex w-full items-center gap-1 px-4 py-3 lg:gap-2 lg:px-6">
-          <SidebarTrigger className="-ml-1" />
-          <Separator
-            orientation="vertical"
-            className="mx-2 data-vertical:self-center data-vertical:h-4"
-          />
-          <div className="flex-1 max-w-sm">
-            <SearchTrigger onClick={() => setSearchOpen(true)} />
-          </div>
-          <div className="ml-auto flex items-center gap-2">
-            <Button
-              variant="ghost"
-              size="sm"
-              className="hidden sm:flex"
-              nativeButton={false}
-              render={<Link href="/calendar" />}
-            >
-              <CalendarClock data-icon="inline-start" />
-              Deadlines
-            </Button>
-            <ProjectDialog
-              trigger={
-                <Button size="sm" className="hidden md:flex cursor-pointer" />
-              }
-            >
-              <Plus data-icon="inline-start" />
-              New project
-            </ProjectDialog>
-            {user && (
-              <span className="hidden lg:inline text-sm text-muted-foreground">
-                {user.name}
-              </span>
-            )}
-            <ModeToggle />
-          </div>
+    <header className="flex h-(--header-height) shrink-0 items-center gap-2 border-b transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-(--header-height)">
+      <div className="flex w-full items-center gap-1 px-4 py-3 lg:gap-2 lg:px-6">
+        <SidebarTrigger className="-ml-1" />
+        <span className="hidden min-w-0 flex-1 truncate text-sm text-muted-foreground md:block">
+          {trail}
+        </span>
+        <Link href="/dashboard" className="mr-auto font-semibold tracking-tight md:hidden">
+          Jkboard
+        </Link>
+        <div className="min-w-0 md:hidden">
+          <SearchTrigger onClick={onSearch} />
         </div>
-      </header>
-      <CommandSearch open={searchOpen} onOpenChange={setSearchOpen} />
-    </>
+        <div className="flex shrink-0 items-center gap-1 md:gap-2">
+          <Button
+            variant="ghost"
+            size="sm"
+            className="hidden sm:flex"
+            nativeButton={false}
+            render={<Link href="/calendar" />}
+          >
+            <CalendarClock data-icon="inline-start" />
+            Deadlines
+          </Button>
+          {user && (
+            <Avatar size="sm" className="hidden md:flex" aria-label={user.name}>
+              <AvatarFallback>{currentMember.initials}</AvatarFallback>
+            </Avatar>
+          )}
+          <ModeToggle />
+        </div>
+      </div>
+    </header>
   )
 }

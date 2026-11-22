@@ -5,7 +5,6 @@ import {
   type ColumnDef,
   type ColumnFiltersState,
   type ColumnVisibilityState,
-  type RowData,
   type RowSelectionState,
   type SortingState,
   flexRender,
@@ -13,6 +12,7 @@ import {
 } from "@tanstack/react-table"
 
 import { dataTableFeatures, type DataTableFeatures } from "@/lib/data-table"
+import type { Task } from "@/data/jkboard"
 
 import {
   Table,
@@ -26,15 +26,14 @@ import {
 import { DataTablePagination } from "./data-table-pagination"
 import { DataTableToolbar } from "./data-table-toolbar"
 
-interface DataTableProps<TData extends RowData> {
-  columns: ColumnDef<DataTableFeatures, TData>[]
-  data: TData[]
+interface DataTableProps {
+  columns: ColumnDef<DataTableFeatures, Task>[]
+  data: Task[]
+  activeTaskId: string | null
+  compact: boolean
 }
 
-export function DataTable<TData extends RowData>({
-  columns,
-  data,
-}: DataTableProps<TData>) {
+export function DataTable({ columns, data, activeTaskId, compact }: DataTableProps) {
   const [rowSelection, setRowSelection] = React.useState<RowSelectionState>({})
   const [columnVisibility, setColumnVisibility] =
     React.useState<ColumnVisibilityState>({})
@@ -60,15 +59,17 @@ export function DataTable<TData extends RowData>({
     onColumnVisibilityChange: setColumnVisibility,
   })
 
+  const showColumn = (id: string) => !compact || !["projectId", "status", "priority"].includes(id)
+
   return (
-    <div className="flex flex-col gap-4">
-      <DataTableToolbar table={table} />
-      <div className="rounded-md border">
-        <Table>
-          <TableHeader>
+    <div className="flex min-w-0 flex-col gap-4">
+      <DataTableToolbar table={table} compact={compact} />
+      <div className="overflow-hidden rounded-md border bg-card">
+        <Table role="table" className="workspace-task-table">
+          <TableHeader className="hidden md:table-header-group">
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
-                {headerGroup.headers.map((header) => {
+                {headerGroup.headers.filter((header) => showColumn(header.column.id)).map((header) => {
                   return (
                     <TableHead key={header.id} colSpan={header.colSpan}>
                       {header.isPlaceholder
@@ -83,15 +84,17 @@ export function DataTable<TData extends RowData>({
               </TableRow>
             ))}
           </TableHeader>
-          <TableBody>
+          <TableBody role="rowgroup">
             {table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row) => (
                 <TableRow
                   key={row.id}
+                  role="row"
                   data-state={row.getIsSelected() && "selected"}
+                  data-inspected={row.original.id === activeTaskId || undefined}
                 >
-                  {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>
+                  {row.getVisibleCells().filter((cell) => showColumn(cell.column.id)).map((cell) => (
+                    <TableCell role="cell" key={cell.id} data-column={cell.column.id}>
                       {flexRender(
                         cell.column.columnDef.cell,
                         cell.getContext()
@@ -101,9 +104,10 @@ export function DataTable<TData extends RowData>({
                 </TableRow>
               ))
             ) : (
-              <TableRow>
+              <TableRow role="row">
                 <TableCell
-                  colSpan={columns.length}
+                  role="cell"
+                  colSpan={table.getVisibleLeafColumns().filter((column) => showColumn(column.id)).length}
                   className="h-24 text-center"
                 >
                   No tasks match these filters.

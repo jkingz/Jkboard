@@ -1,33 +1,17 @@
-"use client"
+import { dateFromToday } from "@/data/jkboard"
 
 import { DeadlineCalendar } from "./components/deadline-calendar"
-import { useJkboard } from "@/data/jkboard-store"
-import { isOverdue } from "@/data/jkboard"
 
 export default function CalendarPage() {
-  const { tasks } = useJkboard()
-
-  const upcoming = tasks
-    .filter((task) => task.status !== "completed")
-    .sort((a, b) => a.dueDate.localeCompare(b.dueDate))
-    .slice(0, 14)
-  const overdue = upcoming.filter(isOverdue).length
-
   return (
-    <>
-      <div className="px-4 lg:px-6">
-        <div className="flex flex-col gap-2">
-          <h1 className="text-2xl font-bold tracking-tight">Calendar</h1>
-          <p className="text-muted-foreground">
-            Every upcoming deadline in the workspace
-            {overdue > 0 ? `, including ${overdue} already overdue.` : "."}
-          </p>
-        </div>
+    <div className="flex min-w-0 flex-col gap-4 px-4 lg:px-6">
+      <div>
+        <h1 className="text-2xl font-bold tracking-tight sm:text-4xl">Calendar</h1>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Select a date to see what’s due across the workspace.
+        </p>
       </div>
-
-      <div className="flex flex-1 flex-col @container/main px-4 lg:px-6">
-        <DeadlineCalendar />
-      </div>
-    </>
+      <DeadlineCalendar initialDate={dateFromToday(0)} />
+    </div>
   )
 }

@@ -1,10 +1,10 @@
-import { headers } from "next/headers"
+import { Suspense } from "react"
 import { redirect } from "next/navigation"
 
 import { DashboardShell } from "./components/dashboard-shell"
 import { WorkspaceAccessNotice } from "./components/workspace-access-notice"
-import { getMemberByUserId, getWorkspaceData } from "@/db/queries/jkboard"
-import { auth } from "@/lib/auth"
+import { getMemberByUserId, getWorkspaceData, getWorkspaceSession } from "./workspace-request"
+import { WorkspaceSkeleton } from "./components/workspace-skeleton"
 
 /**
  * Server layout: verifies the session, loads the workspace once per request and
@@ -16,30 +16,33 @@ import { auth } from "@/lib/auth"
  */
 export const dynamic = "force-dynamic"
 
-export default async function DashboardLayout({
+export default function DashboardLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
+  return (
+    <Suspense fallback={<WorkspaceSkeleton />}>
+      <WorkspaceGate>{children}</WorkspaceGate>
+    </Suspense>
+  )
+}
+
+async function WorkspaceGate({ children }: { children: React.ReactNode }) {
   // The proxy only does an optimistic cookie check; the session is verified
   // here for real.
-  const session = await auth.api.getSession({ headers: await headers() })
+  const session = await getWorkspaceSession()
 
   if (!session) {
     redirect("/sign-in")
   }
 
-  const [initialData, currentMember] = await Promise.all([
-    getWorkspaceData(),
-    // Whose identity this is, resolved from the session rather than from the
-    // member list: `member_userId_uidx` makes it one row, and it is the same
-    // read `requireMembership()` makes inside every action.
-    getMemberByUserId(session.user.id),
-  ])
-
+  const currentMember = await getMemberByUserId(session.user.id)
   if (!currentMember) {
     return <WorkspaceAccessNotice email={session.user.email} />
   }
+
+  const initialData = await getWorkspaceData()
 
   return (
     <DashboardShell

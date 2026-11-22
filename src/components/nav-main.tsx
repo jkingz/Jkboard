@@ -23,8 +23,10 @@ import {
 export function NavMain({
   label,
   items,
+  onNavigate,
 }: {
   label: string
+  onNavigate?: () => void
   items: {
     title: string
     url: string
@@ -90,7 +92,7 @@ export function NavMain({
                           <SidebarMenuSubButton
                             className="cursor-pointer"
                             isActive={isActive(subItem.url)}
-                            render={<Link href={subItem.url} />}
+                            render={<Link href={subItem.url} onNavigate={onNavigate} />}
                           >
                             <span>{subItem.title}</span>
                           </SidebarMenuSubButton>
@@ -107,6 +109,7 @@ export function NavMain({
                   render={
                     <Link
                       href={item.url}
+                      onNavigate={onNavigate}
                       target={item.target}
                       rel={item.target ? "noopener noreferrer" : undefined}
                     />

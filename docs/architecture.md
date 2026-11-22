@@ -261,14 +261,15 @@ None. No queue, worker, or cron. `scripts/` contains only `seed.ts`, `seed-data.
 
 ## Pages and caching
 
-Pages, from the filesystem: `/` (client redirect to `/landing`), `/landing`, `/sign-in`, `/sign-up`,
-five `/errors/*` pages, and under `(dashboard)`: `/dashboard`, `/projects`, `/projects/[id]`, `/tasks`,
+Pages, from the filesystem: `/` (server redirect to `/landing`), `/landing`, `/sign-in`, `/sign-up`,
+`/terms`, `/privacy`, four `/errors/*` status views, and under `(dashboard)`: `/dashboard`, `/projects`, `/projects/[id]`, `/tasks`,
 `/calendar`, `/users`, `/settings/{user,account,notifications,connections,billing}`. Plus the
-framework's `not-found.tsx`, `loading.tsx` and `favicon.ico`. The build output confirms this list and
+framework's loading, not-found, and error boundaries and `favicon.ico`. The build output confirms this list and
 labels `ƒ Proxy (Middleware)`.
 
-`(dashboard)` is `dynamic = "force-dynamic"` — nothing under it is prerendered or cached. **No cache
-tags are used anywhere.** Landing, auth and error pages are static (`○`).
+`(dashboard)` is `dynamic = "force-dynamic"`. The workspace layout and project page share
+request-scoped reads, and a Suspense boundary streams the workspace skeleton while the layout verifies
+access and loads data. Landing, legal, auth, and standalone error views are static (`○`).
 
 UI that reads a column nothing writes yet: none. Every rendered field has a writer.
 

@@ -94,20 +94,10 @@ here as final rather than open.
 
 ---
 
-## Removing the seed arrays in `src/data/jkboard.ts`
+## Replacing seeded Overview metrics
 
-**Why:** the store no longer seeds from those arrays — `JkboardProvider` takes `initialData` from
-`getWorkspaceData()` (`src/data/jkboard-store.tsx:130-143`, `src/app/(dashboard)/layout.tsx:32`), so
-the dashboard lists real rows. What was left: `overview-charts.tsx:30` rendered `taskCompletionTrend`,
-twelve hardcoded weeks labelled as this workspace's completions; and `product-preview.tsx` imported sample
-arrays for landing page visuals.
-
-**Completed:** 2026-10-17. Marked landing preview as example-only with preview badges and "example data"
-disclaimers. Dashboard charts still use seeded data — next increment wires `completedAt`/`createdAt` from
-the schema (already present) to produce real trend lines.
-
-**Status:** Done (landing pages labelled as preview). Dashboard charts can be wired later when queries
-project `completedAt`/`createdAt` columns.
+**Completed:** The workspace loads live rows. The Overview uses live task counts, deadlines,
+and project completion. The landing previews still use sample rows and label them as example data.
 
 ---
 

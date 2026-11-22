@@ -1,9 +1,13 @@
+import { Skeleton } from "@/components/ui/skeleton"
+
 export default function Loading() {
   return (
-    <div className="flex min-h-screen items-center justify-center">
-      <div className="text-center">
-        <div className="animate-spin rounded-full size-8 border-b-2 border-primary mx-auto"></div>
-        <p className="text-muted-foreground mt-2">Loading...</p>
+    <div className="grid min-h-svh place-items-center p-6">
+      <p role="status" className="sr-only">Loading Jkboard</p>
+      <div aria-hidden="true" className="flex w-full max-w-sm flex-col gap-3">
+        <Skeleton className="h-8 w-36 motion-reduce:animate-none" />
+        <Skeleton className="h-36 w-full motion-reduce:animate-none" />
+        <Skeleton className="h-8 w-24 motion-reduce:animate-none" />
       </div>
     </div>
   )
