@@ -1,7 +1,7 @@
 "use client"
 
-import { useRef } from "react"
-import { AnimatePresence, LayoutGroup, motion, type Variants } from "motion/react"
+import { useId, useRef } from "react"
+import { AnimatePresence, LayoutGroup, motion, useReducedMotion, type Variants } from "motion/react"
 
 import { Badge } from "@/components/ui/badge"
 import { cn } from "@/lib/utils"
@@ -191,7 +191,10 @@ function OverviewPreview() {
 /** The card that walks across the board while the preview is on screen. */
 const mover = tasks.find((task) => task.projectId === featured.id && task.status === "todo")!
 
-function BoardPreview() {
+function BoardPreview({ aboveFold = false }: { aboveFold?: boolean }) {
+  const layoutId = useId()
+  const reduceMotion = useReducedMotion()
+  const showOnFirstPaint = aboveFold || reduceMotion
   const ref = useRef<HTMLDivElement>(null)
   const tick = useTicker(ref, 2600)
   const moverStatus = boardColumns[(boardColumns.indexOf("todo") + tick) % boardColumns.length]
@@ -200,20 +203,21 @@ function BoardPreview() {
     .map((task) => (task.id === mover.id ? { ...task, status: moverStatus } : task))
 
   return (
-    <LayoutGroup>
+    <LayoutGroup id={layoutId}>
       <motion.div
         ref={ref}
-        className="grid grid-cols-2 gap-4 lg:grid-cols-4"
+        className="grid grid-cols-2 gap-2.5 lg:grid-cols-4"
         variants={stagger}
-        initial="hidden"
-        whileInView="shown"
+        initial={showOnFirstPaint ? false : "hidden"}
+        animate={showOnFirstPaint ? "shown" : undefined}
+        whileInView={showOnFirstPaint ? undefined : "shown"}
         viewport={viewport}
       >
         {boardColumns.map((status) => {
           const columnTasks = boardTasks.filter((task) => task.status === status)
 
           return (
-            <motion.div key={status} variants={rise} className="flex flex-col gap-2">
+            <motion.div key={status} variants={rise} className="flex min-w-0 flex-col gap-2 rounded-md border bg-muted p-2">
               <p className="flex items-center justify-between text-[13px] font-semibold">
                 {getTaskStatus(status).label}
                 <motion.span
@@ -231,7 +235,7 @@ function BoardPreview() {
                   layoutId={task.id}
                   transition={spring}
                   className={cn(
-                    "rounded-md border bg-background/40 p-3",
+                    "rounded-md border bg-card p-2.5",
                     task.id === mover.id && tick > 0 && "border-ring shadow-lg shadow-black/10"
                   )}
                 >
@@ -452,7 +456,7 @@ function CalendarPreview() {
   )
 }
 
-const previews: Record<PreviewKind, () => React.ReactElement> = {
+const previews: Record<PreviewKind, (props: { aboveFold?: boolean }) => React.ReactElement> = {
   overview: OverviewPreview,
   board: BoardPreview,
   tasks: TasksPreview,
@@ -464,9 +468,11 @@ const previews: Record<PreviewKind, () => React.ReactElement> = {
 export function ProductPreview({
   kind = "overview",
   className,
+  aboveFold,
 }: {
   kind?: PreviewKind
   className?: string
+  aboveFold?: boolean
 }) {
   const Body = previews[kind]
 
@@ -480,7 +486,7 @@ export function ProductPreview({
         <span className="shrink-0 text-[11px] text-muted-foreground">Example data</span>
       </div>
       <div className="p-5">
-        <Body />
+        <Body aboveFold={aboveFold} />
       </div>
     </div>
   )

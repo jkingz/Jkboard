@@ -57,8 +57,9 @@ None recorded. No owner has stated an outcome, and none is invented here. Everyt
 
 ## Core user flow
 
-1. `/` → client-side `router.replace("/landing")` → `/sign-up` → `(dashboard)/layout.tsx` verifies the
-   session → `/dashboard`.
+1. `/` redirects on the server to `/landing`. Sign-in, sign-up, and demo access navigate to the
+   workspace, where a skeleton is shown while the layout verifies membership and loads workspace data.
+2. The landing footer and auth screens link to draft legal pages at `/terms` and `/privacy`.
 
 ---
 

@@ -3,27 +3,25 @@
 import * as React from "react"
 import Link from "next/link"
 import {
-  CalendarClock,
+  ArrowUpRight,
   EllipsisVertical,
   FolderKanban,
   ListTodo,
   Pencil,
   SquarePen,
   Trash2,
-  Users,
 } from "lucide-react"
 
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
-  Card,
-  CardAction,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table"
 import {
   Dialog,
   DialogContent,
@@ -41,7 +39,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Progress } from "@/components/ui/progress"
-import { Avatar, AvatarFallback, AvatarGroup } from "@/components/ui/avatar"
 import {
   InputGroup,
   InputGroupAddon,
@@ -60,15 +57,16 @@ import { cn } from "@/lib/utils"
 import { useJkboard } from "@/data/jkboard-store"
 import {
   daysUntil,
-  formatDate,
+  formatShortDate,
   projectStatusClasses,
+  getProjectStatus,
   projectStatuses,
   type Project,
 } from "@/data/jkboard"
 import { ProjectDialog } from "@/components/project-dialog"
 
-export function ProjectsGrid() {
-  const { projects, projectProgress, memberById, tasksForProject, actions } =
+export function ProjectsTable() {
+  const { projects, projectProgress, tasksForProject, actions } =
     useJkboard()
 
   const [query, setQuery] = React.useState("")
@@ -89,11 +87,29 @@ export function ProjectsGrid() {
   })
 
   return (
-    <div className="flex flex-col gap-6">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+    <div className="flex flex-col gap-4">
+      <div className="flex w-full flex-wrap gap-1 border-b" role="group" aria-label="Project views">
+        {[
+          { value: "all", label: "All projects", count: projects.length },
+          { value: "active", label: "Active", count: projects.filter((project) => project.status === "active").length },
+          { value: "completed", label: "Completed", count: projects.filter((project) => project.status === "completed").length },
+        ].map((view) => (
+          <button
+            type="button"
+            key={view.value}
+            className="workspace-view-tab"
+            aria-pressed={status === view.value}
+            onClick={() => setStatus(view.value)}
+          >
+            {view.label} <span className="tabular-nums">{view.count}</span>
+          </button>
+        ))}
+      </div>
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
         <InputGroup className="sm:max-w-sm">
           <InputGroupInput
-            placeholder="Search projects..."
+            placeholder="Search projects"
+            aria-label="Search projects"
             value={query}
             onChange={(event) => setQuery(event.target.value)}
           />
@@ -128,54 +144,56 @@ export function ProjectsGrid() {
               </SelectGroup>
             </SelectContent>
           </Select>
-          <ProjectDialog />
         </div>
       </div>
 
-      {filtered.length === 0 ? (
-        <Card>
-          <CardContent className="flex flex-col items-center gap-2 py-16 text-center">
-            <FolderKanban className="size-8 text-muted-foreground" />
-            <p className="font-medium">No projects match your filters</p>
-            <p className="text-sm text-muted-foreground">
-              Try a different search term or clear the status filter.
-            </p>
-          </CardContent>
-        </Card>
-      ) : (
-        <div className="grid gap-4 sm:grid-cols-2 @3xl:grid-cols-3">
-          {filtered.map((project) => (
-            <ProjectCard
-              key={project.id}
-              project={project}
-              progress={projectProgress(project.id)}
-              memberNames={project.memberIds
-                .map((id) => memberById(id))
-                .filter(Boolean)
-                .map((member) => member!.initials)}
-              taskCount={tasksForProject(project.id).length}
-              onEdit={() => setEditProject(project)}
-              onDelete={() => setDeleteProject(project)}
-              onComplete={() => {
-                actions.setProjectStatus(project.id, "completed")
-                toast.add({
-                  type: "success",
-                  title: "Project completed",
-                  description: `${project.name} moved to completed.`,
-                })
-              }}
-              onReopen={() => {
-                actions.setProjectStatus(project.id, "active")
-                toast.add({
-                  type: "success",
-                  title: "Project reopened",
-                  description: `${project.name} is active again.`,
-                })
-              }}
-            />
-          ))}
-        </div>
-      )}
+      <div className="overflow-hidden rounded-md border bg-card">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead className="pl-4">Project</TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead>Task progress</TableHead>
+              <TableHead>Target date</TableHead>
+              <TableHead><span className="sr-only">Board and actions</span></TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {filtered.length === 0 && (
+              <TableRow>
+                <TableCell colSpan={5} className="h-24 text-center text-muted-foreground">
+                  No projects match your filters.
+                </TableCell>
+              </TableRow>
+            )}
+            {filtered.map((project) => (
+              <ProjectRow
+                key={project.id}
+                project={project}
+                progress={projectProgress(project.id)}
+                onEdit={() => setEditProject(project)}
+                onDelete={() => setDeleteProject(project)}
+                onComplete={() => {
+                  actions.setProjectStatus(project.id, "completed")
+                  toast.add({
+                    type: "success",
+                    title: "Project completed",
+                    description: `${project.name} moved to completed.`,
+                  })
+                }}
+                onReopen={() => {
+                  actions.setProjectStatus(project.id, "active")
+                  toast.add({
+                    type: "success",
+                    title: "Project reopened",
+                    description: `${project.name} is active again.`,
+                  })
+                }}
+              />
+            ))}
+          </TableBody>
+        </Table>
+      </div>
 
       <ProjectDialog
         key={editProject?.id}
@@ -231,50 +249,47 @@ export function ProjectsGrid() {
   )
 }
 
-interface ProjectCardProps {
+interface ProjectRowProps {
   project: Project
   progress: { total: number; completed: number; progress: number }
-  memberNames: string[]
-  taskCount: number
   onEdit: () => void
   onDelete: () => void
   onComplete: () => void
   onReopen: () => void
 }
 
-function ProjectCard({
-  project,
-  progress,
-  memberNames,
-  taskCount,
-  onEdit,
-  onDelete,
-  onComplete,
-  onReopen,
-}: ProjectCardProps) {
-  const status = projectStatuses.find((entry) => entry.value === project.status)!
-  const remaining = daysUntil(project.dueDate)
-  const overdue = remaining < 0 && project.status !== "completed"
+function ProjectRow({ project, progress, onEdit, onDelete, onComplete, onReopen }: ProjectRowProps) {
+  const status = getProjectStatus(project.status)
+  const overdue = daysUntil(project.dueDate) < 0 && project.status !== "completed"
+  const href = `/projects/${project.id}`
 
   return (
-    <Card className="@container/card">
-      <CardHeader>
-        <div className="flex items-center gap-2">
-          <span
-            className="size-2.5 shrink-0 rounded-full"
-            style={{ backgroundColor: project.color }}
-            aria-hidden="true"
-          />
-          <CardTitle className="truncate">
-            <Link href={`/projects/${project.id}`} className="hover:underline">
-              {project.name}
-            </Link>
-          </CardTitle>
+    <TableRow>
+      <TableCell className="min-w-36 pl-4 whitespace-normal">
+        <Link href={href} className="font-medium hover:underline">{project.name}</Link>
+      </TableCell>
+      <TableCell>
+        <Badge variant="outline" className={projectStatusClasses[project.status]}>
+          <status.icon />
+          {status.label}
+        </Badge>
+      </TableCell>
+      <TableCell>
+        <div className="flex min-w-20 items-center gap-2 text-xs tabular-nums">
+          <Progress className="hidden flex-1 sm:block" value={progress.progress} aria-label={`Task completion for ${project.name}`} />
+          {progress.completed}/{progress.total}
         </div>
-        <CardDescription className="line-clamp-2">
-          {project.description || "No description yet."}
-        </CardDescription>
-        <CardAction>
+      </TableCell>
+      <TableCell className={cn("font-medium tabular-nums", overdue && "text-destructive")}>
+        <time dateTime={project.dueDate}>{formatShortDate(project.dueDate)}</time>
+        {overdue && <span className="ml-2 hidden text-xs lg:inline">Overdue</span>}
+        {overdue && <span className="sr-only lg:hidden"> · Overdue</span>}
+      </TableCell>
+      <TableCell>
+        <div className="flex items-center justify-end gap-2">
+          <Link href={href} aria-label={`Open board for ${project.name}`} className="hidden items-center gap-1 text-xs font-medium hover:underline sm:flex">
+            Open board <ArrowUpRight className="size-3" />
+          </Link>
           <DropdownMenu>
             <DropdownMenuTrigger
               render={
@@ -329,59 +344,8 @@ function ProjectCard({
               </DropdownMenuGroup>
             </DropdownMenuContent>
           </DropdownMenu>
-        </CardAction>
-      </CardHeader>
-
-      <CardContent className="flex flex-col gap-3">
-        <Badge
-          variant="outline"
-          className={cn("w-fit", projectStatusClasses[project.status])}
-        >
-          <status.icon />
-          {status.label}
-        </Badge>
-
-        <div className="flex flex-col gap-1.5">
-          <div className="flex items-center justify-between text-xs text-muted-foreground">
-            <span>
-              {progress.completed} of {progress.total} tasks complete
-            </span>
-            <span className="tabular-nums">{progress.progress}%</span>
-          </div>
-          <Progress value={progress.progress} />
         </div>
-      </CardContent>
-
-      <CardFooter className="justify-between gap-2">
-        <span
-          className={cn(
-            "flex items-center gap-1.5 text-xs",
-            overdue ? "text-destructive" : "text-muted-foreground"
-          )}
-        >
-          <CalendarClock className="size-3.5" />
-          {overdue
-            ? `Overdue by ${Math.abs(remaining)}d`
-            : `Due ${formatDate(project.dueDate)}`}
-        </span>
-        <span className="flex items-center gap-3 text-xs text-muted-foreground">
-          <span className="flex items-center gap-1">
-            <ListTodo className="size-3.5" />
-            {taskCount}
-          </span>
-          <span className="flex items-center gap-1">
-            <Users className="size-3.5" />
-            {memberNames.length}
-          </span>
-          <AvatarGroup>
-            {memberNames.slice(0, 3).map((initials) => (
-              <Avatar key={initials} size="sm" className="size-6">
-                <AvatarFallback className="text-[10px]">{initials}</AvatarFallback>
-              </Avatar>
-            ))}
-          </AvatarGroup>
-        </span>
-      </CardFooter>
-    </Card>
+      </TableCell>
+    </TableRow>
   )
 }

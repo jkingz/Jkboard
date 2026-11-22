@@ -11,51 +11,61 @@ type ThemeProviderProps = {
   storageKey?: string
 }
 
+function subscribeToStorage(onChange: () => void) {
+  window.addEventListener("storage", onChange)
+  return () => window.removeEventListener("storage", onChange)
+}
+
 export function ThemeProvider({
   children,
   defaultTheme = "system",
   storageKey = "vite-ui-theme",
-  ...props
 }: ThemeProviderProps) {
-  const [theme, setTheme] = React.useState<Theme>(
-    () =>
-      (typeof window !== "undefined" &&
-        (localStorage.getItem(storageKey) as Theme)) ||
-      defaultTheme
+  const storedTheme = React.useSyncExternalStore(
+    subscribeToStorage,
+    () => {
+      try {
+        const stored = localStorage.getItem(storageKey)
+        if (stored === "dark" || stored === "light" || stored === "system") return stored
+      } catch {
+        // A restricted browser can still use an in-memory theme.
+      }
+      return defaultTheme
+    },
+    () => defaultTheme
   )
+  const [selectedTheme, setSelectedTheme] = React.useState<Theme>()
+  const theme = selectedTheme ?? storedTheme
 
   React.useEffect(() => {
-    if (typeof window === "undefined") return
+    const root = document.documentElement
+    const system = window.matchMedia("(prefers-color-scheme: dark)")
 
-    const root = window.document.documentElement
-
-    root.classList.remove("light", "dark")
-
-    if (theme === "system") {
-      const systemTheme = window.matchMedia("(prefers-color-scheme: dark)")
-        .matches
-        ? "dark"
-        : "light"
-
-      root.classList.add(systemTheme)
-      return
+    function applyTheme() {
+      const resolvedTheme = theme === "system" ? system.matches ? "dark" : "light" : theme
+      root.classList.toggle("dark", resolvedTheme === "dark")
+      root.classList.toggle("light", resolvedTheme === "light")
     }
 
-    root.classList.add(theme)
+    applyTheme()
+    if (theme === "system") {
+      system.addEventListener("change", applyTheme)
+      return () => system.removeEventListener("change", applyTheme)
+    }
   }, [theme])
 
-  const value = {
-    theme,
-    setTheme: (theme: Theme) => {
-      if (typeof window !== "undefined") {
-        localStorage.setItem(storageKey, theme)
-      }
-      setTheme(theme)
-    },
-  }
+  const setTheme = React.useCallback((value: Theme) => {
+    setSelectedTheme(value)
+    try {
+      localStorage.setItem(storageKey, value)
+    } catch {
+      // Keep the selection active for this visit when storage is unavailable.
+    }
+  }, [storageKey])
+  const value = React.useMemo(() => ({ theme, setTheme }), [theme, setTheme])
 
   return (
-    <ThemeProviderContext.Provider {...props} value={value}>
+    <ThemeProviderContext.Provider value={value}>
       {children}
     </ThemeProviderContext.Provider>
   )

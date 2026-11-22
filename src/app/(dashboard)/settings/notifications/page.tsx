@@ -1,6 +1,8 @@
 "use client"
 
-import { useState } from "react"
+import { SettingsPreviewHeader } from "../settings-preview-header"
+
+import { useState, useSyncExternalStore } from "react"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Controller, useForm } from "react-hook-form"
 import { z } from "zod"
@@ -126,6 +128,16 @@ const HOURS = [
   { value: "23:00", label: "11:00 PM" },
 ]
 
+// The permission prompt updates local state. This snapshot also keeps the
+// server render independent of browser APIs.
+function subscribeToPermissionSnapshot() {
+  return () => {}
+}
+
+function getPermissionSnapshot() {
+  return typeof Notification === "undefined" ? "unsupported" : Notification.permission
+}
+
 export default function NotificationSettings() {
   const form = useForm<NotificationsFormValues>({
     resolver: zodResolver(notificationsFormSchema),
@@ -138,15 +150,19 @@ export default function NotificationSettings() {
       productNews: false,
     },
   })
-  const [permission, setPermission] = useState<NotificationPermission | "unsupported">(
-    typeof Notification === "undefined" ? "unsupported" : Notification.permission
+  const [updatedPermission, setPermission] = useState<NotificationPermission>()
+  const browserPermission = useSyncExternalStore(
+    subscribeToPermissionSnapshot,
+    getPermissionSnapshot,
+    () => "checking" as const
   )
+  const permission = updatedPermission ?? browserPermission
 
   function onSubmit() {
     toast.add({
       type: "success",
-      title: "Notification preferences saved",
-      description: "Jkboard will use these channels from now on.",
+      title: "Preferences previewed",
+      description: "Your selections are available on this page.",
     })
   }
 
@@ -177,12 +193,11 @@ export default function NotificationSettings() {
 
   return (
     <div className="flex flex-col gap-6 px-4 lg:px-6">
-      <div>
-        <h1 className="text-3xl font-bold">Notifications</h1>
-        <p className="text-muted-foreground">
-          Choose which events reach you, and on which channels.
-        </p>
-      </div>
+      <SettingsPreviewHeader
+        title="Notifications"
+        description="Choose which events reach you and on which channels."
+        preview="Delivery preferences are examples. Browser permission uses your browser’s settings."
+      />
 
       <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-6">
         <Card>
@@ -389,7 +404,9 @@ export default function NotificationSettings() {
                     ? "Permission blocked. Re-enable it in your browser settings."
                     : permission === "unsupported"
                       ? "This browser does not support the Notifications API."
-                      : "Jkboard needs permission before it can notify you outside this tab."}
+                      : permission === "checking"
+                        ? "Checking browser permission…"
+                        : "Allow notifications in your browser to try this control."}
               </CardDescription>
             </CardHeader>
             <CardContent className="flex flex-col gap-4">

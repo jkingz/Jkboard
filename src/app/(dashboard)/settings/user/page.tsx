@@ -1,5 +1,7 @@
 "use client"
 
+import { SettingsPreviewHeader } from "../settings-preview-header"
+
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Controller, useForm } from "react-hook-form"
 import { z } from "zod"
@@ -75,8 +77,8 @@ export default function UserSettingsPage() {
   function onSubmit(data: UserFormValues) {
     toast.add({
       type: "success",
-      title: "Profile updated",
-      description: `${data.firstName} ${data.lastName}'s profile was saved.`,
+      title: "Profile preview updated",
+      description: `${data.firstName} ${data.lastName}'s edits are visible until you leave this page.`,
     })
   }
 
@@ -106,12 +108,11 @@ export default function UserSettingsPage() {
 
   return (
     <div className="flex flex-col gap-6 px-4 lg:px-6">
-      <div>
-        <h1 className="text-3xl font-bold">Profile</h1>
-        <p className="text-muted-foreground">
-          Your personal details, timezone and the defaults you work with.
-        </p>
-      </div>
+      <SettingsPreviewHeader
+        title="Profile"
+        description="Manage your workspace identity and regional preferences."
+        preview="Profile edits are available on this page."
+      />
       <form onSubmit={form.handleSubmit(onSubmit)}>
         <Card>
           <CardHeader>

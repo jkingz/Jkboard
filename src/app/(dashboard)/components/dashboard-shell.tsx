@@ -1,13 +1,14 @@
 "use client"
 
 import * as React from "react"
+import { animate, useReducedMotion } from "motion/react"
+import { usePathname } from "next/navigation"
 
-import { AppSidebar } from "@/components/app-sidebar"
+import { AppSidebar, WorkspaceMobileNav } from "@/components/app-sidebar"
+import { CommandSearch } from "@/components/command-search"
 import { SiteHeader } from "@/components/site-header"
-import { SiteFooter } from "@/components/site-footer"
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar"
-import { Skeleton } from "@/components/ui/skeleton"
-import { UpgradeToProButton } from "@/components/upgrade-to-pro-button"
+import { WorkspaceContentSkeleton } from "./workspace-skeleton"
 import { useSidebarConfig } from "@/hooks/use-sidebar-config"
 import { JkboardProvider } from "@/data/jkboard-store"
 import type { WorkspaceData } from "@/db/queries/jkboard"
@@ -35,18 +36,32 @@ export function DashboardShell({
   children: React.ReactNode
 }) {
   const { config } = useSidebarConfig()
+  const [searchOpen, setSearchOpen] = React.useState(false)
+  const openSearch = () => setSearchOpen(true)
+
+  React.useEffect(() => {
+    function onShortcut(event: KeyboardEvent) {
+      if (event.key.toLowerCase() !== "k" || (!event.metaKey && !event.ctrlKey)) return
+      event.preventDefault()
+      setSearchOpen((open) => !open)
+    }
+
+    document.addEventListener("keydown", onShortcut)
+    return () => document.removeEventListener("keydown", onShortcut)
+  }, [])
+
 
   return (
     <JkboardProvider initialData={initialData} currentMember={currentMember}>
       <SidebarProvider
         style={
           {
-            "--sidebar-width": "16rem",
+            "--sidebar-width": "13rem",
             "--sidebar-width-icon": "3rem",
             "--header-height": "calc(var(--spacing) * 14)",
           } as React.CSSProperties
         }
-        className={config.collapsible === "none" ? "sidebar-none-mode" : ""}
+        className={`workspace bg-background ${config.collapsible === "none" ? "sidebar-none-mode" : ""}`}
       >
         {config.side === "left" ? (
           <>
@@ -55,30 +70,31 @@ export function DashboardShell({
               collapsible={config.collapsible}
               side={config.side}
               user={sessionUser}
+              onSearch={openSearch}
             />
-            <SidebarInset>
-              <SiteHeader user={sessionUser} />
+            <SidebarInset className="min-w-0 border-sidebar-border md:border-l md:peer-data-[variant=inset]:m-0 md:peer-data-[variant=inset]:rounded-none md:peer-data-[variant=inset]:shadow-none">
+              <SiteHeader user={sessionUser} onSearch={openSearch} />
               <ContentArea>{children}</ContentArea>
-              <SiteFooter />
             </SidebarInset>
           </>
         ) : (
           <>
-            <SidebarInset>
-              <SiteHeader />
+            <SidebarInset className="min-w-0 border-sidebar-border md:border-l md:peer-data-[variant=inset]:m-0 md:peer-data-[variant=inset]:rounded-none md:peer-data-[variant=inset]:shadow-none">
+              <SiteHeader user={sessionUser} onSearch={openSearch} />
               <ContentArea>{children}</ContentArea>
-              <SiteFooter />
             </SidebarInset>
             <AppSidebar
               variant={config.variant}
               collapsible={config.collapsible}
               side={config.side}
               user={sessionUser}
+              onSearch={openSearch}
             />
           </>
         )}
 
-        <UpgradeToProButton />
+        <WorkspaceMobileNav />
+        <CommandSearch open={searchOpen} onOpenChange={setSearchOpen} />
       </SidebarProvider>
     </JkboardProvider>
   )
@@ -88,12 +104,12 @@ function ContentArea({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex flex-1 flex-col">
       <div className="@container/main flex flex-1 flex-col gap-2">
-        <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
+        <div className="pt-4 pb-20 md:py-6">
           {/* The shell is already interactive once the layout has resolved, so
               page data streams in behind this boundary instead of holding the
               sidebar and header hostage to it. */}
-          <React.Suspense fallback={<ContentFallback />}>
-            {children}
+          <React.Suspense fallback={<WorkspaceContentSkeleton />}>
+            <WorkspaceRoute>{children}</WorkspaceRoute>
           </React.Suspense>
         </div>
       </div>
@@ -101,20 +117,50 @@ function ContentArea({ children }: { children: React.ReactNode }) {
   )
 }
 
-/** Same shape as `DashboardLoading`'s main column, minus the chrome around it. */
-function ContentFallback() {
+function WorkspaceRoute({ children }: { children: React.ReactNode }) {
+  const content = React.useRef<HTMLDivElement>(null)
+  const pathname = usePathname()
+  const reduceMotion = useReducedMotion()
+  const previousPath = React.useRef(pathname)
+  const historyPath = React.useRef<string | null>(null)
+
+  React.useEffect(() => {
+    function onHistoryNavigation() {
+      historyPath.current = window.location.pathname
+    }
+
+    window.addEventListener("popstate", onHistoryNavigation)
+    return () => window.removeEventListener("popstate", onHistoryNavigation)
+  }, [])
+
+  React.useEffect(() => {
+    if (previousPath.current === pathname) return
+
+    const fromHistory = historyPath.current === pathname
+    previousPath.current = pathname
+    historyPath.current = null
+
+    // Let the browser restore back/forward positions and handle fragment links.
+    if (!fromHistory && !window.location.hash && window.scrollY > 0) {
+      window.scrollTo({ top: 0, behavior: reduceMotion ? "instant" : "smooth" })
+    }
+  }, [pathname, reduceMotion])
+
+  React.useEffect(() => {
+    if (!content.current || reduceMotion) return
+
+    const animation = animate(
+      content.current,
+      { opacity: [0.65, 1], transform: ["translateY(6px)", "none"] },
+      { duration: 0.24, ease: [0.2, 0, 0, 1] }
+    )
+
+    return () => animation.cancel()
+  }, [pathname, reduceMotion])
+
   return (
-    <div className="flex flex-col gap-6" aria-busy="true">
-      <div className="flex flex-col gap-2">
-        <Skeleton className="h-7 w-48" />
-        <Skeleton className="h-4 w-72" />
-      </div>
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        {Array.from({ length: 4 }).map((_, index) => (
-          <Skeleton key={index} className="h-24 w-full" />
-        ))}
-      </div>
-      <Skeleton className="h-72 w-full" />
+    <div ref={content} className="flex flex-col gap-4 md:gap-6">
+      {children}
     </div>
   )
 }

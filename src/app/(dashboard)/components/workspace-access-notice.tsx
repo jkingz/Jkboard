@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation"
 
 import { Button } from "@/components/ui/button"
+import { PageStatus } from "@/components/page-status"
 import { authClient } from "@/lib/auth-client"
 
 /**
@@ -34,19 +35,12 @@ export function WorkspaceAccessNotice({ email }: { email: string }) {
   }
 
   return (
-    <div className="mx-auto flex min-h-dvh w-full max-w-md flex-col items-center justify-center gap-6 p-8 text-center">
-      <div className="flex flex-col gap-3">
-        <h1 className="text-2xl font-semibold">No workspace membership</h1>
-        <p className="text-sm text-muted-foreground">
-          You are signed in as {email}, but this account has no membership
-          record, so there is no workspace to show and every action is refused.
-          Someone with database access has to create the membership row before
-          this address can use Jkboard.
-        </p>
-      </div>
-      <Button variant="outline" onClick={signOut}>
-        Sign out
-      </Button>
-    </div>
+    <PageStatus
+      code="403"
+      title="This account needs workspace access"
+      description={`You’re signed in as ${email}. Ask your workspace administrator to check this account’s access.`}
+    >
+      <Button onClick={signOut}>Sign out</Button>
+    </PageStatus>
   )
 }

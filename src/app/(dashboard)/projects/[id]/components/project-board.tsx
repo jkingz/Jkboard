@@ -4,7 +4,6 @@ import * as React from "react"
 import Link from "next/link"
 import { useParams } from "next/navigation"
 import {
-  ArrowLeft,
   FolderOpen,
   ListTodo,
   SquareKanban,
@@ -16,7 +15,6 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
   Card,
-  CardAction,
   CardContent,
   CardDescription,
   CardHeader,
@@ -38,7 +36,9 @@ import { ProjectDialog } from "@/components/project-dialog"
 import { cn } from "@/lib/utils"
 import { useJkboard } from "@/data/jkboard-store"
 import {
+  daysUntil,
   formatDate,
+  formatShortDate,
   isOverdue,
   priorityClasses,
   priorityIcons,
@@ -83,133 +83,67 @@ export function ProjectBoard() {
   const status = projectStatuses.find((entry) => entry.value === project.status)!
   const { completed, total, progress } = projectProgress(project.id)
   const projectTasks = tasksForProject(project.id)
-  const remaining = Math.round(
-    (new Date(project.dueDate).getTime() - startOfToday()) / 86_400_000
-  )
+  const targetOverdue = project.status !== "completed" && daysUntil(project.dueDate) < 0
+  const overdueCount = projectTasks.filter(isOverdue).length
 
   return (
     <>
-      <div className="flex flex-col gap-6">
-        <div className="px-4 lg:px-6">
-          <Button
-            variant="ghost"
-            size="sm"
-            className="-ml-2 cursor-pointer text-muted-foreground"
-            nativeButton={false}
-            render={<Link href="/projects" />}
-          >
-            <ArrowLeft data-icon="inline-start" />
-            All projects
-          </Button>
+      <div className="flex min-w-0 flex-col gap-5 px-4 lg:px-6">
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <div className="min-w-0">
+            <h1 className="text-2xl font-bold tracking-tight sm:text-4xl">{project.name}</h1>
+            {project.description && <p className="mt-1 max-w-2xl text-sm text-muted-foreground">{project.description}</p>}
+          </div>
+          <AddTaskModal defaultProjectId={project.id} />
+        </div>
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-2 rounded-lg border bg-muted px-4 py-3 text-sm">
+          <Badge variant="outline" className={projectStatusClasses[project.status]}>
+            <status.icon />
+            {status.label}
+          </Badge>
+          <span className={cn("text-muted-foreground", targetOverdue && "text-destructive")}>
+            Target <time dateTime={project.dueDate}>{formatShortDate(project.dueDate)}</time>
+            {targetOverdue && " · Overdue"}
+          </span>
+          {overdueCount > 0 && <span className="text-destructive">{overdueCount} overdue {overdueCount === 1 ? "task" : "tasks"}</span>}
+          <div className="flex items-center gap-2">
+            <span>{completed} of {total} complete</span>
+            <Progress value={progress} className="w-16" aria-label="Project completion" />
+          </div>
+          <AvatarGroup>
+            {project.memberIds.map((id) => {
+              const member = memberById(id)
+              return member && (
+                <Avatar key={id} size="sm" aria-label={member.name}>
+                  <AvatarFallback>{member.initials}</AvatarFallback>
+                </Avatar>
+              )
+            })}
+          </AvatarGroup>
         </div>
 
-        <Card className="@container/card">
-          <CardHeader>
-            <div className="flex flex-wrap items-center gap-2">
-              <span
-                className="size-3 shrink-0 rounded-full"
-                style={{ backgroundColor: project.color }}
-                aria-hidden="true"
-              />
-              <CardTitle className="text-xl">{project.name}</CardTitle>
-              <Badge
-                variant="outline"
-                className={projectStatusClasses[project.status]}
-              >
-                <status.icon />
-                {status.label}
-              </Badge>
-              <span className="font-mono text-xs text-muted-foreground">
-                {project.key}
-              </span>
-            </div>
-            <CardDescription className="max-w-2xl">
-              {project.description || "No description yet."}
-            </CardDescription>
-            <CardAction>
-              <div className="flex items-center gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="cursor-pointer"
-                  onClick={() => setEditOpen(true)}
-                >
-                  Edit project
-                </Button>
-                <AddTaskModal defaultProjectId={project.id} />
-              </div>
-            </CardAction>
-          </CardHeader>
-
-          <CardContent>
-            <div className="grid gap-4 sm:grid-cols-2 @3xl:grid-cols-4">
-              <Metric
-                label="Progress"
-                value={`${progress}%`}
-                detail={`${completed} of ${total} tasks complete`}
-              >
-                <Progress value={progress} className="mt-2" />
-              </Metric>
-              <Metric
-                label="Target date"
-                value={formatDate(project.dueDate)}
-                detail={
-                  project.status === "completed"
-                    ? "Shipped"
-                    : remaining < 0
-                      ? `${Math.abs(remaining)} days overdue`
-                      : `${remaining} days remaining`
-                }
-                tone={
-                  remaining < 0 && project.status !== "completed"
-                    ? "destructive"
-                    : undefined
-                }
-              />
-              <Metric
-                label="Overdue tasks"
-                value={String(projectTasks.filter(isOverdue).length)}
-                detail="Past their due date"
-              />
-              <div className="flex flex-col gap-1">
-                <span className="text-sm text-muted-foreground">Team</span>
-                <AvatarGroup>
-                  {project.memberIds.map((memberId) => {
-                    const member = memberById(memberId)
-                    if (!member) return null
-                    return (
-                      <Avatar key={memberId} className="size-8">
-                        <AvatarFallback className="text-xs">
-                          {member.initials}
-                        </AvatarFallback>
-                      </Avatar>
-                    )
-                  })}
-                </AvatarGroup>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
         <Tabs defaultValue="board" className="w-full">
-          <TabsList>
-            <TabsTrigger value="board" className="cursor-pointer">
-              <SquareKanban /> Board
-            </TabsTrigger>
-            <TabsTrigger value="list" className="cursor-pointer">
-              <ListTodo /> List
-            </TabsTrigger>
-          </TabsList>
+          <div className="flex flex-wrap items-center gap-2">
+            <TabsList variant="line">
+              <TabsTrigger value="board" className="cursor-pointer">
+                <SquareKanban /> Board
+              </TabsTrigger>
+              <TabsTrigger value="list" className="cursor-pointer">
+                <ListTodo /> List
+              </TabsTrigger>
+            </TabsList>
+            <Button variant="outline" size="sm" onClick={() => setEditOpen(true)}>Edit project</Button>
+          </div>
 
           <TabsContent value="board" className="mt-4">
-            <div className="grid gap-4 md:grid-cols-2 @4xl:grid-cols-4">
+            <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
               {taskStatuses.map((column) => {
                 const columnTasks = projectTasks.filter(
                   (task) => task.status === column.value
                 )
 
                 return (
-                  <Card key={column.value} size="sm" className="gap-3 bg-muted/30">
+                  <Card key={column.value} size="sm" className="gap-3 bg-muted">
                     <CardHeader className="flex-row items-center justify-between">
                       <CardDescription className="flex items-center gap-1.5 text-xs font-medium">
                         <column.icon className="size-3.5" />
@@ -233,7 +167,7 @@ export function ProjectBoard() {
                               key={task.id}
                               type="button"
                               onClick={() => setOpenTaskId(task.id)}
-                              className="cursor-pointer rounded-lg border bg-card p-3 text-left transition-shadow hover:shadow-md focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
+                              className="cursor-pointer rounded-lg border bg-card p-3 text-left transition-colors hover:bg-accent/60 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
                             >
                               <p className="text-sm font-medium leading-snug">
                                 {task.title}
@@ -377,40 +311,4 @@ export function ProjectBoard() {
       />
     </>
   )
-}
-
-function Metric({
-  label,
-  value,
-  detail,
-  tone,
-  children,
-}: {
-  label: string
-  value: string
-  detail: string
-  tone?: "destructive"
-  children?: React.ReactNode
-}) {
-  return (
-    <div className="flex flex-col gap-1">
-      <span className="text-sm text-muted-foreground">{label}</span>
-      <span
-        className={cn(
-          "text-2xl font-semibold tabular-nums",
-          tone === "destructive" && "text-destructive"
-        )}
-      >
-        {value}
-      </span>
-      <span className="text-xs text-muted-foreground">{detail}</span>
-      {children}
-    </div>
-  )
-}
-
-function startOfToday() {
-  const date = new Date()
-  date.setHours(0, 0, 0, 0)
-  return date.getTime()
 }

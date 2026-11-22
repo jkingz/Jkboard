@@ -4,11 +4,10 @@ import { useState } from "react"
 import Link from "next/link"
 import { Menu, X } from "lucide-react"
 
-import { Button } from "@/components/ui/button"
+import { Button, buttonVariants } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
 import { Logo } from "@/components/logo"
-import { useSession } from "@/lib/auth-client"
-import { DemoButton } from "./demo-button"
+import { ModeToggle } from "@/components/mode-toggle"
 
 const navigationItems = [
   { name: "Workspace", href: "#workspace" },
@@ -16,14 +15,8 @@ const navigationItems = [
   { name: "FAQ", href: "#faq" },
 ]
 
-/**
- * Two actions only: sign in, or one click into the demo. "Create an account"
- * lives in the hero and the closing band, so it is not repeated here.
- */
 export function LandingNavbar() {
   const [isOpen, setIsOpen] = useState(false)
-  // `undefined` while the session loads; only a definite session counts as signed in.
-  const isSignedIn = useSession().data != null
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/80 backdrop-blur-xl supports-[backdrop-filter]:bg-background/60">
@@ -45,20 +38,17 @@ export function LandingNavbar() {
           ))}
         </nav>
 
-        <div className="hidden items-center gap-2 md:flex">
-          {!isSignedIn && (
-            <Button variant="ghost" nativeButton={false} render={<Link href="/sign-in" />}>
-              Sign in
-            </Button>
-          )}
-          <DemoButton size="default" />
-        </div>
-
         <Sheet open={isOpen} onOpenChange={setIsOpen}>
-          <SheetTrigger className="md:hidden" render={<Button variant="ghost" size="icon" />}>
-            <Menu className="size-5" />
-            <span className="sr-only">Open menu</span>
-          </SheetTrigger>
+          <div className="flex items-center gap-2">
+            <Link href="/sign-in" className={buttonVariants({ variant: "ghost" })}>
+              Sign in
+            </Link>
+            <ModeToggle />
+            <SheetTrigger className="md:hidden" render={<Button variant="ghost" size="icon" />}>
+              <Menu className="size-5" />
+              <span className="sr-only">Open menu</span>
+            </SheetTrigger>
+          </div>
           <SheetContent side="right" showCloseButton={false} className="landing w-full gap-0 p-0 sm:w-[400px]">
             <SheetHeader className="flex-row items-center justify-between border-b p-4">
               <SheetTitle className="flex items-center gap-2 text-[17px] font-semibold">
@@ -84,19 +74,13 @@ export function LandingNavbar() {
               ))}
             </nav>
 
-            <div className="mt-auto flex flex-col gap-3 border-t p-6">
-              <DemoButton className="w-full" />
-              {!isSignedIn && (
-                <Button
-                  size="lg"
-                  variant="outline"
-                  className="w-full"
-                  nativeButton={false}
-                  render={<Link href="/sign-in" />}
-                >
-                  Sign in
-                </Button>
-              )}
+            <div className="mt-auto border-t p-6">
+              <Link
+                href="/sign-in"
+                className={buttonVariants({ size: "lg", variant: "outline", className: "w-full" })}
+              >
+                Sign in
+              </Link>
             </div>
           </SheetContent>
         </Sheet>
