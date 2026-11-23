@@ -219,17 +219,13 @@ route → proxy.ts (cookie presence) → (dashboard)/layout.tsx
 | `src/db/schema/*` | implemented: `user`, `session`, `account`, `verification`, `member`, `projectMember`, `project`, `task` |
 | `src/db/queries/jkboard.ts` | implemented: `getWorkspaceData()`, `getMemberByUserId()`, `WorkspaceData` |
 | `src/db/actions/session.ts` | implemented: `requireMembership()` — the guard every mutation awaits first. Not `"use server"`: it is a helper the actions import, not an endpoint. |
-| `src/db/actions/projects.ts` | implemented: `createProjectAction`, `updateProjectAction`, `setProjectStatusAction`, `deleteProjectAction`, `countOwnedProjects`, `assertMemberExists` |
+| `src/db/actions/projects.ts` | implemented: `createProjectAction`, `updateProjectAction`, `setProjectStatusAction`, `deleteProjectAction` |
 | `src/db/actions/tasks.ts` | implemented: `createTaskAction`, `updateTaskAction`, `setTaskStatusAction`, `duplicateTaskAction`, `deleteTaskAction` |
 | `src/db/actions/members.ts` | implemented: `inviteMemberAction`, `setMemberStatusAction`, `removeMemberAction` |
 | `src/data/jkboard.ts` | implemented: `Project` / `Task` / `Member` types, `getTaskStats`, `getProjectProgress`, `getWorkload` |
 | `src/data/jkboard-store.tsx` | implemented: `JkboardProvider`, `useJkboard` |
 | `src/app/api/auth/[...all]/route.ts` | implemented: `GET`, `POST` |
 | `src/app/(dashboard)/layout.tsx` | implemented: `DashboardLayout` — session gate + workspace load + caller membership; renders `WorkspaceAccessNotice` when a session has no `member` row |
-
-**Zero-caller note:** `countOwnedProjects()` and `assertMemberExists()` in
-`src/db/actions/projects.ts` are exported but have **no callers** — `removeMemberAction` inlines its
-own lookup instead. Verified by grep across `src/` and `scripts/`. They are dead exports.
 
 **Stale hardcoded data:** `src/data/jkboard.ts` also exports module-level seed arrays `members`,
 `projects` and `tasks` plus a `taskSeeds` input. These are **not** the live workspace. Dashboard
@@ -288,7 +284,7 @@ pnpm build
 
 **CI runs the first three plus `pnpm test:unit` and `pnpm test:interface`** — `.github/workflows/ci.yml`, on push and pull
 request. It does not run the integration tier, which needs a `DATABASE_URL`; keeping that tier local-only is
-a decision, not a gap. See [target-state.md](./target-state.md) → CI.
+a decision, not a gap. See [ADR 0002](./adr/0002-integration-tier-stays-local.md).
 
 | test folder | owns |
 | --- | --- |

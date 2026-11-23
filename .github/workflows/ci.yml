@@ -9,7 +9,7 @@ name: CI
 #      DATABASE_URL; adding a repository secret to this job for a read-only
 #      schema assertion would let a fork and a first clone fail for a reason
 #      that is not a defect. Keeping that tier local-only is a final decision
-#      (2026-11-24), recorded in docs/target-state.md → CI.
+#      (2026-11-24): docs/adr/0002-integration-tier-stays-local.md.
 #
 # Keep the build hermetic. Anything fetched over the network at build time fails
 # on a sealed runner. It was true of `next/font/google` and is now fixed by

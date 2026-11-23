@@ -25,7 +25,7 @@ secret. Three consequences, all current:
    deletes a project deletes it for everyone.
 2. **Any authenticated session can delete anything.** No server action checks a role, by decision —
    see [ADR 0001](./adr/0001-single-trust-team.md). An anonymous visitor who reads the page can wipe
-   the demo data; the answer is to reseed it ([target-state.md](./target-state.md)).
+   the demo data; the answer is to reseed it with `pnpm db:seed && pnpm db:seed:auth`.
 3. **The password hash lives in the same database as real users.** If this database is ever shared
    with real accounts, rotate `DEMO_PASSWORD` and re-run `pnpm db:seed:auth --reset`.
 
@@ -98,8 +98,8 @@ that allowlist; both packages ship native binaries that need their postinstall t
 
 **CI does not run the integration tier, by decision (2026-11-24):** `.github/workflows/ci.yml` runs
 `pnpm test:unit` and `pnpm test:interface` in place of `pnpm test`, and gets no `DATABASE_URL` secret.
-The integration tier is local-only, so a green check does not mean the schema was verified — run
-`pnpm test:integration` before a schema change merges. See [target-state.md](./target-state.md) → CI.
+The integration tier is local-only, so a green check does not mean the schema was verified. See
+[ADR 0002](./adr/0002-integration-tier-stays-local.md).
 The integration tier is also currently **read-only** — it inspects schema metadata rather than
 inserting rows, so it cannot prove the server actions actually write correctly. Naming the tier as
 covered is not the same as covering behaviour; `pnpm test` reports both counts so a skipped tier is

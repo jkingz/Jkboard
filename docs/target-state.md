@@ -6,22 +6,9 @@ as a description of current behavior.
 The rule that keeps this file honest: nothing here may be cited as a fact about the running system.
 If a line would be a lie if quoted out of context, it belongs in this file, or nowhere.
 
-Jkboard has no permissions by decision, not by omission: one Workspace, and every Member may do
-everything. See [ADR 0001](./adr/0001-single-trust-team.md). Role checks, per-user data and
-per-row ownership are therefore not listed here.
-
----
-
-## Reseeding the demo Workspace
-
-**Why:** the demo credentials are printed on a public landing page, so any visitor can sign in and
-empty the shared Workspace. Per [ADR 0001](./adr/0001-single-trust-team.md) the answer is to reseed
-it, not to add permissions. Today `db:seed` and `db:seed:auth` only add rows; nothing resets them.
-
-**Blocked by:** nothing. Tracked as #29.
-
-**Done when:** one manual `pnpm` script puts the demo Workspace and its sign-ins back to the seeded
-state, and running it twice in a row is safe.
+Decided against, so never listed here: role checks, per-user data and per-row ownership
+([ADR 0001](./adr/0001-single-trust-team.md)), and running the integration tier in CI
+([ADR 0002](./adr/0002-integration-tier-stays-local.md)).
 
 ---
 
@@ -52,13 +39,3 @@ invitee must already know to sign in.
 
 **Done when:** an invited address receives a usable sign-in link.
 
----
-
-## CI and the integration tier — decided, not open
-
-**Decision (2026-11-24, maintainer):** the integration tier stays local-only. CI runs
-`pnpm test:unit` and `pnpm test:interface`, never `pnpm test`, and gets no `DATABASE_URL` secret.
-A green CI check therefore proves the unit and interface tiers, not the schema; run
-`pnpm test:integration` locally before a schema change merges.
-
-This entry is kept only so nobody re-opens the question by accident. It is not work.
