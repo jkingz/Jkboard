@@ -51,7 +51,7 @@ Test layout:
 
 ```
 tests/platform/unit/         selectors, dates, view-model coherence, proxy(), structural rules — no DB
-tests/platform/integration/  schema invariants + column contracts, real DB, read-only
+tests/platform/integration/  schema invariants + column contracts, real DB; one write suite on a scratch branch
 tests/setup-env.ts           loads .env.local for the integration tier
 vitest.config.mts            two projects: unit, integration
 ```
@@ -94,16 +94,16 @@ that allowlist; both packages ship native binaries that need their postinstall t
   behind invariants 1 and 4. This is the tier a CI runner can always execute, and it is what makes
   invariants 1, 4 and 5 CI-visible without a browser — structurally, not behaviourally.
 - **`integration`** — needs a real `DATABASE_URL`. It asserts the persistence invariants and the
-  per-column contracts against `information_schema` and never mutates rows.
+  per-column contracts against `information_schema` without writing. `task-write.integration.test.ts`
+  calls `createTaskAction` and writes rows, so it runs only when `TEST_DATABASE_URL` names a scratch
+  Neon branch that differs from `DATABASE_URL`, and skips otherwise.
 
 **CI does not run the integration tier, by decision (2026-11-24):** `.github/workflows/ci.yml` runs
 `pnpm test:unit` and `pnpm test:interface` in place of `pnpm test`, and gets no `DATABASE_URL` secret.
 The integration tier is local-only, so a green check does not mean the schema was verified. See
 [ADR 0002](./adr/0002-integration-tier-stays-local.md).
-The integration tier is also currently **read-only** — it inspects schema metadata rather than
-inserting rows, so it cannot prove the server actions actually write correctly. Naming the tier as
-covered is not the same as covering behaviour; `pnpm test` reports both counts so a skipped tier is
-visible rather than silent.
+Only `createTaskAction` has a behavioural test. The other actions are covered structurally, not by
+execution. `pnpm test` reports skipped counts, so a skipped tier is visible rather than silent.
 
 Vitest does not read `.env.local`, so `tests/setup-env.ts` loads it for the integration tier.
 Without that file the tier skips and looks like a pass.
