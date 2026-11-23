@@ -7,7 +7,7 @@ import { fileURLToPath } from "node:url"
  * `unit` runs anywhere — no database, no network. It covers the pure modules
  * (selectors, date helpers, Zod/view-model coherence), `proxy()` called
  * in-process, and the source-tree structural rules behind invariants 1 and 4.
- * This is the tier CI runs.
+ * CI runs it as `pnpm test:unit`.
  *
  * `integration` needs a real `DATABASE_URL`. It is credential-gated on purpose:
  * `tests/platform/integration/helpers.ts` detects the `.env.example` placeholder
@@ -17,7 +17,7 @@ import { fileURLToPath } from "node:url"
  *
  * `interface` renders components in jsdom to catch DOM-tier defects like
  * hydration mismatches and uncontrolled component warnings that unit tests
- * cannot see. Runs alongside unit tests in CI as part of `pnpm test`.
+ * cannot see. CI runs it as `pnpm test:interface`, after `pnpm test:unit`.
  */
 export default defineConfig({
   test: {

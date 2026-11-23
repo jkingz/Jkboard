@@ -5,7 +5,7 @@ name: CI
 #
 # Two deliberate deviations, both named rather than hidden:
 #
-#   1. `pnpm test:unit`, not `pnpm test`. The integration tier needs a real
+#   1. `pnpm test:unit` + `pnpm test:interface`, not `pnpm test`. The integration tier needs a real
 #      DATABASE_URL; adding a repository secret to this job for a read-only
 #      schema assertion would let a fork and a first clone fail for a reason
 #      that is not a defect. The gap is recorded in docs/project-context.md →
@@ -70,6 +70,9 @@ jobs:
 
       - name: Test (unit tier)
         run: pnpm test:unit
+
+      - name: Test (interface tier)
+        run: pnpm test:interface
 
       - name: Build
         run: pnpm build
