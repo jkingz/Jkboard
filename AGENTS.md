@@ -66,7 +66,7 @@ Reply with these lists, in this order. Every item is `#NN title` plus one line o
 ## Checks
 
 ```bash
-pnpm typecheck && pnpm lint && pnpm test:unit && pnpm build   # same chain as CI
+pnpm typecheck && pnpm lint && pnpm test:unit && pnpm test:interface && pnpm build   # same chain as CI
 ```
 
 ## Agent skills

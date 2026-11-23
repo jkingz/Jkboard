@@ -282,7 +282,7 @@ pnpm test
 pnpm build
 ```
 
-**CI runs the first three plus `pnpm test:unit`** — `.github/workflows/ci.yml`, on push and pull
+**CI runs the first three plus `pnpm test:unit` and `pnpm test:interface`** — `.github/workflows/ci.yml`, on push and pull
 request. It does not run the integration tier, which needs a `DATABASE_URL` the job does not carry.
 See [target-state.md](./target-state.md) → CI.
 

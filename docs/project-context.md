@@ -65,7 +65,7 @@ Per-file map: [../tests/README.md](../tests/README.md).
 | Need | Command |
 | --- | --- |
 | Dev server | `pnpm dev` |
-| Tests | `pnpm test` (both tiers) · `pnpm test:unit` · `pnpm test:integration` · `pnpm test:watch` |
+| Tests | `pnpm test` (all tiers) · `pnpm test:unit` · `pnpm test:integration` · `pnpm test:interface` · `pnpm test:watch` |
 | Run one test file | `pnpm test:unit tests/platform/unit/selectors.unit.test.ts` |
 | Types | `pnpm typecheck` |
 | Lint | `pnpm lint` (`eslint .`) |
@@ -96,7 +96,7 @@ that allowlist; both packages ship native binaries that need their postinstall t
 - **`integration`** — needs a real `DATABASE_URL`. It asserts the persistence invariants and the
   per-column contracts against `information_schema` and never mutates rows.
 
-**The gap CI does not close:** `.github/workflows/ci.yml` runs `pnpm test:unit` in place of
+**The gap CI does not close:** `.github/workflows/ci.yml` runs `pnpm test:unit` and `pnpm test:interface` in place of
 `pnpm test`, so the integration tier runs on this machine and nowhere else — it is the credential-free
 half that proves the persistence invariants, and a green check does not mean the schema was verified.
 The integration tier is also currently **read-only** — it inspects schema metadata rather than

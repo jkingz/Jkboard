@@ -1,8 +1,12 @@
 import "react"
-import { describe, it, expect, vi, beforeEach, afterEach } from "vitest"
+import { describe, it, expect, vi } from "vitest"
 import { render, screen } from "@testing-library/react"
-import * as Navigation from "next/navigation"
 import { NavMain } from "@/components/nav-main"
+import { SidebarProvider } from "@/components/ui/sidebar"
+
+vi.mock("next/navigation", () => ({ usePathname: () => "/dashboard" }))
+// jsdom has no matchMedia, which SidebarProvider reads through useIsMobile.
+vi.mock("@/hooks/use-mobile", () => ({ useIsMobile: () => false }))
 
 /**
  * Interface test that proves the jsdom tier works.
@@ -12,7 +16,6 @@ import { NavMain } from "@/components/nav-main"
  * verifies the tier can detect DOM-tier defects by checking console warnings.
  */
 describe("NavMain", () => {
-  const mockPathname = "/dashboard"
   const mockItems = [
     {
       title: "Home",
@@ -22,19 +25,11 @@ describe("NavMain", () => {
     },
   ]
 
-  beforeEach(() => {
-    vi.stubGlobal("usePathname", vi.fn().mockReturnValue(mockPathname))
-  })
-
-  afterEach(() => {
-    vi.unstubAllGlobals()
-  })
-
   it("should not log uncontrolled Collapsible warnings", async () => {
     const consoleWarnSpy = vi.spyOn(console, "warn").mockImplementation(() => {})
 
     try {
-      render(<NavMain label="Main" items={mockItems} />)
+      render(<SidebarProvider><NavMain label="Main" items={mockItems} /></SidebarProvider>)
 
       expect(screen.getByText(/Home/i)).toBeTruthy()
 
@@ -50,7 +45,7 @@ describe("NavMain", () => {
   })
 
   it("should work correctly in jsdom environment", () => {
-    render(<NavMain label="Main" items={mockItems} />)
+    render(<SidebarProvider><NavMain label="Main" items={mockItems} /></SidebarProvider>)
 
     const homeLink = screen.getByText(/Home/i)
     expect(homeLink).toBeTruthy()
