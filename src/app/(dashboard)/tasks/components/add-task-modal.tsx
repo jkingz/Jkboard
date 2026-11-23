@@ -58,14 +58,23 @@ export function AddTaskModal({
   const [open, setOpen] = useState(false)
   const [pending, startTransition] = React.useTransition()
 
-  const initialForm = (): TaskFormData => ({
-    title: "",
-    projectId: defaultProjectId ?? projects[0]?.id ?? "",
-    status: "todo",
-    priority: "medium",
-    assigneeId: members[0]?.id ?? "",
-    dueDate: dateFromToday(7),
-  })
+  // Only the Project team can be the Assignee (GLOSSARY.md → Assignee).
+  const teamOf = (projectId: string) => {
+    const memberIds = projects.find((p) => p.id === projectId)?.memberIds ?? []
+    return members.filter((member) => memberIds.includes(member.id))
+  }
+
+  const initialForm = (): TaskFormData => {
+    const projectId = defaultProjectId ?? projects[0]?.id ?? ""
+    return {
+      title: "",
+      projectId,
+      status: "todo",
+      priority: "medium",
+      assigneeId: teamOf(projectId)[0]?.id ?? "",
+      dueDate: dateFromToday(7),
+    }
+  }
 
   const [formData, setFormData] = useState<TaskFormData>(initialForm)
   const [errors, setErrors] = useState<Record<string, string>>({})
@@ -150,7 +159,16 @@ export function AddTaskModal({
                 }))}
                 value={formData.projectId}
                 onValueChange={(value) =>
-                  value && setFormData((prev) => ({ ...prev, projectId: value }))
+                  value &&
+                  setFormData((prev) => {
+                    const team = teamOf(value)
+                    const onTeam = team.some((m) => m.id === prev.assigneeId)
+                    return {
+                      ...prev,
+                      projectId: value,
+                      assigneeId: onTeam ? prev.assigneeId : (team[0]?.id ?? ""),
+                    }
+                  })
                 }
               >
                 <SelectTrigger id="task-project" className="w-full">
@@ -177,7 +195,7 @@ export function AddTaskModal({
             <Field>
               <FieldLabel htmlFor="task-assignee">Assignee</FieldLabel>
               <Select
-                items={members.map((member) => ({
+                items={teamOf(formData.projectId).map((member) => ({
                   value: member.id,
                   label: member.name,
                 }))}
@@ -191,7 +209,7 @@ export function AddTaskModal({
                 </SelectTrigger>
                 <SelectContent>
                   <SelectGroup>
-                    {members.map((member) => (
+                    {teamOf(formData.projectId).map((member) => (
                       <SelectItem key={member.id} value={member.id}>
                         {member.name}
                       </SelectItem>

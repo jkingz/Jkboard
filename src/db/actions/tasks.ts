@@ -7,9 +7,9 @@ import { revalidatePath } from "next/cache"
 import { z } from "zod"
 
 import { db } from "@/db"
-import { task } from "@/db/schema"
+import { projectMember, task } from "@/db/schema"
 import { requireMembership } from "@/db/actions/session"
-import { completedAtFor, type Task } from "@/data/jkboard"
+import { assertAssigneeOnTeam, completedAtFor, type Task } from "@/data/jkboard"
 
 const taskInputSchema = z.object({
   projectId: z.string().uuid(),
@@ -48,6 +48,20 @@ function toISO(value: Date | string) {
   return `${date.getUTCFullYear()}-${month}-${day}`
 }
 
+async function assertOnProjectTeam(
+  projectId: string,
+  assigneeId: string | null | undefined
+) {
+  if (!assigneeId) return
+
+  const team = await db
+    .select({ memberId: projectMember.memberId })
+    .from(projectMember)
+    .where(eq(projectMember.projectId, projectId))
+
+  assertAssigneeOnTeam(assigneeId, team.map((row) => row.memberId))
+}
+
 /** New tasks land at the top of their column. */
 async function nextPosition(projectId: string, status: Task["status"]) {
   const [row] = await db
@@ -69,6 +83,7 @@ export async function createTaskAction(raw: TaskInput): Promise<Task> {
   await requireMembership()
 
   const input = taskInputSchema.parse(raw)
+  await assertOnProjectTeam(input.projectId, input.assigneeId)
   const position = await nextPosition(input.projectId, input.status)
 
   const [row] = await db
@@ -101,12 +116,14 @@ export async function updateTaskAction(
   const input = taskUpdateSchema.parse(raw)
 
   const [current] = await db
-    .select({ status: task.status })
+    .select({ status: task.status, projectId: task.projectId })
     .from(task)
     .where(eq(task.id, taskId))
     .limit(1)
 
   if (!current) throw new Error(`Task ${taskId} was not found.`)
+
+  await assertOnProjectTeam(current.projectId, input.assigneeId)
 
   const completedAt = completedAtFor(current.status, input.status, new Date())
 

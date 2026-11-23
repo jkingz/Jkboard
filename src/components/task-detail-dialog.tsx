@@ -54,6 +54,8 @@ export function TaskDetailDialog({
   if (!task) return null
 
   const project = projectById(task.projectId)
+  // Only the Project team can be the Assignee (GLOSSARY.md → Assignee).
+  const team = members.filter((member) => project?.memberIds.includes(member.id))
   const PriorityIcon = priorityIcons[task.priority]
   const overdue = isOverdue(task)
 
@@ -160,7 +162,7 @@ export function TaskDetailDialog({
           <Field>
             <FieldLabel htmlFor="task-detail-assignee">Assignee</FieldLabel>
             <Select
-              items={members.map((member) => ({
+              items={team.map((member) => ({
                 value: member.id,
                 label: member.name,
               }))}
@@ -176,7 +178,7 @@ export function TaskDetailDialog({
               </SelectTrigger>
               <SelectContent>
                 <SelectGroup>
-                  {members.map((member) => (
+                  {team.map((member) => (
                     <SelectItem key={member.id} value={member.id}>
                       {member.name}
                     </SelectItem>
