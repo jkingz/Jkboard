@@ -144,8 +144,8 @@ deletes from **`user`**, not `member` — the membership and join rows go by cas
   and the same unique `member_userId_uidx`, so the page and the action cannot disagree about who is
   calling.
 - **What the guard is not**: authorization. Under one shared workspace any member may write any row,
-  so "there is a session and it belongs to a member" is the whole check. Role checks and per-row
-  ownership are tracked in [target-state.md](./target-state.md).
+  so "there is a session and it belongs to a member" is the whole check. There are no role checks
+  or per-row ownership, by decision: [ADR 0001](./adr/0001-single-trust-team.md).
 - `src/proxy.ts` is an **optimistic** check only. It calls `getSessionCookie(request)` — presence, not
   validity — because the proxy bundle cannot import the database. A stale cookie passes it and is
   caught by the layout. It must never redirect signed-in users away from `/sign-in`; that produces an
@@ -287,8 +287,8 @@ pnpm build
 ```
 
 **CI runs the first three plus `pnpm test:unit` and `pnpm test:interface`** — `.github/workflows/ci.yml`, on push and pull
-request. It does not run the integration tier, which needs a `DATABASE_URL` the job does not carry.
-See [target-state.md](./target-state.md) → CI.
+request. It does not run the integration tier, which needs a `DATABASE_URL`; keeping that tier local-only is
+a decision, not a gap. See [target-state.md](./target-state.md) → CI.
 
 | test folder | owns |
 | --- | --- |
