@@ -89,7 +89,7 @@ export function ProjectDialog({
   const isOpen = open ?? internalOpen
   const setOpen = onOpenChange ?? setInternalOpen
 
-  const [values, setValues] = useState<ProjectFormValues>(() =>
+  const initialValues = (): ProjectFormValues =>
     project
       ? toFormValues(project)
       : {
@@ -101,25 +101,20 @@ export function ProjectDialog({
           color: projectColorOptions[0].value,
           memberIds: members.slice(0, 2).map((member) => member.id),
         }
-  )
+
+  const [values, setValues] = useState<ProjectFormValues>(initialValues)
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [pending, startTransition] = React.useTransition()
 
-  function reset() {
-    setValues(
-      project
-        ? toFormValues(project)
-        : {
-            name: "",
-            key: "",
-            description: "",
-            status: "planning",
-            dueDate: dateFromToday(30),
-            color: projectColorOptions[0].value,
-            memberIds: members.slice(0, 2).map((member) => member.id),
-          }
-    )
-    setErrors({})
+  // Refill on open, from the Project as it is now: resetting on close used the
+  // pre-save `project`, so a reopened edit showed stale values (#23).
+  const [wasOpen, setWasOpen] = useState(isOpen)
+  if (isOpen !== wasOpen) {
+    setWasOpen(isOpen)
+    if (isOpen) {
+      setValues(initialValues())
+      setErrors({})
+    }
   }
 
   function handleSubmit(event: React.FormEvent) {
@@ -163,7 +158,6 @@ export function ProjectDialog({
         })
       }
 
-      reset()
       setOpen(false)
     })
   }
@@ -180,10 +174,7 @@ export function ProjectDialog({
   return (
     <Dialog
       open={isOpen}
-      onOpenChange={(next) => {
-        setOpen(next)
-        if (!next) reset()
-      }}
+      onOpenChange={setOpen}
     >
       {trigger ? (
         <DialogTrigger render={trigger}>{children}</DialogTrigger>
