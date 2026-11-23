@@ -134,6 +134,8 @@ deletes from **`user`**, not `member` — the membership and join rows go by cas
 ## Auth and tenancy
 
 - **Identity**: Better Auth session cookie → `auth.api.getSession()`, backed by `user`.
+  `session.cookieCache` (5 min, `src/lib/auth.ts`) serves the session from a signed cookie, so a
+  sign-out on another device lands within 5 min. Membership is still read from the database per request.
   Role/ownership lives in the `member.role` **column**, which nothing currently reads.
 - **Two authorities, for two different questions.**
   `src/app/(dashboard)/layout.tsx:26` decides whether a *page renders* and whose membership to hand
@@ -270,6 +272,8 @@ labels `ƒ Proxy (Middleware)`.
 `(dashboard)` is `dynamic = "force-dynamic"`. The workspace layout and project page share
 request-scoped reads, and a Suspense boundary streams the workspace skeleton while the layout verifies
 access and loads data. Landing, legal, auth, and standalone error views are static (`○`).
+The client reuses a visited dynamic page segment for 30 s (`experimental.staleTimes.dynamic`,
+`next.config.ts`); mutations call `router.refresh()`, which clears it.
 
 UI that reads a column nothing writes yet: none. Every rendered field has a writer.
 

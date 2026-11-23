@@ -4,6 +4,8 @@ const nextConfig: NextConfig = {
   experimental: {
     optimizePackageImports: ["lucide-react"],
     agentUpgrade: "security",
+    // Reuse a visited page segment for 30s instead of refetching it on every click.
+    staleTimes: { dynamic: 30 },
   },
   turbopack: {},
 

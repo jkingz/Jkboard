@@ -65,6 +65,9 @@ export const auth = betterAuth({
   session: {
     expiresIn: 60 * 60 * 24 * 7, // one week
     updateAge: 60 * 60 * 24, // refresh the cookie once a day
+    // Skips the session-table read per request. Sign-outs elsewhere take up to 5 min to land;
+    // Member removal is still immediate because membership is read from the database.
+    cookieCache: { enabled: true, maxAge: 5 * 60 },
   },
 
   user: {
