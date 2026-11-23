@@ -12,23 +12,6 @@ Decided against, so never listed here: role checks, per-user data and per-row ow
 
 ---
 
-## Behavioural tests for the server actions
-
-**Why:** the integration tier is currently **read-only** — it asserts the schema in
-`information_schema` and never inserts. It therefore proves the schema shape, not that
-`createTaskAction` writes correctly, that `revalidatePath` runs, or that a bad payload is rejected.
-
-`tests/platform/unit/action-revalidation.unit.test.ts` closes the middle one only as far as text can:
-it proves the call is still written at every mutation, not that it executed or that the client picked
-up the result. This entry stays open until something inserts a row.
-
-**Blocked by:** nothing. It needs a disposable database, since it writes rows. Point it at a scratch
-Neon branch rather than the working one.
-
-**Done when:** the integration tier inserts and reads back a task, and covers a rejected payload.
-
----
-
 ## Email on invite
 
 **Why:** `inviteMemberAction` writes the `user` + `member` rows and stops. Nothing is sent, so the

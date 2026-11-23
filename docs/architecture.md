@@ -289,7 +289,7 @@ a decision, not a gap. See [ADR 0002](./adr/0002-integration-tier-stays-local.md
 | test folder | owns |
 | --- | --- |
 | `tests/platform/unit` | the pure selectors, date helpers and Zod/view-model coherence in `src/data/jkboard.ts`; the source-tree structural rules behind invariants 1 and 4; `proxy()` under real `NextRequest`s; the demo-account env flags. No DB, no network. |
-| `tests/platform/integration` | the persistence invariants and per-column contracts, asserted against `information_schema` on a real database (read-only) |
+| `tests/platform/integration` | the persistence invariants and per-column contracts, asserted against `information_schema` on a real database (read-only), plus `createTaskAction` writing to a scratch branch |
 
 Which tier a green run covered: `pnpm test` runs both and reports both counts. The integration tier
 skips with a stated reason when `DATABASE_URL` is missing or is still the `.env.example` placeholder.

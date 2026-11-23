@@ -23,9 +23,9 @@ import {
  *
  * Both are structural checks, not execution checks, for the same reason the
  * boundary test is: `src/db/actions/*.ts` is `server-only`, so a test process
- * outside a React Server Component graph cannot import it and call it. A
- * behavioural test needs a disposable database — see `docs/target-state.md` →
- * "Behavioural tests for the server actions".
+ * outside a React Server Component graph cannot import it and call it. The
+ * behavioural check is `task-write.integration.test.ts`, which stubs
+ * `server-only` and runs against a scratch branch.
  */
 
 /** The guard module the mutations call. It is not an action, so it is not one of the three. */

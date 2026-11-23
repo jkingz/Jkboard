@@ -24,8 +24,8 @@ import { hasDatabase, rowsOf, skipReason, testDb } from "./helpers"
  *
  * Read-only throughout, like the invariants suite: this database is the shared
  * demo workspace, so it asserts against `information_schema` and `pg_indexes`
- * and inserts nothing. Writing is `docs/target-state.md` → "Behavioural tests
- * for the server actions", which needs a disposable database first.
+ * and inserts nothing. Writing lives in `task-write.integration.test.ts`, which
+ * needs a scratch branch.
  */
 
 const available = hasDatabase()
@@ -230,7 +230,6 @@ describe.skipIf(!available)("column contracts", () => {
  */
 describe("not yet covered", () => {
   it.todo("createTaskAction writes a row that getWorkspaceData reads back")
-  it.todo("a payload that fails the action's Zod schema is rejected, not coerced")
   it.todo(
     "an action called with an unverifiable session is refused by requireMembership() — no test has run it, and a cookie-less request never reaches the action (proxy.unit.test.ts shows why: src/proxy.ts checks presence only)"
   )

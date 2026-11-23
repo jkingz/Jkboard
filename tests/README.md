@@ -17,10 +17,11 @@ tests/
     │   ├── module-boundaries.unit.test.ts   invariant 1: server-only imports, by file
     │   ├── action-revalidation.unit.test.ts invariant 4: every mutation revalidates
     │   └── seed-guard.unit.test.ts     which users db:seed would wipe without creating them
-    └── integration/                    real DATABASE_URL, read-only
+    └── integration/                    real DATABASE_URL; the write suite needs TEST_DATABASE_URL
         ├── helpers.ts                  testDb, hasDatabase, rowsOf, skipReason
         ├── invariants.integration.test.ts       invariants 2, 3, 6 + table existence
-        └── column-contracts.integration.test.ts declared defaults, enums, indexes, nullability
+        ├── column-contracts.integration.test.ts declared defaults, enums, indexes, nullability
+        └── task-write.integration.test.ts      createTaskAction inserts a Task, rejects a bad payload
 ```
 
 There is no `e2e/` tier. Nothing covers the interface; it was verified by clicking it,
@@ -42,8 +43,12 @@ not by a test.
     nothing else, and a matcher that finds zero files passes silently — so each one carries a
     non-vacuity assertion (`clientModules.length > 80`, the 12 action names pinned by hand). If you
     weaken a structural test, check it still goes red before you check it goes green.
-- **integration** — needs a real `DATABASE_URL`. Currently read-only: it asserts persistence
-  invariants and column contracts against `information_schema` and inserts nothing.
+- **integration** — needs a real `DATABASE_URL`. The schema suites assert persistence
+  invariants and column contracts against `information_schema` and insert nothing.
+  `task-write` writes, so it runs only against `TEST_DATABASE_URL`, a scratch Neon branch that must
+  differ from `DATABASE_URL`, and cleans up the rows it made:
+  `neon branches create --name scratch-…` then
+  `TEST_DATABASE_URL="$(neon connection-string scratch-…)" pnpm test:integration`.
 
 The one deliberate exception to "builds its own fixtures" is `view-model.unit.test.ts`, which reads
 the seed `projects` / `members` / `tasks` arrays. It has to: `projectProgressSeries` and
@@ -101,9 +106,8 @@ the reason it skipped. Report which tier a run covered.
   called with no session, which is still open in `column-contracts.integration.test.ts` as `it.todo`.
 - Ownership or tenancy needs a two-tenant fixture proving a foreign id cannot be read. Jkboard has a
   single workspace, so that test would fail today — which is the point.
-- Writing a row means the integration tier stops being read-only. That is a decision, not an
-  escalation: it needs its own database, or a transaction that never commits. Nothing here does it
-  against the shared demo instance.
+- A test that writes rows goes behind `TEST_DATABASE_URL`, like `task-write`. Nothing writes to the
+  shared demo instance.
 - Verify moves by count, not by color: record totals before and after.
 
 See [../docs/target-state.md](../docs/target-state.md) for what is deliberately untested.

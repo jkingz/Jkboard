@@ -45,8 +45,8 @@ export function skipReason() {
  * import outside a React Server Component graph. Building the handle here keeps
  * the integration tier runnable under plain Node.
  */
-export function testDb() {
-  return drizzle(neon(process.env.DATABASE_URL!), {
+export function testDb(url = process.env.DATABASE_URL!) {
+  return drizzle(neon(url), {
     schema,
     casing: "snake_case",
   })

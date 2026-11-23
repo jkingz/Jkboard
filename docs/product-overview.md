@@ -27,9 +27,9 @@ marketing landing page; light/dark theming with a runtime theme customizer.
   with public demo credentials, that means a visitor can empty the demo workspace.
 - **Email delivery.** `inviteMemberAction` creates the `user` + `member` rows and stops. No message is
   sent; the invitee must already know to sign in.
-- **Tests.** A unit tier and a read-only integration tier exist and run, but there is **no e2e tier** —
-  nothing renders the interface, and no test has ever written a row, so the server actions are unverified
-  behaviourally.
+- **Tests.** A unit tier and an integration tier exist and run, but there is **no e2e tier** —
+  nothing renders the interface. Only `createTaskAction` is tested by execution (on a scratch branch);
+  the other server actions are unverified behaviourally.
 - **Settings are static.** `settings/billing` reads from `data/*.json` files committed to the repo.
   `settings/user`, `settings/account`, `settings/notifications`, `settings/connections` have no
   persistence.
