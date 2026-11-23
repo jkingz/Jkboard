@@ -4,14 +4,17 @@
  *
  *   pnpm db:seed
  *
- * Safe to re-run: every table is cleared first.
+ * Safe to re-run: every table is cleared first. Refuses to clear when a user
+ * exists who is not a seeded Member, unless run with --force:
+ *
+ *   pnpm db:seed --force
  */
 import { neon } from "@neondatabase/serverless"
 import { count, sql } from "drizzle-orm"
 import { drizzle } from "drizzle-orm/neon-http"
 
 import * as schema from "../src/db/schema/index.ts"
-import { seedMembers, seedProjects, seedTaskSeeds } from "./seed-data.ts"
+import { nonSeededEmails, seedMembers, seedProjects, seedTaskSeeds } from "./seed-data.ts"
 
 async function main() {
   const url = process.env.DATABASE_URL
@@ -21,6 +24,15 @@ async function main() {
   }
 
   const db = drizzle(neon(url), { schema })
+
+  // Clearing deletes every user, so refuse when that includes real people.
+  const existing = await db.select({ email: schema.user.email }).from(schema.user)
+  const realUsers = nonSeededEmails(existing.map((row) => row.email))
+  if (realUsers.length > 0 && !process.argv.includes("--force")) {
+    throw new Error(
+      `Refusing to clear: ${realUsers.length} user(s) here are not seeded demo Members and would be deleted. Nothing was changed. Re-run with --force to wipe them anyway.`
+    )
+  }
 
   console.log("Clearing existing workspace data...")
   // order matters: children first, then parents

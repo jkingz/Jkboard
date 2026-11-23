@@ -15,7 +15,8 @@ tests/
     │   ├── error-message.unit.test.ts  errorMessage, including the blank-toast case
     │   ├── proxy.unit.test.ts          invariant 5, calling proxy() with real NextRequests
     │   ├── module-boundaries.unit.test.ts   invariant 1: server-only imports, by file
-    │   └── action-revalidation.unit.test.ts invariant 4: every mutation revalidates
+    │   ├── action-revalidation.unit.test.ts invariant 4: every mutation revalidates
+    │   └── seed-guard.unit.test.ts     which users db:seed would wipe without creating them
     └── integration/                    real DATABASE_URL, read-only
         ├── helpers.ts                  testDb, hasDatabase, rowsOf, skipReason
         ├── invariants.integration.test.ts       invariants 2, 3, 6 + table existence

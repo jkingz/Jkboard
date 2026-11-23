@@ -72,7 +72,7 @@ Per-file map: [../tests/README.md](../tests/README.md).
 | Build | `pnpm build` |
 | Migrations | `pnpm db:generate` (new) · `pnpm db:migrate` (apply) · `pnpm db:push` (local shortcut, skips migration files) |
 | Studio | `pnpm db:studio` |
-| Seeding | `pnpm db:seed` (data) · `pnpm db:seed:auth` (auth users) |
+| Seeding | `pnpm db:seed` (clears every table, then seeds; refuses if a non-seeded user exists, `--force` overrides) · `pnpm db:seed:auth` (auth users) |
 
 Every `db:*` and seed script runs through `node --env-file=.env.local`, so `.env.local` must exist
 before any of them will start.

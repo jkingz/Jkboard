@@ -100,6 +100,13 @@ export const seedMembers = people.map((person) => ({
   userId: userIdFor(person.email),
 }))
 
+const seededEmails = new Set(seedMembers.map((entry) => entry.email.toLowerCase()))
+
+/** Emails `db:seed` would delete but did not create: real people who signed up. */
+export function nonSeededEmails(emails: string[]): string[] {
+  return emails.filter((email) => !seededEmails.has(email.toLowerCase()))
+}
+
 const id = {
   maya: userIdFor("maya.chen@jkboard.app"),
   daniel: userIdFor("daniel.okafor@jkboard.app"),
