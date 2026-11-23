@@ -8,8 +8,8 @@ name: CI
 #   1. `pnpm test:unit` + `pnpm test:interface`, not `pnpm test`. The integration tier needs a real
 #      DATABASE_URL; adding a repository secret to this job for a read-only
 #      schema assertion would let a fork and a first clone fail for a reason
-#      that is not a defect. The gap is recorded in docs/project-context.md →
-#      Verification gates and must stay there until the tier is credential-free.
+#      that is not a defect. Keeping that tier local-only is a final decision
+#      (2026-11-24): docs/adr/0002-integration-tier-stays-local.md.
 #
 # Keep the build hermetic. Anything fetched over the network at build time fails
 # on a sealed runner. It was true of `next/font/google` and is now fixed by

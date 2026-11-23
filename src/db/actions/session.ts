@@ -20,8 +20,8 @@ import { auth } from "@/lib/auth"
  *
  * Deliberately **not** authorization: under one shared workspace every member
  * may write every row, so "there is a session and it belongs to a member" is
- * the whole of what this proves. Role checks and per-row ownership are tracked
- * in `docs/target-state.md`.
+ * the whole of what this proves. There are no role checks or per-row
+ * ownership, by decision: `docs/adr/0001-single-trust-team.md`.
  */
 export async function requireMembership(): Promise<string> {
   const session = await auth.api.getSession({ headers: await headers() })

@@ -23,9 +23,9 @@ secret. Three consequences, all current:
 
 1. **The workspace is shared.** Every demo visitor sees and mutates the same data. A visitor who
    deletes a project deletes it for everyone.
-2. **Any authenticated session can delete anything.** No server action checks a role — see
-   [target-state.md](./target-state.md). An anonymous visitor who reads the page can wipe the demo
-   data.
+2. **Any authenticated session can delete anything.** No server action checks a role, by decision —
+   see [ADR 0001](./adr/0001-single-trust-team.md). An anonymous visitor who reads the page can wipe
+   the demo data; the answer is to reseed it with `pnpm db:seed && pnpm db:seed:auth`.
 3. **The password hash lives in the same database as real users.** If this database is ever shared
    with real accounts, rotate `DEMO_PASSWORD` and re-run `pnpm db:seed:auth --reset`.
 
@@ -96,9 +96,10 @@ that allowlist; both packages ship native binaries that need their postinstall t
 - **`integration`** — needs a real `DATABASE_URL`. It asserts the persistence invariants and the
   per-column contracts against `information_schema` and never mutates rows.
 
-**The gap CI does not close:** `.github/workflows/ci.yml` runs `pnpm test:unit` and `pnpm test:interface` in place of
-`pnpm test`, so the integration tier runs on this machine and nowhere else — it is the credential-free
-half that proves the persistence invariants, and a green check does not mean the schema was verified.
+**CI does not run the integration tier, by decision (2026-11-24):** `.github/workflows/ci.yml` runs
+`pnpm test:unit` and `pnpm test:interface` in place of `pnpm test`, and gets no `DATABASE_URL` secret.
+The integration tier is local-only, so a green check does not mean the schema was verified. See
+[ADR 0002](./adr/0002-integration-tier-stays-local.md).
 The integration tier is also currently **read-only** — it inspects schema metadata rather than
 inserting rows, so it cannot prove the server actions actually write correctly. Naming the tier as
 covered is not the same as covering behaviour; `pnpm test` reports both counts so a skipped tier is
@@ -236,8 +237,8 @@ membership" a one-row lookup.
 
 **What the guard proves, and what it does not.** `requireMembership()` answers "is there a session, and
 does a membership exist for it?" — nothing else. It is not authorization: under one shared workspace any
-member may write any row, and every action still takes a raw id and acts on it. Role checks and per-row ownership
-are tracked in [target-state.md](./target-state.md).
+member may write any row, and every action still takes a raw id and acts on it. There are no role checks
+or per-row ownership, by decision: [ADR 0001](./adr/0001-single-trust-team.md).
 
 ---
 

@@ -482,7 +482,7 @@ export function ProductPreview({
         <p className="truncate text-[13px] font-semibold">
           {kind === "overview" ? previewTitles[kind] : `${featured.name} · ${previewTitles[kind]}`}
         </p>
-        {/* Sample data from the demo workspace, not the visitor's (docs/target-state.md). */}
+        {/* Sample data from the demo workspace, not the visitor's. */}
         <span className="shrink-0 text-[11px] text-muted-foreground">Example data</span>
       </div>
       <div className="p-5">

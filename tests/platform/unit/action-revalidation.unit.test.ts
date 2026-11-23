@@ -41,9 +41,8 @@ const REVALIDATE = 'revalidatePath("/", "layout")'
 
 /**
  * Reads, not mutations: they write nothing, so requiring revalidation of them
- * would be wrong. Both are also recorded as dead exports in
- * `docs/target-state.md` → "Wiring or deleting countOwnedProjects /
- * assertMemberExists"; this list is where that claim is checked.
+ * would be wrong. Empty since `countOwnedProjects` and `assertMemberExists`
+ * were deleted; add a read-only export here rather than exempting a mutation.
  */
 const READ_ONLY_EXPORTS: string[] = []
 
