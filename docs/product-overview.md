@@ -33,7 +33,7 @@ marketing landing page; light/dark theming with a runtime theme customizer.
 - **Settings are static.** `settings/billing` reads from `data/*.json` files committed to the repo.
   `settings/user`, `settings/account`, `settings/notifications`, `settings/connections` have no
   persistence.
-- **Deployment.** CI runs the gate chain on push, unit tier only. Vercel builds a preview per PR and production from `main`.
+- **Deployment.** CI runs the gate chain on push, unit tier only. Vercel builds a preview per PR and production from `main`. Functions run in `sin1` (`vercel.json`), next to the Neon database in `ap-southeast-1`; the default `iad1` added a trans-Pacific round trip to every query.
 
 Verified: 2026-10-15, against the repo at `a70a95d`.
 
