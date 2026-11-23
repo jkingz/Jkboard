@@ -367,8 +367,8 @@ const taskSeeds: TaskSeed[] = [
   ["Audit colour contrast in dark mode", "p-1", "todo", "medium", "u-3", 5],
   ["Ship push notification settings", "p-1", "in-review", "high", "u-4", 3],
   ["Prototype gesture navigation", "p-1", "in-progress", "high", "u-7", 9],
-  ["Migrate build pipeline to EAS", "p-1", "todo", "low", "u-2", 17],
-  ["Regression pass on Android 15", "p-1", "todo", "medium", "u-5", 12],
+  ["Migrate build pipeline to EAS", "p-1", "todo", "low", "u-4", 17],
+  ["Regression pass on Android 15", "p-1", "todo", "medium", "u-7", 12],
 
   ["Book the paid social budget", "p-2", "completed", "high", "u-8", -8],
   ["Write lifecycle email sequence", "p-2", "in-progress", "medium", "u-3", 4],
@@ -381,26 +381,26 @@ const taskSeeds: TaskSeed[] = [
   ["Invoice PDF redesign", "p-3", "in-review", "medium", "u-2", 3],
   ["Add usage metering to API gateway", "p-3", "todo", "high", "u-6", 14],
   ["Backfill historical invoices", "p-3", "todo", "medium", "u-6", 19],
-  ["Dunning emails for failed payments", "p-3", "in-progress", "high", "u-1", 8],
-  ["Localise billing strings (DE, FR)", "p-3", "todo", "low", "u-3", 24],
+  ["Dunning emails for failed payments", "p-3", "in-progress", "high", "u-2", 8],
+  ["Localise billing strings (DE, FR)", "p-3", "todo", "low", "u-6", 24],
   ["Tax rate lookup integration", "p-3", "todo", "medium", "u-2", 27],
 
   ["Interview five portal power users", "p-4", "in-progress", "high", "u-7", 2],
   ["Draft saved-views information architecture", "p-4", "in-review", "medium", "u-1", -1],
   ["Prototype audit log export", "p-4", "todo", "medium", "u-4", 4],
-  ["Seat management API contract", "p-4", "todo", "high", "u-6", 5],
-  ["Accessibility audit of portal forms", "p-4", "todo", "low", "u-5", 6],
+  ["Seat management API contract", "p-4", "todo", "high", "u-8", 5],
+  ["Accessibility audit of portal forms", "p-4", "todo", "low", "u-4", 6],
 
   ["Inventory reporting queries", "p-5", "completed", "medium", "u-6", -10],
   ["Size the new warehouse cluster", "p-5", "todo", "urgent", "u-2", 22],
   ["Map legacy report dependencies", "p-5", "todo", "high", "u-8", 29],
   ["Write backfill runbook", "p-5", "todo", "medium", "u-6", 36],
 
-  ["Approve new wordmark", "p-6", "completed", "high", "u-1", -14],
+  ["Approve new wordmark", "p-6", "completed", "high", "u-3", -14],
   ["Update marketing site imagery", "p-6", "completed", "medium", "u-3", -11],
   ["Publish brand guidelines", "p-6", "completed", "low", "u-7", -9],
 
-  ["Resolve flaky checkout test", "p-3", "in-progress", "urgent", "u-5", -4],
+  ["Resolve flaky checkout test", "p-3", "in-progress", "urgent", "u-6", -4],
   ["Fix calendar timezone drift", "p-4", "todo", "urgent", "u-4", -2],
   ["Correct overdue badge contrast", "p-1", "in-progress", "high", "u-3", -1],
   ["Verify CSV export encoding", "p-5", "in-review", "medium", "u-8", 3],
@@ -438,6 +438,28 @@ export function getMember(memberId: string, source: Member[] = members) {
 /** A Project team always includes its Owner, listed first (GLOSSARY.md → Owner). */
 export function projectTeam(ownerId: string, memberIds: string[]) {
   return [ownerId, ...new Set(memberIds.filter((id) => id !== ownerId))]
+}
+
+/** An Assignee must be on the Task's Project team (GLOSSARY.md → Assignee). */
+export function assertAssigneeOnTeam(
+  assigneeId: string | null | undefined,
+  team: string[]
+) {
+  if (assigneeId && !team.includes(assigneeId)) {
+    throw new Error(
+      "The assignee must be on the project team. Add them to the project first, or pick someone on it."
+    )
+  }
+}
+
+/** Tasks whose Assignee is off the team; leaving a team unassigns them (GLOSSARY.md → Project team). */
+export function tasksToUnassign(
+  tasks: { id: string; assigneeId: string | null }[],
+  team: string[]
+) {
+  return tasks
+    .filter((task) => task.assigneeId && !team.includes(task.assigneeId))
+    .map((task) => task.id)
 }
 
 /** A Removed Member's Projects pass to whoever removed them (GLOSSARY.md → Removed). */

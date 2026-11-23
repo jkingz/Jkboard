@@ -2,14 +2,19 @@
 
 import "server-only"
 
-import { eq } from "drizzle-orm"
+import { and, eq, inArray, isNotNull } from "drizzle-orm"
 import { revalidatePath } from "next/cache"
 import { z } from "zod"
 
 import { db } from "@/db"
-import { member, project, projectMember } from "@/db/schema"
+import { member, project, projectMember, task } from "@/db/schema"
 import { requireMembership } from "@/db/actions/session"
-import { canOwnProject, projectTeam, type Project } from "@/data/jkboard"
+import {
+  canOwnProject,
+  projectTeam,
+  tasksToUnassign,
+  type Project,
+} from "@/data/jkboard"
 
 const projectInputSchema = z.object({
   name: z.string().min(2).max(120),
@@ -72,6 +77,16 @@ async function assertCanOwn(memberId: string) {
 
 async function syncMemberships(projectId: string, memberIds: string[]) {
   await db.delete(projectMember).where(eq(projectMember.projectId, projectId))
+
+  const assigned = await db
+    .select({ id: task.id, assigneeId: task.assigneeId })
+    .from(task)
+    .where(and(eq(task.projectId, projectId), isNotNull(task.assigneeId)))
+  const leaving = tasksToUnassign(assigned, memberIds)
+
+  if (leaving.length > 0) {
+    await db.update(task).set({ assigneeId: null }).where(inArray(task.id, leaving))
+  }
 
   if (memberIds.length === 0) return
 

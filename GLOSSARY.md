@@ -42,7 +42,7 @@ _Avoid_: Deleted, deactivated
 A body of work with a status, an Owner, a Project team and a due date, broken into Tasks. Its status is the team's judgment, independent of its Tasks' statuses.
 
 **Project team**:
-The Members on a Project. A Member "on the Project" is part of its Project team.
+The Members on a Project. A Member "on the Project" is part of its Project team. A Member who leaves a Project team is no longer the Assignee of its Tasks; those Tasks become unassigned.
 _Avoid_: Project member
 
 **Owner**:
